@@ -46,13 +46,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -314,7 +312,19 @@ fun ConfigurationScreen(
                             }
                             DropdownMenu(expanded = showMoreMenu, onDismissRequest = { showMoreMenu = false }) {
                                 DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            if (isTestingAll) stringResource(R.string.connection_test_testing)
+                                            else stringResource(R.string.connection_test)
+                                        )
+                                    },
+                                    leadingIcon = { Icon(Icons.Rounded.Bolt, contentDescription = null) },
+                                    enabled = !isTestingAll && profiles.isNotEmpty(),
+                                    onClick = { showMoreMenu = false; runPingAll() },
+                                )
+                                DropdownMenuItem(
                                     text = { Text(stringResource(R.string.connection_test_icmp_ping)) },
+                                    enabled = !isTestingAll && profiles.isNotEmpty(),
                                     onClick = { showMoreMenu = false; runPingAll() },
                                 )
                                 DropdownMenuItem(
@@ -404,40 +414,6 @@ fun ConfigurationScreen(
                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             ),
                         )
-                    }
-                }
-            }
-
-            if (!selectMode && profiles.isNotEmpty()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 18.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    val reachable = profiles.count { it.status == 1 }
-                    Text(
-                        text = if (reachable > 0) "${profiles.size} nodes  •  $reachable reachable" else "${profiles.size} nodes",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    FilledTonalButton(
-                        onClick = { runPingAll() },
-                        enabled = !isTestingAll,
-                        shape = CircleShape,
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp),
-                        modifier = Modifier.height(34.dp),
-                    ) {
-                        if (isTestingAll) {
-                            LoadingIndicator(modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(6.dp))
-                            Text(stringResource(R.string.connection_test_testing), style = MaterialTheme.typography.labelMedium)
-                        } else {
-                            Icon(Icons.Rounded.Bolt, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("Ping", style = MaterialTheme.typography.labelMedium)
-                        }
                     }
                 }
             }
