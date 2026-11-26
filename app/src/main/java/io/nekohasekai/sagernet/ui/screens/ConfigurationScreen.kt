@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -68,7 +66,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -685,41 +682,9 @@ private fun ProfileExpressiveCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 14.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (selected) {
-                Box(
-                    modifier = Modifier
-                        .width(4.dp)
-                        .height(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
-                )
-                Spacer(Modifier.width(10.dp))
-            }
-
-            val protoTag = entity.displayType().take(2).uppercase()
-            Box(
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(
-                        if (selected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.secondaryContainer
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = protoTag,
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
-                )
-            }
-
-            Spacer(Modifier.width(12.dp))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = entity.displayName(),

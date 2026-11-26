@@ -4,8 +4,6 @@ import android.graphics.Bitmap
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -127,22 +125,10 @@ fun ExpressiveSurfaceItem(
         },
         label = "expressiveCardColor",
     )
-    val borderColor by animateColorAsState(
-        targetValue = if (selected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            Color.Transparent
-        },
-        label = "expressiveCardBorder",
-    )
-
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .then(
-                if (selected) Modifier.border(1.5.dp, borderColor, shape) else Modifier
-            )
             .then(
                 if (onClick != null || onLongClick != null) {
                     Modifier.combinedClickable(
