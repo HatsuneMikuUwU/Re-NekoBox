@@ -25,7 +25,7 @@ jobs:
         with:
           path: |
             app/libs/libcore.aar
-          key: ${{ hashFiles('.github/workflows/*', 'golang_status', 'libcore_status') }}
+          key: libcore-go1249-${{ hashFiles('golang_status', 'libcore_status') }}
       - name: Install Golang
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/setup-go@v6
@@ -34,6 +34,12 @@ jobs:
       - name: Native Build
         if: steps.cache.outputs.cache-hit != 'true'
         run: ./run lib core
+      - name: Upload LibCore Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libcore-aar
+          path: app/libs/libcore.aar
+          retention-days: 1
   build:
     name: Build OSS APK
     runs-on: ubuntu-latest
@@ -53,7 +59,13 @@ jobs:
         with:
           path: |
             app/libs/libcore.aar
-          key: ${{ hashFiles('.github/workflows/*', 'golang_status', 'libcore_status') }}
+          key: libcore-go1249-${{ hashFiles('golang_status', 'libcore_status') }}
+      - name: Download LibCore Artifact
+        if: hashFiles('app/libs/libcore.aar') == ''
+        uses: actions/download-artifact@v4
+        with:
+          name: libcore-aar
+          path: app/libs
       - name: HevTun Status
         run: |
           git submodule status hev-socks5-tunnel > hev_status
