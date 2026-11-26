@@ -3,8 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="internalOnly">
 
-    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android, com.blacksquircle.ui.editorkit" />
-
     <permission
         android:name="${applicationId}.SERVICE"
         android:protectionLevel="signature" />
@@ -63,7 +61,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Start">
+        android:theme="@style/Theme.ReNekoBox">
         <meta-data
             android:name="android.app.shortcuts"
             android:resource="@xml/shortcuts" />
@@ -279,13 +277,13 @@
             android:configChanges="uiMode"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
-            android:theme="@style/Theme.SagerNet.Dialog" />
+            android:theme="@style/Theme.ReNekoBox.Dialog" />
 
         <activity
             android:name=".ui.WebDAVSettingsActivity"
             android:label="@string/webdav_settings"
             android:configChanges="uiMode"
-            android:theme="@style/Theme.SagerNet" />
+            android:theme="@style/Theme.ReNekoBox" />
 
         <service
             android:name="io.nekohasekai.sagernet.bg.ProxyService"

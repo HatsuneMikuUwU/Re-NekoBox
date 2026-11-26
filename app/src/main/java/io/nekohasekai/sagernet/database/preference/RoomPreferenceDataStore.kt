@@ -1,6 +1,6 @@
 package io.nekohasekai.sagernet.database.preference
 
-import androidx.preference.PreferenceDataStore
+import io.nekohasekai.sagernet.database.preference.PreferenceDataStore
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 open class RoomPreferenceDataStore(private val kvPairDao: KeyValuePair.Dao) :

@@ -1,15 +1,14 @@
 package io.nekohasekai.sagernet.ui
 
 import android.app.Activity
-import android.view.View
+import android.widget.Toast
 import androidx.annotation.StringRes
-import com.google.android.material.snackbar.Snackbar
 import io.nekohasekai.sagernet.ktx.Logs
+import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
 import java.lang.ref.WeakReference
 
 object MessageStore {
     private var currentActivity: WeakReference<Activity>? = null
-    private var snackbar: Snackbar? = null
 
     fun setCurrentActivity(activity: Activity) {
         currentActivity = WeakReference(activity)
@@ -18,12 +17,15 @@ object MessageStore {
     fun showMessage(message: String) {
         val activity = currentActivity?.get() ?: return
         try {
-            val rootView = activity.window.decorView.findViewById<View>(android.R.id.content)
-            snackbar?.dismiss()
-            snackbar = Snackbar.make(rootView, message, Snackbar.LENGTH_LONG)
-            snackbar?.show()
+            if (activity is ThemedActivity) {
+                activity.showComposeSnackbar(message)
+            } else {
+                runOnMainDispatcher {
+                    Toast.makeText(activity, message, Toast.LENGTH_LONG).show()
+                }
+            }
         } catch (e: Exception) {
-            Logs.w("Failed to show snackbar", e)
+            Logs.w("Failed to show message", e)
         }
     }
 
@@ -38,4 +40,4 @@ object MessageStore {
     fun showMessage(activity: Activity, @StringRes resId: Int, vararg formatArgs: Any) {
         showMessage(activity.getString(resId, *formatArgs))
     }
-} 
+}

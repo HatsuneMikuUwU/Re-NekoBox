@@ -1,295 +1,209 @@
 package io.nekohasekai.sagernet.ui.profile
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.os.Bundle
-import android.text.format.Formatter
-import android.view.View
-import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.activity.result.component1
-import androidx.activity.result.component2
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.view.isVisible
-import androidx.preference.PreferenceFragmentCompat
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.ArrowDownward
+import androidx.compose.material.icons.rounded.ArrowUpward
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Title
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
-import io.nekohasekai.sagernet.databinding.LayoutAddEntityBinding
-import io.nekohasekai.sagernet.databinding.LayoutProfileBinding
 import io.nekohasekai.sagernet.fmt.internal.ChainBean
-import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.ui.ProfileSelectActivity
-import moe.matsuri.nb4a.Protocols.getProtocolColor
+import io.nekohasekai.sagernet.ui.components.ComposePreferenceStore
+import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
+import io.nekohasekai.sagernet.ui.components.ExpressivePillBadge
+import io.nekohasekai.sagernet.ui.components.ExpressiveSectionHeader
+import io.nekohasekai.sagernet.ui.components.ExpressiveSurfaceItem
+import io.nekohasekai.sagernet.ui.components.PrefCategory
+import io.nekohasekai.sagernet.ui.components.StoreEditTextPref
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class ChainSettingsActivity : ProfileSettingsActivity<ChainBean>(R.layout.layout_chain_settings) {
+class ChainSettingsActivity : ProfileSettingsActivity<ChainBean>() {
 
     override fun createEntity() = ChainBean()
 
-    val proxyList = ArrayList<ProxyEntity>()
+    private var chainIds: List<Long> = emptyList()
 
     override fun ChainBean.init() {
         DataStore.profileName = name
         DataStore.serverProtocol = proxies.joinToString(",")
+        chainIds = proxies.toList()
     }
 
     override fun ChainBean.serialize() {
         name = DataStore.profileName
-        proxies = proxyList.map { it.id }
-        initializeDefaultValues()
+        proxies = DataStore.serverProtocol.split(",")
+            .mapNotNull { it.trim().toLongOrNull() }
     }
 
-    override fun PreferenceFragmentCompat.createPreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
-        addPreferencesFromResource(R.xml.name_preferences)
-    }
+    @Composable
+    override fun ProfileSettingsContent(store: ComposePreferenceStore) {
+        val context = LocalContext.current
+        var proxyIds by remember {
+            mutableStateOf(
+                store.getString(Key.SERVER_PROTOCOL)
+                    .split(",")
+                    .mapNotNull { it.trim().toLongOrNull() }
+            )
+        }
+        var entities by remember { mutableStateOf<List<ProxyEntity>>(emptyList()) }
 
-    lateinit var configurationList: RecyclerView
-    lateinit var configurationAdapter: ProxiesAdapter
-    lateinit var layoutManager: LinearLayoutManager
+        LaunchedEffect(proxyIds) {
+            entities = withContext(Dispatchers.IO) {
+                val map = ProfileManager.getProfiles(proxyIds).associateBy { it.id }
+                proxyIds.mapNotNull { map[it] }
+            }
+        }
 
-    @SuppressLint("InlinedApi")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        fun updateIds(newIds: List<Long>) {
+            proxyIds = newIds
+            store.putString(Key.SERVER_PROTOCOL, newIds.joinToString(","))
+        }
 
-        supportActionBar!!.setTitle(R.string.chain_settings)
-        configurationList = findViewById(R.id.configuration_list)
-        layoutManager = FixedLinearLayoutManager(configurationList)
-        configurationList.layoutManager = layoutManager
-        configurationAdapter = ProxiesAdapter()
-        configurationList.adapter = configurationAdapter
+        val selectLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val id = result.data?.getLongExtra(ProfileSelectActivity.EXTRA_PROFILE_ID, 0L) ?: 0L
+                if (id != 0L && id != DataStore.editingId) {
+                    updateIds(proxyIds + id)
+                }
+            }
+        }
 
-        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.START
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 8.dp),
         ) {
-            override fun getSwipeDirs(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-            ) = if (viewHolder is ProfileHolder) {
-                super.getSwipeDirs(recyclerView, viewHolder)
-            } else 0
-
-            override fun getDragDirs(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-            ) = if (viewHolder is ProfileHolder) {
-                super.getDragDirs(recyclerView, viewHolder)
-            } else 0
-
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder,
-            ): Boolean {
-                return if (target !is ProfileHolder) false else {
-                    configurationAdapter.move(
-                        viewHolder.bindingAdapterPosition, target.bindingAdapterPosition
+            item {
+                PrefCategory(titleRes = R.string.profile_name) {
+                    StoreEditTextPref(
+                        store = store,
+                        key = Key.PROFILE_NAME,
+                        titleRes = R.string.profile_name,
+                        icon = Icons.Rounded.Title,
+                        position = ExpressiveGroupPosition.SINGLE,
                     )
-                    true
                 }
             }
 
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                configurationAdapter.remove(viewHolder.bindingAdapterPosition)
+            item {
+                ExpressiveSectionHeader(title = stringResource(R.string.proxy_chain))
             }
 
-        }).attachToRecyclerView(configurationList)
-    }
-
-    override fun PreferenceFragmentCompat.viewCreated(view: View, savedInstanceState: Bundle?) {
-        view.rootView.findViewById<RecyclerView>(R.id.recycler_view).apply {
-            (layoutParams ?: LinearLayout.LayoutParams(-1, -2)).apply {
-                height = -2
-                layoutParams = this
-            }
-        }
-
-        runOnDefaultDispatcher {
-            configurationAdapter.reload()
-        }
-    }
-
-    inner class ProxiesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-        suspend fun reload() {
-            val idList = DataStore.serverProtocol.split(",")
-                .mapNotNull { it.takeIf { it.isNotBlank() }?.toLong() }
-            if (idList.isNotEmpty()) {
-                val profiles = ProfileManager.getProfiles(idList).map { it.id to it }.toMap()
-                for (id in idList) {
-                    proxyList.add(profiles[id] ?: continue)
+            itemsIndexed(entities, key = { idx, ent -> "${ent.id}_$idx" }) { idx, entity ->
+                val pos = when {
+                    entities.size == 1 -> ExpressiveGroupPosition.SINGLE
+                    idx == 0 -> ExpressiveGroupPosition.TOP
+                    idx == entities.lastIndex -> ExpressiveGroupPosition.BOTTOM
+                    else -> ExpressiveGroupPosition.MIDDLE
                 }
-            }
-            onMainDispatcher {
-                notifyDataSetChanged()
-            }
-        }
-
-        fun move(from: Int, to: Int) {
-            val toMove = proxyList[to - 1]
-            proxyList[to - 1] = proxyList[from - 1]
-            proxyList[from - 1] = toMove
-            notifyItemMoved(from, to)
-            DataStore.dirty = true
-        }
-
-        fun remove(index: Int) {
-            proxyList.removeAt(index - 1)
-            notifyItemRemoved(index)
-            DataStore.dirty = true
-        }
-
-        override fun getItemId(position: Int): Long {
-            return if (position == 0) 0 else proxyList[position - 1].id
-        }
-
-        override fun getItemViewType(position: Int): Int {
-            return if (position == 0) 0 else 1
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-            return if (viewType == 0) {
-                AddHolder(LayoutAddEntityBinding.inflate(layoutInflater, parent, false))
-            } else {
-                ProfileHolder(LayoutProfileBinding.inflate(layoutInflater, parent, false))
-            }
-        }
-
-        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            if (holder is AddHolder) {
-                holder.bind()
-            } else if (holder is ProfileHolder) {
-                holder.bind(proxyList[position - 1])
-            }
-        }
-
-        override fun getItemCount(): Int {
-            return proxyList.size + 1
-        }
-
-    }
-
-    fun testProfileAllowed(profile: ProxyEntity): Boolean {
-        if (profile.id == DataStore.editingId) return false
-
-        for (entity in proxyList) {
-            if (testProfileContains(entity, profile)) return false
-        }
-
-        return true
-    }
-
-    fun testProfileContains(profile: ProxyEntity, anotherProfile: ProxyEntity): Boolean {
-        if (profile.type != 8 || anotherProfile.type != 8) return false
-        if (profile.id == anotherProfile.id) return true
-        val proxies = profile.chainBean!!.proxies
-        if (proxies.contains(anotherProfile.id)) return true
-        if (proxies.isNotEmpty()) {
-            for (entity in ProfileManager.getProfiles(proxies)) {
-                if (testProfileContains(entity, anotherProfile)) {
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
-    var replacing = 0
-
-    val selectProfileForAdd =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { (resultCode, data) ->
-            if (resultCode == Activity.RESULT_OK) runOnDefaultDispatcher {
-                DataStore.dirty = true
-
-                val profile = ProfileManager.getProfile(
-                    data!!.getLongExtra(
-                        ProfileSelectActivity.EXTRA_PROFILE_ID, 0
-                    )
-                )!!
-
-                if (!testProfileAllowed(profile)) {
-                    onMainDispatcher {
-                        MaterialAlertDialogBuilder(this@ChainSettingsActivity).setTitle(R.string.circular_reference)
-                            .setMessage(R.string.circular_reference_sum)
-                            .setPositiveButton(android.R.string.ok, null).show()
-                    }
-                } else {
-                    configurationList.post {
-                        if (replacing != 0) {
-                            proxyList[replacing - 1] = profile
-                            configurationAdapter.notifyItemChanged(replacing)
-                        } else {
-                            proxyList.add(profile)
-                            configurationAdapter.notifyItemInserted(proxyList.size)
+                ExpressiveSurfaceItem(
+                    position = pos,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 1.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "${idx + 1}. ${entity.displayName()}",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            ExpressivePillBadge(text = entity.displayType())
+                        }
+                        if (idx > 0) {
+                            IconButton(onClick = {
+                                val mutable = proxyIds.toMutableList()
+                                val tmp = mutable[idx - 1]
+                                mutable[idx - 1] = mutable[idx]
+                                mutable[idx] = tmp
+                                updateIds(mutable)
+                            }) {
+                                Icon(Icons.Rounded.ArrowUpward, contentDescription = "Move up")
+                            }
+                        }
+                        if (idx < proxyIds.lastIndex) {
+                            IconButton(onClick = {
+                                val mutable = proxyIds.toMutableList()
+                                val tmp = mutable[idx + 1]
+                                mutable[idx + 1] = mutable[idx]
+                                mutable[idx] = tmp
+                                updateIds(mutable)
+                            }) {
+                                Icon(Icons.Rounded.ArrowDownward, contentDescription = "Move down")
+                            }
+                        }
+                        IconButton(onClick = {
+                            val mutable = proxyIds.toMutableList()
+                            if (idx in mutable.indices) {
+                                mutable.removeAt(idx)
+                                updateIds(mutable)
+                            }
+                        }) {
+                            Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete))
                         }
                     }
                 }
             }
-        }
 
-    inner class AddHolder(val binding: LayoutAddEntityBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind() {
-            binding.root.setOnClickListener {
-                replacing = 0
-                selectProfileForAdd.launch(
-                    Intent(
-                        this@ChainSettingsActivity, ProfileSelectActivity::class.java
-                    )
-                )
+            item {
+                Button(
+                    onClick = {
+                        selectLauncher.launch(Intent(context, ProfileSelectActivity::class.java))
+                    },
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                ) {
+                    Icon(Icons.Rounded.Add, contentDescription = null)
+                    Text("  " + stringResource(R.string.add_profile))
+                }
             }
         }
     }
-
-    inner class ProfileHolder(binding: LayoutProfileBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        val profileName = binding.profileName
-        val profileType = binding.profileType
-        val trafficText: TextView = binding.trafficText
-        val editButton = binding.edit
-        val shareLayout = binding.share
-
-        fun bind(proxyEntity: ProxyEntity) {
-
-            profileName.text = proxyEntity.displayName()
-            profileType.text = proxyEntity.displayType()
-            profileType.setTextColor(getProtocolColor(proxyEntity.type))
-
-            val rx = proxyEntity.rx
-            val tx = proxyEntity.tx
-
-            val showTraffic = rx + tx != 0L
-            trafficText.isVisible = showTraffic
-            if (showTraffic) {
-                trafficText.text = itemView.context.getString(
-                    R.string.traffic,
-                    Formatter.formatFileSize(itemView.context, tx),
-                    Formatter.formatFileSize(itemView.context, rx)
-                )
-            }
-
-            editButton.setOnClickListener {
-                replacing = bindingAdapterPosition
-                selectProfileForAdd.launch(Intent(
-                    this@ChainSettingsActivity, ProfileSelectActivity::class.java
-                ).apply {
-                    putExtra(ProfileSelectActivity.EXTRA_SELECTED, proxyEntity)
-                })
-            }
-
-            shareLayout.isVisible = false
-        }
-
-    }
-
 }

@@ -1,14 +1,13 @@
 package moe.matsuri.nb4a.proxy.config
+import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
+import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
 
 import android.os.Bundle
-import androidx.preference.PreferenceDataStore
-import androidx.preference.PreferenceFragmentCompat
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
-import moe.matsuri.nb4a.ui.EditConfigPreference
 
 class ConfigSettingActivity :
     ProfileSettingsActivity<ConfigBean>(),
@@ -40,21 +39,7 @@ class ConfigSettingActivity :
 
     private lateinit var editConfigPreference: EditConfigPreference
 
-    override fun PreferenceFragmentCompat.createPreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
-        addPreferencesFromResource(R.xml.config_preferences)
-
-        editConfigPreference = findPreference(Key.SERVER_CONFIG)!!
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        if (::editConfigPreference.isInitialized) {
-            editConfigPreference.notifyChanged()
-        }
-    }
+    override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.Config
+    override val passwordKeys: Set<String> = emptySet()
 
 }

@@ -1,14 +1,13 @@
 package io.nekohasekai.sagernet.ui.profile
+import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
+import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
+import io.nekohasekai.sagernet.ui.components.ComposePreferenceStore
 
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.PreferenceFragmentCompat
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
-import moe.matsuri.nb4a.ui.SimpleMenuPreference
 
 class SocksSettingsActivity : ProfileSettingsActivity<SOCKSBean>() {
     override fun createEntity() = SOCKSBean()
@@ -37,27 +36,13 @@ class SocksSettingsActivity : ProfileSettingsActivity<SOCKSBean>() {
         sUoT = DataStore.profileCacheStore.getBoolean("sUoT")
     }
 
-    override fun PreferenceFragmentCompat.createPreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
-        addPreferencesFromResource(R.xml.socks_preferences)
-        findPreference<EditTextPreference>(Key.SERVER_PORT)!!.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
-        }
-        val password = findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
-            summaryProvider = PasswordSummaryProvider
-        }
-        val protocol = findPreference<SimpleMenuPreference>(Key.SERVER_PROTOCOL)!!
+    override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.Socks
+    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD)
 
-        fun updateProtocol(version: Int) {
-            password.isVisible = version == SOCKSBean.PROTOCOL_SOCKS5
+    override fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean {
+        if (key == Key.SERVER_PASSWORD) {
+            return (store.getString(Key.SERVER_PROTOCOL, "2").toIntOrNull() ?: 2) == SOCKSBean.PROTOCOL_SOCKS5
         }
-
-        updateProtocol(DataStore.protocolVersion)
-        protocol.setOnPreferenceChangeListener { _, newValue ->
-            updateProtocol((newValue as String).toInt())
-            true
-        }
+        return true
     }
 }

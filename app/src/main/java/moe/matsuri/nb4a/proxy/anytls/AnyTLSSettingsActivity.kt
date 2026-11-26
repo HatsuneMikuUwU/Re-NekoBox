@@ -1,11 +1,10 @@
 package moe.matsuri.nb4a.proxy.anytls
+import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
+import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
 
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.PreferenceFragmentCompat
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
 import moe.matsuri.nb4a.proxy.PreferenceBinding
@@ -37,17 +36,7 @@ class AnyTLSSettingsActivity : ProfileSettingsActivity<AnyTLSBean>() {
         pbm.fromCacheAll(this)
     }
 
-    override fun PreferenceFragmentCompat.createPreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?
-    ) {
-        addPreferencesFromResource(R.xml.anytls_preferences)
+    override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.AnyTLS
+    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD)
 
-        findPreference<EditTextPreference>(Key.SERVER_PORT)!!.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
-        }
-        findPreference<EditTextPreference>("password")!!.apply {
-            summaryProvider = PasswordSummaryProvider
-        }
-    }
 }

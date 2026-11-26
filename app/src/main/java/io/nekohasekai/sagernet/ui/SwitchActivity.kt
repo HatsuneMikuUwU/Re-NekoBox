@@ -1,36 +1,36 @@
 package io.nekohasekai.sagernet.ui
 
 import android.os.Bundle
-import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
+import io.nekohasekai.sagernet.ui.screens.ConfigurationScreen
 
-class SwitchActivity : ThemedActivity(R.layout.layout_empty),
-    ConfigurationFragment.SelectCallback {
+class SwitchActivity : ThemedActivity() {
 
     override val isDialog = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        supportFragmentManager.beginTransaction()
-            .replace(
-                R.id.fragment_holder,
-                ConfigurationFragment(true, null, R.string.action_switch)
+        setComposeContent {
+            ConfigurationScreen(
+                onOpenDrawer = { finish() },
+                refreshSignal = 0,
+                onShowMessage = { showComposeSnackbar(it) },
+                selectMode = true,
+                onProfileSelected = { entity ->
+                    val old = DataStore.selectedProxy
+                    DataStore.selectedProxy = entity.id
+                    runOnMainDispatcher {
+                        ProfileManager.postUpdate(old, true)
+                        ProfileManager.postUpdate(entity.id, true)
+                    }
+                    SagerNet.reloadService()
+                    finish()
+                },
             )
-            .commitAllowingStateLoss()
-    }
-
-    override fun returnProfile(profileId: Long) {
-        val old = DataStore.selectedProxy
-        DataStore.selectedProxy = profileId
-        runOnMainDispatcher {
-            ProfileManager.postUpdate(old, true)
-            ProfileManager.postUpdate(profileId, true)
         }
-        SagerNet.reloadService()
-        finish()
     }
 }

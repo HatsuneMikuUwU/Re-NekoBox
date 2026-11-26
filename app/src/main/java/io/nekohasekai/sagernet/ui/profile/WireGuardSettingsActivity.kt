@@ -1,10 +1,9 @@
 package io.nekohasekai.sagernet.ui.profile
+import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
+import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
 
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.PreferenceFragmentCompat
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import moe.matsuri.nb4a.proxy.PreferenceBinding
 import moe.matsuri.nb4a.proxy.PreferenceBindingManager
@@ -33,17 +32,7 @@ class WireGuardSettingsActivity : ProfileSettingsActivity<WireGuardBean>() {
         pbm.fromCacheAll(this)
     }
 
-    override fun PreferenceFragmentCompat.createPreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
-        addPreferencesFromResource(R.xml.wireguard_preferences)
-        pbm.setPreferenceFragment(this)
-
-        (serverPort.preference as EditTextPreference)
-            .setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
-        (privateKey.preference as EditTextPreference).summaryProvider = PasswordSummaryProvider
-        (mtu.preference as EditTextPreference).setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
-    }
+    override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.WireGuard
+    override val passwordKeys: Set<String> = setOf(Key.SERVER_PRIVATE_KEY)
 
 }

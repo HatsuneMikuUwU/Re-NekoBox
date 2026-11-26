@@ -1,16 +1,14 @@
 package io.nekohasekai.sagernet.ui.profile
+import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
+import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
+import io.nekohasekai.sagernet.ui.components.ComposePreferenceStore
 
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreference
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
-import moe.matsuri.nb4a.ui.SimpleMenuPreference
 
 class HysteriaSettingsActivity : ProfileSettingsActivity<HysteriaBean>() {
 
@@ -58,84 +56,19 @@ class HysteriaSettingsActivity : ProfileSettingsActivity<HysteriaBean>() {
         hopInterval = DataStore.serverHopInterval
     }
 
-    override fun PreferenceFragmentCompat.createPreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
-        addPreferencesFromResource(R.xml.hysteria_preferences)
+    override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.Hysteria
+    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD)
 
-        val authType = findPreference<SimpleMenuPreference>(Key.SERVER_AUTH_TYPE)!!
-        val authPayload = findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!
-        authPayload.isVisible = authType.value != "${HysteriaBean.TYPE_NONE}"
-        authType.setOnPreferenceChangeListener { _, newValue ->
-            authPayload.isVisible = newValue != "${HysteriaBean.TYPE_NONE}"
-            true
-        }
-
-        val protocol = findPreference<SimpleMenuPreference>(Key.SERVER_PROTOCOL)!!
-        val alpn = findPreference<EditTextPreference>(Key.SERVER_ALPN)!!
-
-        fun updateVersion(v: Int) {
-            if (v == 2) {
-                authPayload.isVisible = true
-                //
-                authType.isVisible = false
-                protocol.isVisible = false
-                alpn.isVisible = false
-                //
-                findPreference<EditTextPreference>(Key.SERVER_STREAM_RECEIVE_WINDOW)!!.isVisible =
-                    false
-                findPreference<EditTextPreference>(Key.SERVER_CONNECTION_RECEIVE_WINDOW)!!.isVisible =
-                    false
-                findPreference<SwitchPreference>(Key.SERVER_DISABLE_MTU_DISCOVERY)!!.isVisible =
-                    false
-                //
-                authPayload.title = resources.getString(R.string.password)
-            } else {
-                authType.isVisible = true
-                authPayload.isVisible = true
-                protocol.isVisible = true
-                alpn.isVisible = true
-                //
-                findPreference<EditTextPreference>(Key.SERVER_STREAM_RECEIVE_WINDOW)!!.isVisible =
-                    true
-                findPreference<EditTextPreference>(Key.SERVER_CONNECTION_RECEIVE_WINDOW)!!.isVisible =
-                    true
-                findPreference<SwitchPreference>(Key.SERVER_DISABLE_MTU_DISCOVERY)!!.isVisible =
-                    true
-                //
-                authPayload.title = resources.getString(R.string.hysteria_auth_payload)
-            }
-        }
-        findPreference<SimpleMenuPreference>(Key.PROTOCOL_VERSION)!!.setOnPreferenceChangeListener { _, newValue ->
-            updateVersion(newValue.toString().toIntOrNull() ?: 1)
-            true
-        }
-        updateVersion(DataStore.protocolVersion)
-
-        findPreference<EditTextPreference>(Key.SERVER_UPLOAD_SPEED)!!.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
-        }
-        findPreference<EditTextPreference>(Key.SERVER_DOWNLOAD_SPEED)!!.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
-        }
-        findPreference<EditTextPreference>(Key.SERVER_STREAM_RECEIVE_WINDOW)!!.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
-        }
-        findPreference<EditTextPreference>(Key.SERVER_CONNECTION_RECEIVE_WINDOW)!!.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
-        }
-
-        findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
-            summaryProvider = PasswordSummaryProvider
-        }
-        findPreference<EditTextPreference>(Key.SERVER_OBFS)!!.apply {
-            summaryProvider = PasswordSummaryProvider
-        }
-
-        findPreference<EditTextPreference>(Key.SERVER_HOP_INTERVAL)!!.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
-        }
+    override fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean {
+        val version = store.getString(Key.SERVER_PROTOCOL, "2").toIntOrNull() ?: 2
+        return if (version == HysteriaBean.PROTOCOL_VERSION_2) {
+            key !in setOf(
+                Key.SERVER_AUTH_TYPE,
+                Key.SERVER_ALPN,
+                Key.SERVER_STREAM_RECEIVE_WINDOW,
+                Key.SERVER_CONNECTION_RECEIVE_WINDOW,
+                Key.SERVER_DISABLE_MTU_DISCOVERY,
+            )
+        } else true
     }
-
 }

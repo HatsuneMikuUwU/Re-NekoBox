@@ -1,29 +1,44 @@
 package io.nekohasekai.sagernet.ui
 
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
-import android.widget.TextView
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.app.ActivityCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.snackbar.Snackbar
-import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.ui.theme.AppThemeState
+import io.nekohasekai.sagernet.ui.theme.ReNekoBoxTheme
 import io.nekohasekai.sagernet.utils.Theme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
-abstract class ThemedActivity : AppCompatActivity {
-    constructor() : super()
-    constructor(contentLayoutId: Int) : super(contentLayoutId)
+val LocalSnackbarHostState = staticCompositionLocalOf { SnackbarHostState() }
+
+/**
+ * Lightweight handle returned by [ThemedActivity.snackbar] for call-site
+ * compatibility with background adapters without requiring Material Views Snackbar.
+ */
+class ComposeSnackbarHandle(private val trigger: () -> Unit) {
+    fun show() = trigger()
+}
+
+abstract class ThemedActivity : AppCompatActivity() {
 
     var themeResId = 0
     var uiMode = 0
     open val isDialog = false
+
+    val composeSnackbarHostState = SnackbarHostState()
+    private val snackbarScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (!isDialog) {
@@ -32,55 +47,61 @@ abstract class ThemedActivity : AppCompatActivity {
             Theme.applyDialog(this)
         }
         Theme.applyNightTheme()
+        AppThemeState.syncFromDataStore()
 
         super.onCreate(savedInstanceState)
-
-        uiMode = resources.configuration.uiMode
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-
-            val isNight = (uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
-                Configuration.UI_MODE_NIGHT_YES
-            val insetController = WindowCompat.getInsetsController(window, window.decorView)
-            insetController.isAppearanceLightNavigationBars = false
-            insetController.isAppearanceLightStatusBars =
-                if (DataStore.appTheme == Theme.BLACK) !isNight else false
+        if (!isDialog) {
+            enableEdgeToEdge()
         }
+        uiMode = resources.configuration.uiMode
+    }
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { _, insets ->
-            val bars = insets.getInsets(
-                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-            )
-            findViewById<AppBarLayout>(R.id.appbar)?.apply {
-                updatePadding(top = bars.top)
+    protected fun setComposeContent(content: @Composable () -> Unit) {
+        setContent {
+            CompositionLocalProvider(LocalSnackbarHostState provides composeSnackbarHostState) {
+                ReNekoBoxTheme {
+                    content()
+                }
             }
-            insets
+        }
+    }
+
+    fun showComposeSnackbar(
+        message: String,
+        actionLabel: String? = null,
+        duration: SnackbarDuration = SnackbarDuration.Short,
+        onAction: (() -> Unit)? = null,
+    ) {
+        snackbarScope.launch {
+            composeSnackbarHostState.currentSnackbarData?.dismiss()
+            val result = composeSnackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = actionLabel,
+                duration = duration,
+                withDismissAction = actionLabel != null,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                onAction?.invoke()
+            }
         }
     }
 
     override fun setTheme(resId: Int) {
         super.setTheme(resId)
-
         themeResId = resId
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-
         if (newConfig.uiMode != uiMode) {
             uiMode = newConfig.uiMode
+            AppThemeState.syncFromDataStore()
             ActivityCompat.recreate(this)
         }
     }
 
-    fun snackbar(@StringRes resId: Int): Snackbar = snackbar("").setText(resId)
-    fun snackbar(text: CharSequence): Snackbar = snackbarInternal(text).apply {
-        view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text).apply {
-            maxLines = 10
-        }
-    }
+    fun snackbar(@StringRes resId: Int): ComposeSnackbarHandle = snackbar(getString(resId))
 
-    internal open fun snackbarInternal(text: CharSequence): Snackbar = throw NotImplementedError()
-
+    fun snackbar(text: CharSequence): ComposeSnackbarHandle =
+        ComposeSnackbarHandle { showComposeSnackbar(text.toString()) }
 }

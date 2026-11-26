@@ -7,8 +7,14 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.app
 
+/**
+ * Theme constants & night-mode coordinator.
+ * All 22 color palettes + Dynamic Color (Material You) are rendered purely in
+ * Jetpack Compose via [io.nekohasekai.sagernet.ui.theme.ReNekoBoxTheme].
+ */
 object Theme {
 
+    const val DYNAMIC = 0
     const val RED = 1
     const val PINK_SSR = 2
     const val PINK = 3
@@ -32,79 +38,18 @@ object Theme {
     const val BLACK = 21
     const val VERDANT_MINT = 22
 
-    private fun defaultTheme() = PINK_SSR
-
     fun apply(context: Context) {
-        context.setTheme(getTheme())
+        context.setTheme(R.style.Theme_ReNekoBox)
     }
 
     fun applyDialog(context: Context) {
-        context.setTheme(getDialogTheme())
+        context.setTheme(R.style.Theme_ReNekoBox_Dialog)
     }
 
-    fun getTheme(): Int {
-        return getTheme(DataStore.appTheme)
-    }
-
-    fun getDialogTheme(): Int {
-        return getDialogTheme(DataStore.appTheme)
-    }
-
-    fun getTheme(theme: Int): Int {
-        return when (theme) {
-            RED -> R.style.Theme_SagerNet_Red
-            PINK -> R.style.Theme_SagerNet
-            PINK_SSR -> R.style.Theme_SagerNet_Pink_SSR
-            PURPLE -> R.style.Theme_SagerNet_Purple
-            DEEP_PURPLE -> R.style.Theme_SagerNet_DeepPurple
-            INDIGO -> R.style.Theme_SagerNet_Indigo
-            BLUE -> R.style.Theme_SagerNet_Blue
-            LIGHT_BLUE -> R.style.Theme_SagerNet_LightBlue
-            CYAN -> R.style.Theme_SagerNet_Cyan
-            TEAL -> R.style.Theme_SagerNet_Teal
-            GREEN -> R.style.Theme_SagerNet_Green
-            LIGHT_GREEN -> R.style.Theme_SagerNet_LightGreen
-            LIME -> R.style.Theme_SagerNet_Lime
-            YELLOW -> R.style.Theme_SagerNet_Yellow
-            AMBER -> R.style.Theme_SagerNet_Amber
-            ORANGE -> R.style.Theme_SagerNet_Orange
-            DEEP_ORANGE -> R.style.Theme_SagerNet_DeepOrange
-            BROWN -> R.style.Theme_SagerNet_Brown
-            GREY -> R.style.Theme_SagerNet_Grey
-            BLUE_GREY -> R.style.Theme_SagerNet_BlueGrey
-            BLACK -> R.style.Theme_SagerNet_Black
-            VERDANT_MINT -> R.style.Theme_SagerNet_VerdantMint
-            else -> getTheme(defaultTheme())
-        }
-    }
-
-    fun getDialogTheme(theme: Int): Int {
-        return when (theme) {
-            RED -> R.style.Theme_SagerNet_Dialog_Red
-            PINK -> R.style.Theme_SagerNet_Dialog
-            PINK_SSR -> R.style.Theme_SagerNet_Dialog_Pink_SSR
-            PURPLE -> R.style.Theme_SagerNet_Dialog_Purple
-            DEEP_PURPLE -> R.style.Theme_SagerNet_Dialog_DeepPurple
-            INDIGO -> R.style.Theme_SagerNet_Dialog_Indigo
-            BLUE -> R.style.Theme_SagerNet_Dialog_Blue
-            LIGHT_BLUE -> R.style.Theme_SagerNet_Dialog_LightBlue
-            CYAN -> R.style.Theme_SagerNet_Dialog_Cyan
-            TEAL -> R.style.Theme_SagerNet_Dialog_Teal
-            GREEN -> R.style.Theme_SagerNet_Dialog_Green
-            LIGHT_GREEN -> R.style.Theme_SagerNet_Dialog_LightGreen
-            LIME -> R.style.Theme_SagerNet_Dialog_Lime
-            YELLOW -> R.style.Theme_SagerNet_Dialog_Yellow
-            AMBER -> R.style.Theme_SagerNet_Dialog_Amber
-            ORANGE -> R.style.Theme_SagerNet_Dialog_Orange
-            DEEP_ORANGE -> R.style.Theme_SagerNet_Dialog_DeepOrange
-            BROWN -> R.style.Theme_SagerNet_Dialog_Brown
-            GREY -> R.style.Theme_SagerNet_Dialog_Grey
-            BLUE_GREY -> R.style.Theme_SagerNet_Dialog_BlueGrey
-            BLACK -> R.style.Theme_SagerNet_Dialog_Black
-            VERDANT_MINT -> R.style.Theme_SagerNet_Dialog_VerdantMint
-            else -> getDialogTheme(defaultTheme())
-        }
-    }
+    fun getTheme(): Int = R.style.Theme_ReNekoBox
+    fun getTheme(theme: Int): Int = R.style.Theme_ReNekoBox
+    fun getDialogTheme(): Int = R.style.Theme_ReNekoBox_Dialog
+    fun getDialogTheme(theme: Int): Int = R.style.Theme_ReNekoBox_Dialog
 
     var currentNightMode = -1
     fun getNightMode(): Int {
@@ -114,25 +59,20 @@ object Theme {
         return getNightMode(currentNightMode)
     }
 
-    fun getNightMode(mode: Int): Int {
-        return when (mode) {
-            0 -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            1 -> AppCompatDelegate.MODE_NIGHT_YES
-            2 -> AppCompatDelegate.MODE_NIGHT_NO
-            else -> AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY
-        }
+    fun getNightMode(mode: Int): Int = when (mode) {
+        0 -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        1 -> AppCompatDelegate.MODE_NIGHT_YES
+        2 -> AppCompatDelegate.MODE_NIGHT_NO
+        else -> AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY
     }
 
-    fun usingNightMode(): Boolean {
-        return when (DataStore.nightTheme) {
-            1 -> true
-            2 -> false
-            else -> (app.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-        }
+    fun usingNightMode(): Boolean = when (DataStore.nightTheme) {
+        1 -> true
+        2 -> false
+        else -> (app.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
     }
 
     fun applyNightTheme() {
         AppCompatDelegate.setDefaultNightMode(getNightMode())
     }
-
 }

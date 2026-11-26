@@ -22,12 +22,6 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.preference.Preference
-import androidx.recyclerview.widget.LinearSmoothScroller
-import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.processphoenix.ProcessPhoenix
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.R
@@ -36,7 +30,6 @@ import io.nekohasekai.sagernet.aidl.ISagerNetService
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.bg.SagerConnection
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.ui.ThemedActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -135,7 +128,6 @@ fun Resources.Theme.resolveResourceId(@AttrRes resId: Int): Int {
     return typedValue.resourceId
 }
 
-fun Preference.remove() = parent!!.removePreference(this)
 
 /**
  * A slightly more performant variant of parseNumericAddress.
@@ -157,9 +149,6 @@ fun String?.parseNumericAddress(): InetAddress? =
     }
 
 @JvmOverloads
-fun DialogFragment.showAllowingStateLoss(fragmentManager: FragmentManager, tag: String? = null) {
-    if (!fragmentManager.isStateSaved) show(fragmentManager, tag)
-}
 
 fun String.pathSafe(): String {
     // " " encoded as +
@@ -174,25 +163,6 @@ fun String.unUrlSafe(): String {
     return NGUtil.urlDecode(this)
 }
 
-fun RecyclerView.scrollTo(index: Int, force: Boolean = false) {
-    if (force) post {
-        scrollToPosition(index)
-    }
-    postDelayed({
-        try {
-            layoutManager?.startSmoothScroll(object : LinearSmoothScroller(context) {
-                init {
-                    targetPosition = index
-                }
-
-                override fun getVerticalSnapPreference(): Int {
-                    return SNAP_TO_START
-                }
-            })
-        } catch (ignored: IllegalArgumentException) {
-        }
-    }, 300L)
-}
 
 val app get() = SagerNet.application
 
@@ -215,8 +185,6 @@ fun View.crossFadeFrom(other: View) {
 }
 
 
-fun Fragment.snackbar(textId: Int) = (requireActivity() as MainActivity).snackbar(textId)
-fun Fragment.snackbar(text: CharSequence) = (requireActivity() as MainActivity).snackbar(text)
 
 fun ThemedActivity.startFilesForResult(
     launcher: ActivityResultLauncher<String>, input: String
@@ -240,19 +208,7 @@ fun Fragment.startFilesForResult(
     (requireActivity() as ThemedActivity).snackbar(getString(R.string.file_manager_missing)).show()
 }
 
-fun Fragment.needReload() {
-    if (DataStore.serviceState.started) {
-        snackbar(getString(R.string.need_reload)).setAction(R.string.apply) {
-            SagerNet.reloadService()
-        }.show()
-    }
-}
 
-fun Fragment.needRestart() {
-    snackbar(R.string.need_restart).setAction(R.string.apply) {
-        triggerFullRestart(requireContext())
-    }.show()
-}
 
 fun triggerFullRestart(ctx: Context) {
     runOnDefaultDispatcher {

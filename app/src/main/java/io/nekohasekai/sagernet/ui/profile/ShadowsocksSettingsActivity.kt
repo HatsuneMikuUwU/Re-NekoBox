@@ -1,18 +1,16 @@
 package io.nekohasekai.sagernet.ui.profile
+import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
+import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
+import io.nekohasekai.sagernet.ui.components.ComposePreferenceStore
 
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreference
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import moe.matsuri.nb4a.proxy.PreferenceBinding
 import moe.matsuri.nb4a.proxy.PreferenceBindingManager
 import moe.matsuri.nb4a.proxy.Type
 
-import moe.matsuri.nb4a.ui.SimpleMenuPreference
 
 class ShadowsocksSettingsActivity : ProfileSettingsActivity<ShadowsocksBean>() {
 
@@ -55,54 +53,15 @@ class ShadowsocksSettingsActivity : ProfileSettingsActivity<ShadowsocksBean>() {
         plugin = if (pn.isNotBlank()) "$pn;$pc" else ""
     }
 
-    override fun PreferenceFragmentCompat.createPreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
-        addPreferencesFromResource(R.xml.shadowsocks_preferences)
-        pbm.setPreferenceFragment(this)
+    override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.Shadowsocks
+    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD)
 
-        serverPort.preference.apply {
-            this as EditTextPreference
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
-        }
-        password.preference.apply {
-            this as EditTextPreference
-            summaryProvider = PasswordSummaryProvider
-        }
-
-        // Mux mode visibility control
-        muxMode.preference.apply {
-            updateMuxMode(muxMode.readIntFromCache())
-            this as SimpleMenuPreference
-            setOnPreferenceChangeListener { _, newValue ->
-                updateMuxMode((newValue as String).toInt())
-                true
-            }
-        }
-
-        muxBrutal.preference.apply {
-            updateMuxBrutal(muxBrutal.readBoolFromCache())
-            this as SwitchPreference
-            setOnPreferenceChangeListener { _, newValue ->
-                updateMuxBrutal(newValue as Boolean)
-                true
-            }
+    override fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean {
+        val mux = store.getBoolean("enableMux", false)
+        val brutal = store.getBoolean("enableBrutal", false)
+        return when (key) {
+            "brutalUpMbps", "brutalDownMbps" -> mux && brutal
+            else -> true
         }
     }
-
-    private fun updateMuxBrutal(enabled: Boolean) {
-        muxBrutalUpMbps.preference.isVisible = enabled
-        muxBrutalDownMbps.preference.isVisible = enabled
-    }
-
-    private fun updateMuxMode(mode: Int) {
-        // mode 0: max_streams mode - show muxConcurrency, hide muxMaxConnections/muxMinStreams
-        // mode 1: connections mode - hide muxConcurrency, show muxMaxConnections/muxMinStreams
-        val isMaxStreamsMode = mode == 0
-        muxConcurrency.preference.isVisible = isMaxStreamsMode
-        muxMaxConnections.preference.isVisible = !isMaxStreamsMode
-        muxMinStreams.preference.isVisible = !isMaxStreamsMode
-    }
-
 }

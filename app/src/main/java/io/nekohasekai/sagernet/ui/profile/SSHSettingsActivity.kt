@@ -1,14 +1,13 @@
 package io.nekohasekai.sagernet.ui.profile
+import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
+import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
+import io.nekohasekai.sagernet.ui.components.ComposePreferenceStore
 
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.PreferenceFragmentCompat
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.ssh.SSHBean
-import moe.matsuri.nb4a.ui.SimpleMenuPreference
 
 class SSHSettingsActivity : ProfileSettingsActivity<SSHBean>() {
 
@@ -46,32 +45,15 @@ class SSHSettingsActivity : ProfileSettingsActivity<SSHBean>() {
         publicKey = DataStore.serverCertificates
     }
 
-    override fun PreferenceFragmentCompat.createPreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
-        addPreferencesFromResource(R.xml.ssh_preferences)
-        findPreference<EditTextPreference>(Key.SERVER_PORT)!!.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
-        }
-        val password = findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
-            summaryProvider = PasswordSummaryProvider
-        }
-        val privateKey = findPreference<EditTextPreference>(Key.SERVER_PRIVATE_KEY)!!
-        val privateKeyPassphrase = findPreference<EditTextPreference>(Key.SERVER_PASSWORD1)!!.apply {
-            summaryProvider = PasswordSummaryProvider
-        }
-        val authType = findPreference<SimpleMenuPreference>(Key.SERVER_AUTH_TYPE)!!
-        fun updateAuthType(type: Int = DataStore.serverAuthType) {
-            password.isVisible = type == SSHBean.AUTH_TYPE_PASSWORD
-            privateKey.isVisible = type == SSHBean.AUTH_TYPE_PRIVATE_KEY
-            privateKeyPassphrase.isVisible = type == SSHBean.AUTH_TYPE_PRIVATE_KEY
-        }
-        updateAuthType()
-        authType.setOnPreferenceChangeListener { _, newValue ->
-            updateAuthType((newValue as String).toInt())
-            true
+    override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.SSH
+    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD, Key.SERVER_PRIVATE_KEY, "serverPrivateKeyPassword")
+
+    override fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean {
+        val authType = store.getString(Key.SERVER_AUTH_TYPE, "0").toIntOrNull() ?: 0
+        return when (key) {
+            Key.SERVER_PASSWORD -> authType == SSHBean.AUTH_TYPE_PASSWORD
+            Key.SERVER_PRIVATE_KEY, "serverPrivateKeyPassword" -> authType == SSHBean.AUTH_TYPE_PRIVATE_KEY
+            else -> true
         }
     }
-
 }

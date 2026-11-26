@@ -1,12 +1,11 @@
 package io.nekohasekai.sagernet.ui.profile
+import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
+import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
 
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.PreferenceFragmentCompat
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 
 class ShadowsocksRSettingsActivity : ProfileSettingsActivity<ShadowsocksRBean>() {
@@ -37,16 +36,7 @@ class ShadowsocksRSettingsActivity : ProfileSettingsActivity<ShadowsocksRBean>()
         obfsParam = DataStore.serverObfsParam
     }
 
-    override fun PreferenceFragmentCompat.createPreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
-        addPreferencesFromResource(R.xml.shadowsocksr_preferences)
-        findPreference<EditTextPreference>(Key.SERVER_PORT)!!.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
-        }
-        findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
-            summaryProvider = PasswordSummaryProvider
-        }
-    }
+    override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.ShadowsocksR
+    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD)
+
 }

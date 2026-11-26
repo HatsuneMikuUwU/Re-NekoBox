@@ -1,7 +1,5 @@
 package moe.matsuri.nb4a.proxy
 
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.readableMessage
@@ -17,7 +15,6 @@ class PreferenceBinding(
     val type: Int = Type.Text,
     var fieldName: String,
     var bean: Any? = null,
-    var pf: PreferenceFragmentCompat? = null
 ) {
 
     var cacheName = fieldName
@@ -90,9 +87,5 @@ class PreferenceBinding(
                 }
             }
         }
-    }
-
-    val preference by lazy {
-        pf!!.findPreference<Preference>(cacheName)!!
     }
 }

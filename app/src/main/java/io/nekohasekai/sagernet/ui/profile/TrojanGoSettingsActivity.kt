@@ -1,16 +1,14 @@
 package io.nekohasekai.sagernet.ui.profile
+import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
+import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
+import io.nekohasekai.sagernet.ui.components.ComposePreferenceStore
 
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.PreferenceCategory
-import androidx.preference.PreferenceFragmentCompat
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.trojan_go.TrojanGoBean
 import io.nekohasekai.sagernet.ktx.app
-import moe.matsuri.nb4a.ui.SimpleMenuPreference
 
 class TrojanGoSettingsActivity : ProfileSettingsActivity<TrojanGoBean>() {
 
@@ -55,76 +53,21 @@ class TrojanGoSettingsActivity : ProfileSettingsActivity<TrojanGoBean>() {
         }
     }
 
-    lateinit var network: SimpleMenuPreference
-    lateinit var encryprtion: SimpleMenuPreference
-    lateinit var wsCategory: PreferenceCategory
-    lateinit var ssCategory: PreferenceCategory
-    lateinit var method: SimpleMenuPreference
+
 
     val trojanGoMethods = app.resources.getStringArray(R.array.trojan_go_methods)
     val trojanGoNetworks = app.resources.getStringArray(R.array.trojan_go_networks_value)
 
-    override fun PreferenceFragmentCompat.createPreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
-        addPreferencesFromResource(R.xml.trojan_go_preferences)
-        findPreference<EditTextPreference>(Key.SERVER_PORT)!!.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
-        }
-        findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
-            summaryProvider = PasswordSummaryProvider
-        }
-        findPreference<EditTextPreference>(Key.SERVER_PASSWORD1)!!.apply {
-            summaryProvider = PasswordSummaryProvider
-        }
-        wsCategory = findPreference(Key.SERVER_WS_CATEGORY)!!
-        ssCategory = findPreference(Key.SERVER_SS_CATEGORY)!!
-        method = findPreference(Key.SERVER_METHOD)!!
+    override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.TrojanGo
+    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD, Key.SERVER_ENCRYPTION)
 
-        network = findPreference(Key.SERVER_NETWORK)!!
-
-        if (network.value !in trojanGoNetworks) {
-            network.value = trojanGoNetworks[0]
-        }
-
-        updateNetwork(network.value)
-        network.setOnPreferenceChangeListener { _, newValue ->
-            updateNetwork(newValue as String)
-            true
-        }
-        encryprtion = findPreference(Key.SERVER_ENCRYPTION)!!
-        updateEncryption(encryprtion.value)
-        encryprtion.setOnPreferenceChangeListener { _, newValue ->
-            updateEncryption(newValue as String)
-            true
+    override fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean {
+        val network = store.getString(Key.SERVER_NETWORK, "original")
+        val encryption = store.getString(Key.SERVER_ENCRYPTION, "none")
+        return when (key) {
+            Key.SERVER_WS_CATEGORY, Key.SERVER_HOST, Key.SERVER_PATH -> network == "ws"
+            Key.SERVER_SS_CATEGORY, Key.SERVER_METHOD -> encryption == "ss"
+            else -> true
         }
     }
-
-    fun updateNetwork(newNet: String) {
-        when (newNet) {
-            "ws" -> {
-                wsCategory.isVisible = true
-            }
-            else -> {
-                wsCategory.isVisible = false
-            }
-        }
-    }
-
-    fun updateEncryption(encryption: String) {
-        when (encryption) {
-            "ss" -> {
-                ssCategory.isVisible = true
-
-                if (method.value !in trojanGoMethods) {
-                    method.value = trojanGoMethods[0]
-                }
-            }
-            else -> {
-                ssCategory.isVisible = false
-            }
-        }
-    }
-
 }

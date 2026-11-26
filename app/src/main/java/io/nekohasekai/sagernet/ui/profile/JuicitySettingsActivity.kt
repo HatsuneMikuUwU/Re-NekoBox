@@ -1,9 +1,8 @@
 package io.nekohasekai.sagernet.ui.profile
+import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
+import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
 
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreference
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
@@ -36,14 +35,7 @@ class JuicitySettingsActivity : ProfileSettingsActivity<JuicityBean>() {
         allowInsecure = DataStore.serverAllowInsecure
     }
 
-    override fun PreferenceFragmentCompat.createPreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
-        addPreferencesFromResource(R.xml.juicity_preferences)
+    override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.Juicity
+    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD)
 
-        findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
-            summaryProvider = PasswordSummaryProvider
-        }
-    }
 }

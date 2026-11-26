@@ -18,17 +18,14 @@
  ******************************************************************************/
 
 package io.nekohasekai.sagernet.ui.profile
+import io.nekohasekai.sagernet.ui.components.ComposePreferenceStore
 
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.PreferenceFragmentCompat
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.mieru.MieruBean
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
-import moe.matsuri.nb4a.ui.SimpleMenuPreference
 
 class MieruSettingsActivity : ProfileSettingsActivity<MieruBean>() {
 
@@ -54,24 +51,13 @@ class MieruSettingsActivity : ProfileSettingsActivity<MieruBean>() {
         mtu = DataStore.serverMTU
     }
 
-    override fun PreferenceFragmentCompat.createPreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
-        addPreferencesFromResource(R.xml.mieru_preferences)
-        findPreference<EditTextPreference>(Key.SERVER_PORT)!!.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
-        }
-        findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
-            summaryProvider = PasswordSummaryProvider
-        }
-        val protocol = findPreference<SimpleMenuPreference>(Key.SERVER_PROTOCOL)!!
-        val mtu = findPreference<EditTextPreference>(Key.SERVER_MTU)!!
-        mtu.isVisible = protocol.value.equals("UDP")
-        protocol.setOnPreferenceChangeListener { _, newValue ->
-            mtu.isVisible = newValue.equals("UDP")
-            true
-        }
-    }
+    override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.Mieru
+    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD)
 
+    override fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean {
+        if (key == Key.SERVER_MTU) {
+            return store.getString(Key.SERVER_PROTOCOL, "TCP").equals("UDP", ignoreCase = true)
+        }
+        return true
+    }
 }

@@ -2,11 +2,9 @@ package io.nekohasekai.sagernet.ui
 
 import android.content.Intent
 import android.os.Bundle
-import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.database.ProxyEntity
+import io.nekohasekai.sagernet.ui.screens.ConfigurationScreen
 
-class ProfileSelectActivity : ThemedActivity(R.layout.layout_empty),
-    ConfigurationFragment.SelectCallback {
+class ProfileSelectActivity : ThemedActivity() {
 
     companion object {
         const val EXTRA_SELECTED = "selected"
@@ -16,21 +14,19 @@ class ProfileSelectActivity : ThemedActivity(R.layout.layout_empty),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val selected = intent.getParcelableExtra<ProxyEntity>(EXTRA_SELECTED)
-
-        supportFragmentManager.beginTransaction()
-            .replace(
-                R.id.fragment_holder,
-                ConfigurationFragment(true, selected, R.string.select_profile)
+        setComposeContent {
+            ConfigurationScreen(
+                onOpenDrawer = { finish() },
+                refreshSignal = 0,
+                onShowMessage = { showComposeSnackbar(it) },
+                selectMode = true,
+                onProfileSelected = { entity ->
+                    setResult(RESULT_OK, Intent().apply {
+                        putExtra(EXTRA_PROFILE_ID, entity.id)
+                    })
+                    finish()
+                },
             )
-            .commitAllowingStateLoss()
+        }
     }
-
-    override fun returnProfile(profileId: Long) {
-        setResult(RESULT_OK, Intent().apply {
-            putExtra(EXTRA_PROFILE_ID, profileId)
-        })
-        finish()
-    }
-
 }

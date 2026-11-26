@@ -1,6 +1,6 @@
 package io.nekohasekai.sagernet.group
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.appcompat.app.AlertDialog
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.GroupManager
 import io.nekohasekai.sagernet.database.ProxyGroup
@@ -16,7 +16,7 @@ class GroupInterfaceAdapter(val context: ThemedActivity) : GroupManager.Interfac
     override suspend fun confirm(message: String): Boolean {
         return suspendCoroutine {
             runOnMainDispatcher {
-                MaterialAlertDialogBuilder(context).setTitle(R.string.confirm)
+                AlertDialog.Builder(context).setTitle(R.string.confirm)
                     .setMessage(message)
                     .setPositiveButton(R.string.yes) { _, _ -> it.resume(true) }
                     .setNegativeButton(R.string.no) { _, _ -> it.resume(false) }
@@ -70,7 +70,7 @@ class GroupInterfaceAdapter(val context: ThemedActivity) : GroupManager.Interfac
             onMainDispatcher {
                 delay(1000L)
 
-                MaterialAlertDialogBuilder(context).setTitle(
+                AlertDialog.Builder(context).setTitle(
                         context.getString(
                                 R.string.group_diff, group.displayName()
                         )
@@ -90,7 +90,7 @@ class GroupInterfaceAdapter(val context: ThemedActivity) : GroupManager.Interfac
     override suspend fun alert(message: String) {
         return suspendCoroutine {
             runOnMainDispatcher {
-                MaterialAlertDialogBuilder(context).setTitle(R.string.ooc_warning)
+                AlertDialog.Builder(context).setTitle(R.string.ooc_warning)
                     .setMessage(message)
                     .setPositiveButton(android.R.string.ok) { _, _ -> it.resume(Unit) }
                     .setOnCancelListener { _ -> it.resume(Unit) }

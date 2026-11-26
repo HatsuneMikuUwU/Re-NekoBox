@@ -2,7 +2,7 @@ package moe.matsuri.nb4a.ui
 
 import android.content.Context
 import android.widget.TextView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.appcompat.app.AlertDialog
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.readableMessage
@@ -12,7 +12,7 @@ object Dialogs {
     fun logExceptionAndShow(context: Context, e: Exception, callback: Runnable) {
         Logs.e(e)
         runOnMainDispatcher {
-            MaterialAlertDialogBuilder(context)
+            AlertDialog.Builder(context)
                 .setTitle(R.string.error_title)
                 .setMessage(e.readableMessage)
                 .setCancelable(false)
@@ -25,7 +25,7 @@ object Dialogs {
 
     fun message(context: Context, title: String, message: String) {
         runOnMainDispatcher {
-            val dialog = MaterialAlertDialogBuilder(context)
+            val dialog = AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(message)
                 .setCancelable(true)
