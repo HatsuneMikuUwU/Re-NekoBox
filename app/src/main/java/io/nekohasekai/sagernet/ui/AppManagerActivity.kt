@@ -247,7 +247,7 @@ class AppManagerActivity : ThemedActivity() {
                     } else {
                         LazyColumn(
                             contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             itemsIndexed(filtered, key = { _, item -> item.packageName }) { idx, item ->
                                 val checked = item.packageName in selectedPackages

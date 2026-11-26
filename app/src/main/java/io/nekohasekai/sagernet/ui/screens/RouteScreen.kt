@@ -145,7 +145,7 @@ fun RouteScreen(
                     .fillMaxSize()
                     .padding(top = padding.calculateTopPadding()),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(3.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 itemsIndexed(rules, key = { _, r -> r.id }) { idx, rule ->
                     val pos = when {

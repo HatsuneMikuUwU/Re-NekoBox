@@ -123,7 +123,7 @@ class AssetsActivity : ThemedActivity() {
                             .fillMaxSize()
                             .padding(padding),
                         contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         itemsIndexed(files, key = { _, f -> f.absolutePath }) { idx, file ->
                             val pos = when {

@@ -426,7 +426,7 @@ fun ConfigurationScreen(
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     itemsIndexed(filteredProfiles, key = { _, p -> p.id }) { index, entity ->
                         val position = when {
@@ -584,7 +584,7 @@ fun ConfigurationScreen(
 
                 LazyColumn(
                     modifier = Modifier.height(260.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     itemsIndexed(protocols) { idx, (name, clazz) ->
                         val pos = when (idx) {

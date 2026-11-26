@@ -102,7 +102,7 @@ fun ExpressiveGroupedContainer(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         content = content,
     )
 }
