@@ -62,6 +62,9 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     // Material 3 Expressive (MaterialExpressiveTheme, MotionScheme.expressive, LoadingIndicator, LinearWavyProgressIndicator)
     implementation("androidx.compose.material3:material3:1.4.0-alpha15")
+    // Backdrop Blur (same as AnimeX: GPU textureBlur + RenderEffect on Android 13+)
+    implementation("top.yukonga.miuix.kmp:miuix-shader-android:0.9.4")
+    implementation("top.yukonga.miuix.kmp:miuix-blur-android:0.9.4")
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     implementation("androidx.activity:activity-compose:1.10.1")

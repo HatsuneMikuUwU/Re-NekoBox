@@ -5,6 +5,7 @@ import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,31 +13,32 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Link
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.ui.components.FloatingTopBar
+import io.nekohasekai.sagernet.ui.components.LocalBottomInset
+import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import moe.matsuri.nb4a.utils.WebViewUtil
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -48,36 +50,20 @@ fun WebviewScreen(
     var showUrlDialog by remember { mutableStateOf(false) }
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.menu_dashboard),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { webViewRef?.reload() }) {
-                        Icon(Icons.Rounded.Refresh, contentDescription = "Reload")
-                    }
-                    IconButton(onClick = { showUrlDialog = true }) {
-                        Icon(Icons.Rounded.Link, contentDescription = stringResource(R.string.set_panel_url))
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    val topInset = floatingTopBarSpace()
+    val bottomInset = LocalBottomInset.current
+
+    val topBackdrop = rememberBlurBackdrop()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(if (topBackdrop != null) Modifier.layerBackdrop(topBackdrop) else Modifier),
+        ) {
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding()),
+                .padding(top = topInset, bottom = bottomInset),
             factory = { ctx ->
                 WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
                 WebView(ctx).apply {
@@ -101,6 +87,23 @@ fun WebviewScreen(
                     view.loadUrl(currentUrl)
                 }
             },
+        )
+
+        }
+
+        FloatingTopBar(
+            backdrop = topBackdrop,
+            title = stringResource(R.string.menu_dashboard),
+            onBack = onBack,
+            actions = {
+                IconButton(onClick = { webViewRef?.reload() }) {
+                    Icon(Icons.Rounded.Refresh, contentDescription = "Reload")
+                }
+                IconButton(onClick = { showUrlDialog = true }) {
+                    Icon(Icons.Rounded.Link, contentDescription = stringResource(R.string.set_panel_url))
+                }
+            },
+            modifier = Modifier.align(Alignment.TopCenter),
         )
     }
 

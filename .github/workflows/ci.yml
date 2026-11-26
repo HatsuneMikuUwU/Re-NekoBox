@@ -94,6 +94,8 @@ jobs:
       - name: Gradle Build
         env:
           BUILD_PLUGIN: none
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
           [ -d "${ANDROID_HOME}/ndk/25.0.8775105" ] && echo "ndk.dir=${ANDROID_HOME}/ndk/25.0.8775105" >> local.properties || true

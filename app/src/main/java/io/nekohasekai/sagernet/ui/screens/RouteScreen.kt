@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.ui.screens
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,13 +30,10 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -61,6 +59,11 @@ import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.AssetsActivity
 import io.nekohasekai.sagernet.ui.RouteSettingsActivity
 import io.nekohasekai.sagernet.ui.components.ExpressiveEmptyState
+import io.nekohasekai.sagernet.ui.components.FloatingTopBar
+import io.nekohasekai.sagernet.ui.components.LocalBottomInset
+import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
 import io.nekohasekai.sagernet.ui.components.ExpressiveIconBadge
 import io.nekohasekai.sagernet.ui.components.ExpressivePillBadge
@@ -98,37 +101,16 @@ fun RouteScreen(
         onDispose { ProfileManager.removeListener(listener) }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.menu_route),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                actions = {
-                    IconButton(onClick = {
-                        context.startActivity(Intent(context, AssetsActivity::class.java))
-                    }) {
-                        Icon(Icons.Rounded.FolderZip, contentDescription = stringResource(R.string.route_manage_assets))
-                    }
-                    IconButton(onClick = { showResetDialog = true }) {
-                        Icon(Icons.Rounded.RestartAlt, contentDescription = stringResource(R.string.route_reset))
-                    }
-                    IconButton(onClick = {
-                        context.startActivity(Intent(context, RouteSettingsActivity::class.java))
-                    }) {
-                        Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.route_add))
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
-            )
-        },
-    ) { padding ->
+    val topInset = floatingTopBarSpace()
+    val bottomInset = LocalBottomInset.current
+
+    val topBackdrop = rememberBlurBackdrop()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(if (topBackdrop != null) Modifier.layerBackdrop(topBackdrop) else Modifier),
+        ) {
         if (rules.isEmpty()) {
             ExpressiveEmptyState(
                 icon = Icons.Rounded.AccountTree,
@@ -137,14 +119,17 @@ fun RouteScreen(
                 onAction = { context.startActivity(Intent(context, RouteSettingsActivity::class.java)) },
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding()),
+                    .padding(top = topInset, bottom = bottomInset),
             )
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding()),
-                contentPadding = PaddingValues(16.dp),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = topInset + 4.dp,
+                    bottom = bottomInset + 16.dp,
+                ),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 itemsIndexed(rules, key = { _, r -> r.id }) { idx, rule ->
@@ -235,6 +220,29 @@ fun RouteScreen(
                 }
             }
         }
+
+        }
+
+        FloatingTopBar(
+            backdrop = topBackdrop,
+            title = stringResource(R.string.menu_route),
+            actions = {
+                IconButton(onClick = {
+                    context.startActivity(Intent(context, AssetsActivity::class.java))
+                }) {
+                    Icon(Icons.Rounded.FolderZip, contentDescription = stringResource(R.string.route_manage_assets))
+                }
+                IconButton(onClick = { showResetDialog = true }) {
+                    Icon(Icons.Rounded.RestartAlt, contentDescription = stringResource(R.string.route_reset))
+                }
+                IconButton(onClick = {
+                    context.startActivity(Intent(context, RouteSettingsActivity::class.java))
+                }) {
+                    Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.route_add))
+                }
+            },
+            modifier = Modifier.align(Alignment.TopCenter),
+        )
     }
 
     if (showResetDialog) {

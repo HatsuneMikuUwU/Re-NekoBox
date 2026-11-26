@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,15 +23,10 @@ import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Layers
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Update
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -50,6 +46,11 @@ import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.ktx.launchCustomTab
 import io.nekohasekai.sagernet.plugin.PluginManager.loadString
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
+import io.nekohasekai.sagernet.ui.components.FloatingTopBar
+import io.nekohasekai.sagernet.ui.components.LocalBottomInset
+import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import io.nekohasekai.sagernet.ui.components.ExpressiveIconBadge
 import io.nekohasekai.sagernet.ui.components.PrefActionRow
 import io.nekohasekai.sagernet.ui.components.PrefCategory
@@ -82,29 +83,19 @@ fun AboutScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.menu_about),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
-                    }
-                },
-            )
-        },
-    ) { padding ->
-        LazyColumn(
+    val topInset = floatingTopBarSpace()
+    val bottomInset = LocalBottomInset.current
+
+    val topBackdrop = rememberBlurBackdrop()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding()),
-            contentPadding = PaddingValues(bottom = 28.dp),
+                .then(if (topBackdrop != null) Modifier.layerBackdrop(topBackdrop) else Modifier),
+        ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(top = topInset, bottom = bottomInset + 16.dp),
         ) {
             item {
                 Surface(
@@ -265,5 +256,13 @@ fun AboutScreen(
                 }
             }
         }
+         }
+
+        FloatingTopBar(
+            backdrop = topBackdrop,
+            title = stringResource(R.string.menu_about),
+            onBack = onBack,
+            modifier = Modifier.align(Alignment.TopCenter),
+        )
     }
 }

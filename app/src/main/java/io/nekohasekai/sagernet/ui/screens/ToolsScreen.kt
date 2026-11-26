@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,26 +18,22 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.NetworkPing
 import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -52,6 +49,11 @@ import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.StunActivity
 import io.nekohasekai.sagernet.ui.WebDAVSettingsActivity
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
+import io.nekohasekai.sagernet.ui.components.FloatingTopBar
+import io.nekohasekai.sagernet.ui.components.LocalBottomInset
+import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import io.nekohasekai.sagernet.ui.components.PrefActionRow
 import io.nekohasekai.sagernet.ui.components.PrefCategory
 import io.nekohasekai.sagernet.ui.components.PrefSwitchRow
@@ -120,28 +122,20 @@ fun ToolsScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.menu_tools),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    val topInset = floatingTopBarSpace()
+    val bottomInset = LocalBottomInset.current
+
+    val topBackdrop = rememberBlurBackdrop()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(if (topBackdrop != null) Modifier.layerBackdrop(topBackdrop) else Modifier),
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding()),
+                .padding(top = topInset, bottom = bottomInset),
         ) {
             val tabs = listOf(
                 stringResource(R.string.tools_network),
@@ -252,5 +246,13 @@ fun ToolsScreen(
                 }
             }
         }
+         }
+
+        FloatingTopBar(
+            backdrop = topBackdrop,
+            title = stringResource(R.string.menu_tools),
+            onBack = onBack,
+            modifier = Modifier.align(Alignment.TopCenter),
+        )
     }
 }

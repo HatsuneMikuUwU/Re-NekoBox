@@ -4,12 +4,12 @@ import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -41,14 +41,11 @@ import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -60,7 +57,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.nekohasekai.sagernet.Key
@@ -70,6 +66,11 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.triggerFullRestart
 import io.nekohasekai.sagernet.ui.AppManagerActivity
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
+import io.nekohasekai.sagernet.ui.components.FloatingTopBar
+import io.nekohasekai.sagernet.ui.components.LocalBottomInset
+import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import io.nekohasekai.sagernet.ui.components.MtuPickerDialog
 import io.nekohasekai.sagernet.ui.components.PrefActionRow
 import io.nekohasekai.sagernet.ui.components.PrefCategory
@@ -128,27 +129,19 @@ fun SettingsScreen(
     val rulesProvider = store.getString(Key.RULES_PROVIDER, "0").toIntOrNull() ?: 0
     val appendHttpProxy = store.getBoolean(Key.APPEND_HTTP_PROXY, false)
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.settings),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
-            )
-        },
-    ) { padding ->
-        LazyColumn(
+    val topInset = floatingTopBarSpace()
+    val bottomInset = LocalBottomInset.current
+
+    val topBackdrop = rememberBlurBackdrop()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding()),
-            contentPadding = PaddingValues(bottom = 28.dp),
+                .then(if (topBackdrop != null) Modifier.layerBackdrop(topBackdrop) else Modifier),
+        ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(top = topInset, bottom = bottomInset + 16.dp),
         ) {
             // General Settings
             item {
@@ -564,6 +557,14 @@ fun SettingsScreen(
                 }
             }
         }
+
+        }
+
+        FloatingTopBar(
+            backdrop = topBackdrop,
+            title = stringResource(R.string.settings),
+            modifier = Modifier.align(Alignment.TopCenter),
+        )
     }
 
     if (showMtuDialog) {

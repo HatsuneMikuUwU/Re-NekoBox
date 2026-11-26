@@ -38,11 +38,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -69,6 +66,11 @@ import io.nekohasekai.sagernet.group.GroupUpdater
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.GroupSettingsActivity
 import io.nekohasekai.sagernet.ui.components.ExpressiveEmptyState
+import io.nekohasekai.sagernet.ui.components.FloatingTopBar
+import io.nekohasekai.sagernet.ui.components.LocalBottomInset
+import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
 import io.nekohasekai.sagernet.ui.components.ExpressivePillBadge
 import io.nekohasekai.sagernet.ui.components.ExpressiveSurfaceItem
@@ -112,32 +114,16 @@ fun GroupScreen(
         onDispose { GroupManager.removeListener(listener) }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.menu_group),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
-                actions = {
-                    IconButton(onClick = { showUpdateAllDialog = true }) {
-                        Icon(Icons.Rounded.Sync, contentDescription = stringResource(R.string.update_all_subscription))
-                    }
-                    IconButton(onClick = {
-                        context.startActivity(Intent(context, GroupSettingsActivity::class.java))
-                    }) {
-                        Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.group_create))
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    val topInset = floatingTopBarSpace()
+    val bottomInset = LocalBottomInset.current
+
+    val topBackdrop = rememberBlurBackdrop()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(if (topBackdrop != null) Modifier.layerBackdrop(topBackdrop) else Modifier),
+        ) {
         if (groups.isEmpty()) {
             ExpressiveEmptyState(
                 icon = Icons.Rounded.FolderCopy,
@@ -146,14 +132,17 @@ fun GroupScreen(
                 onAction = { context.startActivity(Intent(context, GroupSettingsActivity::class.java)) },
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding()),
+                    .padding(top = topInset, bottom = bottomInset),
             )
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding()),
-                contentPadding = PaddingValues(16.dp),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = topInset + 4.dp,
+                    bottom = bottomInset + 16.dp,
+                ),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 itemsIndexed(groups, key = { _, (g, _) -> g.id }) { idx, (group, count) ->
@@ -197,6 +186,24 @@ fun GroupScreen(
                 }
             }
         }
+
+        }
+
+        FloatingTopBar(
+            backdrop = topBackdrop,
+            title = stringResource(R.string.menu_group),
+            actions = {
+                IconButton(onClick = { showUpdateAllDialog = true }) {
+                    Icon(Icons.Rounded.Sync, contentDescription = stringResource(R.string.update_all_subscription))
+                }
+                IconButton(onClick = {
+                    context.startActivity(Intent(context, GroupSettingsActivity::class.java))
+                }) {
+                    Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.group_create))
+                }
+            },
+            modifier = Modifier.align(Alignment.TopCenter),
+        )
     }
 
     if (showUpdateAllDialog) {

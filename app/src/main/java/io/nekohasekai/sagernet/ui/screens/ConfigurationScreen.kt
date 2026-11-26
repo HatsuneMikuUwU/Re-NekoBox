@@ -5,7 +5,6 @@ import android.os.SystemClock
 import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,12 +31,10 @@ import androidx.compose.material.icons.rounded.ContentPaste
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.FileOpen
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material.icons.rounded.Router
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -47,13 +44,10 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -89,7 +83,11 @@ import io.nekohasekai.sagernet.ui.ScannerActivity
 import io.nekohasekai.sagernet.ui.components.ExpressiveEmptyState
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
 import io.nekohasekai.sagernet.ui.components.ExpressivePillBadge
-import io.nekohasekai.sagernet.ui.components.ExpressiveSearchField
+import io.nekohasekai.sagernet.ui.components.FloatingSearchBar
+import io.nekohasekai.sagernet.ui.components.LocalBottomInset
+import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import io.nekohasekai.sagernet.ui.components.ExpressiveSurfaceItem
 import io.nekohasekai.sagernet.ui.components.QrCodeDialog
 import io.nekohasekai.sagernet.ui.profile.*
@@ -118,7 +116,6 @@ fun ConfigurationScreen(
     var profiles by remember { mutableStateOf<List<ProxyEntity>>(emptyList()) }
     var selectedProxyId by remember { mutableLongStateOf(DataStore.selectedProxy) }
 
-    var searchVisible by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showAddSheet by remember { mutableStateOf(false) }
     var showMoreMenu by remember { mutableStateOf(false) }
@@ -247,187 +244,81 @@ fun ConfigurationScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = if (selectMode) stringResource(R.string.select_profile) else stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                navigationIcon = {
-                    if (selectMode && onBack != null) {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
-                        }
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {
-                        searchVisible = !searchVisible
-                        if (!searchVisible) searchQuery = ""
-                    }) {
-                        Icon(Icons.Rounded.Search, contentDescription = stringResource(android.R.string.search_go))
-                    }
-                    if (!selectMode) {
-                        IconButton(onClick = { showAddSheet = true }) {
-                            Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_profile))
-                        }
-                        Box {
-                            IconButton(onClick = { showSortMenu = true }) {
-                                Icon(Icons.AutoMirrored.Rounded.Sort, contentDescription = stringResource(R.string.group_order))
-                            }
-                            DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
-                                val currentGroup = groups.firstOrNull { it.id == selectedGroupId }
-                                listOf(
-                                    GroupOrder.ORIGIN to R.string.group_order_origin,
-                                    GroupOrder.BY_NAME to R.string.group_order_by_name,
-                                    GroupOrder.BY_DELAY to R.string.group_order_by_delay,
-                                ).forEach { (order, labelRes) ->
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(labelRes)) },
-                                        onClick = {
-                                            showSortMenu = false
-                                            if (currentGroup != null) {
-                                                runOnDefaultDispatcher {
-                                                    currentGroup.order = order
-                                                    GroupManager.updateGroup(currentGroup)
-                                                    reloadData()
-                                                }
-                                            }
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                        Box {
-                            IconButton(onClick = { showMoreMenu = true }) {
-                                Icon(Icons.Rounded.MoreVert, contentDescription = "More")
-                            }
-                            DropdownMenu(expanded = showMoreMenu, onDismissRequest = { showMoreMenu = false }) {
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            if (isTestingAll) stringResource(R.string.connection_test_testing)
-                                            else stringResource(R.string.connection_test)
-                                        )
-                                    },
-                                    enabled = !isTestingAll && profiles.isNotEmpty(),
-                                    onClick = { showMoreMenu = false; runPingAll() },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.connection_test_icmp_ping)) },
-                                    enabled = !isTestingAll && profiles.isNotEmpty(),
-                                    onClick = { showMoreMenu = false; runPingAll() },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.connection_test_clear_results)) },
-                                    onClick = {
-                                        showMoreMenu = false
-                                        runOnDefaultDispatcher {
-                                            profiles.forEach {
-                                                it.status = 0
-                                                it.ping = 0
-                                                it.error = null
-                                            }
-                                            SagerDatabase.proxyDao.updateProxy(profiles)
-                                            reloadData()
-                                        }
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.connection_test_delete_unavailable)) },
-                                    onClick = {
-                                        showMoreMenu = false
-                                        runOnDefaultDispatcher {
-                                            val unavailable = profiles.filter { it.status == 2 || it.status == 3 }
-                                            unavailable.forEach { ProfileManager.deleteProfile(it.groupId, it.id) }
-                                            onMainDispatcher {
-                                                onShowMessage(context.getString(R.string.removed, unavailable.size))
-                                            }
-                                        }
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.clear_traffic_statistics)) },
-                                    onClick = {
-                                        showMoreMenu = false
-                                        runOnDefaultDispatcher {
-                                            ProfileManager.resetTraffic(profiles.map { it.id }.toLongArray())
-                                            reloadData()
-                                        }
-                                    },
-                                )
-                            }
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
-            )
-        },
-    ) { padding ->
-        Column(
+    val topInset = floatingTopBarSpace()
+    val bottomInset = LocalBottomInset.current
+
+    val topBackdrop = rememberBlurBackdrop()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding()),
+                .then(if (topBackdrop != null) Modifier.layerBackdrop(topBackdrop) else Modifier),
         ) {
-            AnimatedVisibility(visible = searchVisible) {
-                ExpressiveSearchField(
-                    query = searchQuery,
-                    onQueryChange = { searchQuery = it },
-                    placeholder = stringResource(R.string.search),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                )
-            }
-
-            if (groups.size > 1) {
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(groups, key = { it.id }) { group ->
-                        val selected = group.id == selectedGroupId
-                        FilterChip(
-                            selected = selected,
-                            onClick = {
-                                selectedGroupId = group.id
-                                DataStore.selectedGroup = group.id
-                            },
-                            label = {
-                                Text(
-                                    text = group.displayName(),
-                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+        if (filteredProfiles.isEmpty() && groups.size <= 1) {
+            ExpressiveEmptyState(
+                icon = Icons.Rounded.Router,
+                title = stringResource(R.string.no_proxies_found),
+                subtitle = stringResource(R.string.add_profile),
+                actionLabel = if (!selectMode) stringResource(R.string.add_profile) else null,
+                onAction = if (!selectMode) { { showAddSheet = true } } else null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = topInset, bottom = bottomInset),
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = topInset + 4.dp,
+                    bottom = bottomInset + 16.dp,
+                ),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (groups.size > 1) {
+                    item(key = "group-chips") {
+                        LazyRow(
+                            contentPadding = PaddingValues(bottom = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            items(groups, key = { it.id }) { group ->
+                                val selected = group.id == selectedGroupId
+                                FilterChip(
+                                    selected = selected,
+                                    onClick = {
+                                        selectedGroupId = group.id
+                                        DataStore.selectedGroup = group.id
+                                    },
+                                    label = {
+                                        Text(
+                                            text = group.displayName(),
+                                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                        )
+                                    },
+                                    shape = CircleShape,
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    ),
                                 )
-                            },
-                            shape = CircleShape,
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            ),
-                        )
+                            }
+                        }
                     }
                 }
-            }
 
-            if (filteredProfiles.isEmpty()) {
-                ExpressiveEmptyState(
-                    icon = Icons.Rounded.Router,
-                    title = stringResource(R.string.no_proxies_found),
-                    subtitle = stringResource(R.string.add_profile),
-                    actionLabel = if (!selectMode) stringResource(R.string.add_profile) else null,
-                    onAction = if (!selectMode) { { showAddSheet = true } } else null,
-                    modifier = Modifier.weight(1f),
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
+                if (filteredProfiles.isEmpty()) {
+                    item(key = "empty-profiles") {
+                        ExpressiveEmptyState(
+                            icon = Icons.Rounded.Router,
+                            title = stringResource(R.string.no_proxies_found),
+                            subtitle = stringResource(R.string.add_profile),
+                            actionLabel = if (!selectMode) stringResource(R.string.add_profile) else null,
+                            onAction = if (!selectMode) { { showAddSheet = true } } else null,
+                            modifier = Modifier.fillParentMaxHeight(0.7f),
+                        )
+                    }
+                } else {
                     itemsIndexed(filteredProfiles, key = { _, p -> p.id }) { index, entity ->
                         val position = when {
                             filteredProfiles.size == 1 -> ExpressiveGroupPosition.SINGLE
@@ -472,6 +363,111 @@ fun ConfigurationScreen(
                 }
             }
         }
+
+        }
+
+        FloatingSearchBar(
+            backdrop = topBackdrop,
+            query = searchQuery,
+            onQueryChange = { searchQuery = it },
+            placeholder = if (selectMode) stringResource(R.string.select_profile) else stringResource(R.string.search),
+            onBack = if (selectMode) onBack else null,
+            actions = if (!selectMode) {
+                {
+                    IconButton(onClick = { showAddSheet = true }) {
+                        Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_profile))
+                    }
+                    Box {
+                        IconButton(onClick = { showSortMenu = true }) {
+                            Icon(Icons.AutoMirrored.Rounded.Sort, contentDescription = stringResource(R.string.group_order))
+                        }
+                        DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
+                            val currentGroup = groups.firstOrNull { it.id == selectedGroupId }
+                            listOf(
+                                GroupOrder.ORIGIN to R.string.group_order_origin,
+                                GroupOrder.BY_NAME to R.string.group_order_by_name,
+                                GroupOrder.BY_DELAY to R.string.group_order_by_delay,
+                            ).forEach { (order, labelRes) ->
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(labelRes)) },
+                                    onClick = {
+                                        showSortMenu = false
+                                        if (currentGroup != null) {
+                                            runOnDefaultDispatcher {
+                                                currentGroup.order = order
+                                                GroupManager.updateGroup(currentGroup)
+                                                reloadData()
+                                            }
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                    }
+                    Box {
+                        IconButton(onClick = { showMoreMenu = true }) {
+                            Icon(Icons.Rounded.MoreVert, contentDescription = "More")
+                        }
+                        DropdownMenu(expanded = showMoreMenu, onDismissRequest = { showMoreMenu = false }) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        if (isTestingAll) stringResource(R.string.connection_test_testing)
+                                        else stringResource(R.string.connection_test)
+                                    )
+                                },
+                                enabled = !isTestingAll && profiles.isNotEmpty(),
+                                onClick = { showMoreMenu = false; runPingAll() },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.connection_test_icmp_ping)) },
+                                enabled = !isTestingAll && profiles.isNotEmpty(),
+                                onClick = { showMoreMenu = false; runPingAll() },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.connection_test_clear_results)) },
+                                onClick = {
+                                    showMoreMenu = false
+                                    runOnDefaultDispatcher {
+                                        profiles.forEach {
+                                            it.status = 0
+                                            it.ping = 0
+                                            it.error = null
+                                        }
+                                        SagerDatabase.proxyDao.updateProxy(profiles)
+                                        reloadData()
+                                    }
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.connection_test_delete_unavailable)) },
+                                onClick = {
+                                    showMoreMenu = false
+                                    runOnDefaultDispatcher {
+                                        val unavailable = profiles.filter { it.status == 2 || it.status == 3 }
+                                        unavailable.forEach { ProfileManager.deleteProfile(it.groupId, it.id) }
+                                        onMainDispatcher {
+                                            onShowMessage(context.getString(R.string.removed, unavailable.size))
+                                        }
+                                    }
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.clear_traffic_statistics)) },
+                                onClick = {
+                                    showMoreMenu = false
+                                    runOnDefaultDispatcher {
+                                        ProfileManager.resetTraffic(profiles.map { it.id }.toLongArray())
+                                        reloadData()
+                                    }
+                                },
+                            )
+                        }
+                    }
+                }
+            } else null,
+            modifier = Modifier.align(Alignment.TopCenter),
+        )
     }
 
     if (showAddSheet) {

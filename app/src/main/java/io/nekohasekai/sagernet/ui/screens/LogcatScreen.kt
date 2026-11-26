@@ -1,6 +1,7 @@
 package io.nekohasekai.sagernet.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,16 +14,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DeleteSweep
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -30,12 +28,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.nekohasekai.sagernet.R
@@ -43,6 +41,11 @@ import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.components.ExpressiveSearchField
+import io.nekohasekai.sagernet.ui.components.FloatingTopBar
+import io.nekohasekai.sagernet.ui.components.LocalBottomInset
+import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,53 +83,20 @@ fun LogcatScreen(
         else logLines.filter { it.contains(filterQuery, ignoreCase = true) }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.menu_log),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { reloadLogs() }) {
-                        Icon(Icons.Rounded.Refresh, contentDescription = "Refresh")
-                    }
-                    IconButton(onClick = {
-                        runOnDefaultDispatcher {
-                            SendLog.sendLog(context, "NB4A")
-                        }
-                    }) {
-                        Icon(Icons.Rounded.Share, contentDescription = "Send Log")
-                    }
-                    IconButton(onClick = {
-                        runOnDefaultDispatcher {
-                            try {
-                                Libcore.nekoLogClear()
-                                Runtime.getRuntime().exec("/system/bin/logcat -c")
-                                onMainDispatcher { logLines = emptyList() }
-                            } catch (e: Exception) {
-                                onMainDispatcher { onShowMessage(e.readableMessage) }
-                            }
-                        }
-                    }) {
-                        Icon(Icons.Rounded.DeleteSweep, contentDescription = "Clear")
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    val topInset = floatingTopBarSpace()
+    val bottomInset = LocalBottomInset.current
+
+    val topBackdrop = rememberBlurBackdrop()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(if (topBackdrop != null) Modifier.layerBackdrop(topBackdrop) else Modifier),
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding()),
+                .padding(top = topInset, bottom = bottomInset),
         ) {
             ExpressiveSearchField(
                 query = filterQuery,
@@ -168,5 +138,38 @@ fun LogcatScreen(
                 }
             }
         }
+         }
+
+        FloatingTopBar(
+            backdrop = topBackdrop,
+            title = stringResource(R.string.menu_log),
+            onBack = onBack,
+            actions = {
+                IconButton(onClick = { reloadLogs() }) {
+                    Icon(Icons.Rounded.Refresh, contentDescription = "Refresh")
+                }
+                IconButton(onClick = {
+                    runOnDefaultDispatcher {
+                        SendLog.sendLog(context, "NB4A")
+                    }
+                }) {
+                    Icon(Icons.Rounded.Share, contentDescription = "Send Log")
+                }
+                IconButton(onClick = {
+                    runOnDefaultDispatcher {
+                        try {
+                            Libcore.nekoLogClear()
+                            Runtime.getRuntime().exec("/system/bin/logcat -c")
+                            onMainDispatcher { logLines = emptyList() }
+                        } catch (e: Exception) {
+                            onMainDispatcher { onShowMessage(e.readableMessage) }
+                        }
+                    }
+                }) {
+                    Icon(Icons.Rounded.DeleteSweep, contentDescription = "Clear")
+                }
+            },
+            modifier = Modifier.align(Alignment.TopCenter),
+        )
     }
 }

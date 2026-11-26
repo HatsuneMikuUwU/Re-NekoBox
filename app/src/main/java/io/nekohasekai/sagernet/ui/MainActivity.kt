@@ -20,7 +20,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -47,14 +52,12 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
@@ -67,6 +70,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import io.nekohasekai.sagernet.BuildConfig
@@ -98,6 +102,16 @@ import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.parseProxies
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
+import androidx.compose.ui.graphics.Color
+import io.nekohasekai.sagernet.ui.components.FloatingTabBar
+import io.nekohasekai.sagernet.ui.components.FloatingTabBarMargin
+import io.nekohasekai.sagernet.ui.components.LocalBlurBackdrop
+import io.nekohasekai.sagernet.ui.components.LocalBottomInset
+import io.nekohasekai.sagernet.ui.components.barGlass
+import io.nekohasekai.sagernet.ui.components.bottomScrim
+import io.nekohasekai.sagernet.ui.components.floatingTabBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import io.nekohasekai.sagernet.ui.screens.AboutScreen
 import io.nekohasekai.sagernet.ui.screens.ConfigurationScreen
 import io.nekohasekai.sagernet.ui.screens.GroupScreen
@@ -202,58 +216,35 @@ class MainActivity : ThemedActivity(),
             }
         }
 
-        Scaffold(
-            snackbarHost = { SnackbarHost(hostState = composeSnackbarHostState) },
-            bottomBar = {
-                if (!isSettingsSubScreen) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        ExpressiveConnectionDock(
-                            state = serviceState,
-                            txRate = txRate,
-                            rxRate = rxRate,
-                            onToggleConnection = {
-                                if (DataStore.serviceState.canStop) {
-                                    SagerNet.stopService()
-                                } else {
-                                    connect.launch(null)
-                                }
-                            },
-                            onUrlTest = { urlTest() },
-                        )
-                        NavigationBar(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                            tonalElevation = 2.dp,
-                        ) {
-                            MainDestination.entries.filter { it.inBottomBar }.forEach { dest ->
-                                NavigationBarItem(
-                                    selected = destination == dest,
-                                    onClick = { currentDestination.value = dest },
-                                    icon = { Icon(dest.icon, contentDescription = stringResource(dest.titleRes)) },
-                                    label = {
-                                        Text(
-                                            text = stringResource(dest.titleRes),
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                            fontWeight = if (destination == dest) FontWeight.Bold else FontWeight.Medium,
-                                        )
-                                    },
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-        ) { innerPadding ->
+        val bottomTabs = remember { MainDestination.entries.filter { it.inBottomBar } }
+        val backdrop = rememberBlurBackdrop()
+        val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        val bottomInset = if (!isSettingsSubScreen) {
+            floatingTabBarSpace() + 92.dp
+        } else {
+            navBarInset + 16.dp
+        }
+
+        CompositionLocalProvider(
+            LocalBottomInset provides bottomInset,
+            LocalBlurBackdrop provides backdrop,
+        ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = innerPadding.calculateBottomPadding()),
+                    .then(if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier),
             ) {
                 val backToSettings: () -> Unit = { currentDestination.value = MainDestination.SETTINGS }
                 AnimatedContent(
                     targetState = destination,
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
                     label = "mainDestinationTransition",
+                    modifier = Modifier.fillMaxSize(),
                 ) { target ->
                     when (target) {
                         MainDestination.CONFIGURATION -> ConfigurationScreen(
@@ -294,6 +285,68 @@ class MainActivity : ThemedActivity(),
                     }
                 }
             }
+
+            if (!isSettingsSubScreen) {
+                val bg = MaterialTheme.colorScheme.background
+                val fadeBrush = remember(bg) { bottomScrim(bg) }
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(floatingTabBarSpace() + 104.dp)
+                        .background(fadeBrush),
+                )
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(bottom = FloatingTabBarMargin),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    ExpressiveConnectionDock(
+                        state = serviceState,
+                        txRate = txRate,
+                        rxRate = rxRate,
+                        onToggleConnection = {
+                            if (DataStore.serviceState.canStop) {
+                                SagerNet.stopService()
+                            } else {
+                                connect.launch(null)
+                            }
+                        },
+                        onUrlTest = { urlTest() },
+                    )
+                    FloatingTabBar(
+                        items = bottomTabs,
+                        selectedIndex = { bottomTabs.indexOf(destination).coerceAtLeast(0) },
+                        onSelected = { idx -> currentDestination.value = bottomTabs[idx] },
+                        iconContent = { dest, _ ->
+                            Icon(dest.icon, contentDescription = null, modifier = Modifier.size(22.dp))
+                        },
+                        labelContent = { dest, _ ->
+                            Text(
+                                text = stringResource(dest.titleRes),
+                                fontSize = 11.sp,
+                                lineHeight = 14.sp,
+                                maxLines = 1,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                    )
+                }
+            }
+
+            SnackbarHost(
+                hostState = composeSnackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = bottomInset + 4.dp),
+            )
+        }
         }
 
         subImport?.let { group ->
@@ -406,6 +459,7 @@ class MainActivity : ThemedActivity(),
             },
             label = "dockColor",
         )
+        val backdrop = LocalBlurBackdrop.current
         Surface(
             onClick = {
                 testing = true
@@ -424,11 +478,17 @@ class MainActivity : ThemedActivity(),
             enabled = isConnected && !testing,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp)
+                .barGlass(
+                    backdrop = backdrop,
+                    shape = CircleShape,
+                    containerColor = dockContainerColor,
+                    drawFlatBackground = false,
+                ),
             shape = CircleShape,
-            color = dockContainerColor,
-            tonalElevation = 6.dp,
-            shadowElevation = 3.dp,
+            color = if (backdrop != null) Color.Transparent else dockContainerColor,
+            tonalElevation = if (backdrop != null) 0.dp else 6.dp,
+            shadowElevation = if (backdrop != null) 0.dp else 3.dp,
         ) {
             Row(
                 modifier = Modifier
