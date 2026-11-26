@@ -399,7 +399,7 @@
     <string name="subscription_user_agent">UserAgent</string>
     <string name="confirm">Confirm</string>
     <string name="missing_plugin">Missing Plugin</string>
-    <string name="profile_requiring_plugin">Profile %s requires the %s plugin to be installed, but
+    <string name="profile_requiring_plugin">Profile %1$s requires the %2$s plugin to be installed, but
         it was not found.</string>
     <string name="action_learn_more">LEARN MORE</string>
     <string name="action_download">DOWNLOAD</string>
@@ -446,7 +446,7 @@
     <string name="group_order_origin">Origin</string>
     <string name="group_order_by_name">By Name</string>
     <string name="group_order_by_delay">By Delay</string>
-    <string name="plugin_exists_but_on_shit_system">Profile %s requires the %s plugin, but your
+    <string name="plugin_exists_but_on_shit_system">Profile %1$s requires the %2$s plugin, but your
         proprietary equipment vendor (usually surveillance capital giants and malware maker)
         tampered with your Android, making the plugin unusable.</string>
 
@@ -557,9 +557,9 @@
 
     <string name="pinned_certchain_sha256">Pinned Certificate SHA256</string>
 
-    <string name="please_update">Your APP is too old (%s). And will stop working at %s. Please
+    <string name="please_update">Your APP is too old (%1$s). And will stop working at %2$s. Please
         update!</string>
-    <string name="please_update_force">Your APP is too old (%s). And has been stopped working at %s.
+    <string name="please_update_force">Your APP is too old (%1$s). And has been stopped working at %2$s.
         Please update!</string>
     <string name="connection_test_delete_unavailable">Clear unavailable</string>
     <string name="move">Move</string>
