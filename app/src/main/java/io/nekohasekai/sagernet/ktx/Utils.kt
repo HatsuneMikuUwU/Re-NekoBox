@@ -149,7 +149,6 @@ fun String?.parseNumericAddress(): InetAddress? =
         ) as InetAddress
     }
 
-@JvmOverloads
 
 fun String.pathSafe(): String {
     // " " encoded as +

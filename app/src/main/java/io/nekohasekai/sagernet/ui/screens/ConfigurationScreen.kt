@@ -40,7 +40,7 @@ import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.rounded.Sort
+import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -285,7 +285,7 @@ fun ConfigurationScreen(
                         }
                         Box {
                             IconButton(onClick = { showSortMenu = true }) {
-                                Icon(Icons.Rounded.Sort, contentDescription = stringResource(R.string.group_order))
+                                Icon(Icons.AutoMirrored.Rounded.Sort, contentDescription = stringResource(R.string.group_order))
                             }
                             DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
                                 val currentGroup = groups.firstOrNull { it.id == selectedGroupId }
@@ -365,7 +365,7 @@ fun ConfigurationScreen(
                     }
                 },
                 scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.largeTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                 ),

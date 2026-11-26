@@ -20,6 +20,7 @@ android {
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
             "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
+            "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi",
         )
     }
     ksp {

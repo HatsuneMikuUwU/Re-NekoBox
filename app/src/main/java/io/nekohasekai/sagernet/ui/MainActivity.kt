@@ -42,7 +42,7 @@ import androidx.compose.material.icons.rounded.AccountTree
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.FolderCopy
-import androidx.compose.material.icons.rounded.HelpOutline
+import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Router
@@ -293,7 +293,7 @@ class MainActivity : ThemedActivity(),
 
                     NavigationDrawerItem(
                         label = { Text(stringResource(R.string.document), style = MaterialTheme.typography.labelLarge) },
-                        icon = { Icon(Icons.Rounded.HelpOutline, contentDescription = null) },
+                        icon = { Icon(Icons.AutoMirrored.Rounded.HelpOutline, contentDescription = null) },
                         selected = false,
                         onClick = {
                             scope.launch { drawerState.close() }

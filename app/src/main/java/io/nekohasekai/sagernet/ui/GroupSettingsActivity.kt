@@ -13,7 +13,7 @@ import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Link
-import androidx.compose.material.icons.rounded.Sort
+import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.Title
 import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material3.Icon
@@ -181,7 +181,7 @@ class GroupSettingsActivity : ThemedActivity() {
                                     entriesRes = R.array.group_orders,
                                     entryValuesRes = R.array.int_array_3,
                                     defaultValue = "0",
-                                    icon = Icons.Rounded.Sort,
+                                    icon = Icons.AutoMirrored.Rounded.Sort,
                                 )
                                 StoreSwitchPref(
                                     store = store,
