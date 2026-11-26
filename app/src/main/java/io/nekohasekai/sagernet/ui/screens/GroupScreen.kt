@@ -42,7 +42,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -84,6 +86,7 @@ fun GroupScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     var groups by remember { mutableStateOf<List<Pair<ProxyGroup, Long>>>(emptyList()) }
     var showUpdateAllDialog by remember { mutableStateOf(false) }
@@ -114,8 +117,10 @@ fun GroupScreen(
     }
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
+            LargeTopAppBar(
+                scrollBehavior = scrollBehavior,
                 title = {
                     Text(
                         text = stringResource(R.string.menu_group),

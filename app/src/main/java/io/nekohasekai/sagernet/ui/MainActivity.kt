@@ -14,11 +14,14 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +32,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -45,6 +47,7 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Terminal
@@ -52,6 +55,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
@@ -71,8 +75,6 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -87,7 +89,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import io.nekohasekai.sagernet.database.preference.PreferenceDataStore
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.GroupType
 import io.nekohasekai.sagernet.Key
@@ -104,6 +105,7 @@ import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyGroup
 import io.nekohasekai.sagernet.database.SubscriptionBean
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
+import io.nekohasekai.sagernet.database.preference.PreferenceDataStore
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.KryoConverters
 import io.nekohasekai.sagernet.fmt.PluginEntry
@@ -116,6 +118,7 @@ import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.parseProxies
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
+import io.nekohasekai.sagernet.ui.components.ExpressiveIconBadge
 import io.nekohasekai.sagernet.ui.screens.AboutScreen
 import io.nekohasekai.sagernet.ui.screens.ConfigurationScreen
 import io.nekohasekai.sagernet.ui.screens.GroupScreen
@@ -227,29 +230,44 @@ class MainActivity : ThemedActivity(),
             drawerState = drawerState,
             drawerContent = {
                 ModalDrawerSheet(
-                    drawerShape = RoundedCornerShape(topEnd = 28.dp, bottomEnd = 28.dp),
+                    drawerShape = RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp),
                     drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                 ) {
-                    Column(
+                    Surface(
                         modifier = Modifier
-                            .padding(horizontal = 20.dp, vertical = 20.dp)
                             .fillMaxWidth()
+                            .padding(16.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
                     ) {
-                        Text(
-                            text = stringResource(R.string.app_name),
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = SagerNet.appVersionNameForDisplay,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            ExpressiveIconBadge(
+                                icon = Icons.Rounded.Shield,
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(44.dp),
+                            )
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.app_name),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    text = SagerNet.appVersionNameForDisplay,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f),
+                                )
+                            }
+                        }
                     }
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     MainDestination.entries.forEach { dest ->
                         if (dest == MainDestination.TRAFFIC && !clashApiEnabled) return@forEach
@@ -271,7 +289,7 @@ class MainActivity : ThemedActivity(),
                         )
                     }
 
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp))
 
                     NavigationDrawerItem(
                         label = { Text(stringResource(R.string.document), style = MaterialTheme.typography.labelLarge) },
@@ -290,9 +308,7 @@ class MainActivity : ThemedActivity(),
             Scaffold(
                 snackbarHost = { SnackbarHost(hostState = composeSnackbarHostState) },
                 bottomBar = {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         AnimatedVisibility(
                             visible = showConnectionDock,
                             enter = slideInVertically { it / 2 } + fadeIn(),
@@ -326,6 +342,7 @@ class MainActivity : ThemedActivity(),
                                             text = stringResource(dest.titleRes),
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
+                                            fontWeight = if (destination == dest) FontWeight.Bold else FontWeight.Medium,
                                         )
                                     },
                                 )
@@ -342,6 +359,7 @@ class MainActivity : ThemedActivity(),
                     val onOpenDrawer: () -> Unit = { scope.launch { drawerState.open() } }
                     AnimatedContent(
                         targetState = destination,
+                        transitionSpec = { fadeIn() togetherWith fadeOut() },
                         label = "mainDestinationTransition",
                     ) { target ->
                         when (target) {
@@ -385,7 +403,6 @@ class MainActivity : ThemedActivity(),
             }
         }
 
-        // Import Subscription Dialog
         subImport?.let { group ->
             val displayName = group.name.takeIf { !it.isNullOrBlank() } ?: "Subscription"
             AlertDialog(
@@ -401,9 +418,7 @@ class MainActivity : ThemedActivity(),
                             runOnDefaultDispatcher { finishImportSubscription(group) }
                         },
                         shape = CircleShape,
-                    ) {
-                        Text(stringResource(R.string.yes))
-                    }
+                    ) { Text(stringResource(R.string.yes)) }
                 },
                 dismissButton = {
                     TextButton(onClick = { pendingSubscriptionImport.value = null }) {
@@ -413,7 +428,6 @@ class MainActivity : ThemedActivity(),
             )
         }
 
-        // Import Profile Dialog
         profImport?.let { profile ->
             AlertDialog(
                 onDismissRequest = { pendingProfileImport.value = null },
@@ -427,9 +441,7 @@ class MainActivity : ThemedActivity(),
                             runOnDefaultDispatcher { finishImportProfile(profile) }
                         },
                         shape = CircleShape,
-                    ) {
-                        Text(stringResource(R.string.yes))
-                    }
+                    ) { Text(stringResource(R.string.yes)) }
                 },
                 dismissButton = {
                     TextButton(onClick = { pendingProfileImport.value = null }) {
@@ -439,7 +451,6 @@ class MainActivity : ThemedActivity(),
             )
         }
 
-        // Missing Plugin Dialog
         pluginMissing?.let { (profileName, pluginEntity) ->
             AlertDialog(
                 onDismissRequest = { missingPluginDialog.value = null },
@@ -455,17 +466,13 @@ class MainActivity : ThemedActivity(),
                             launchCustomTab(pluginEntity.downloadSource.downloadLink)
                         },
                         shape = CircleShape,
-                    ) {
-                        Text(stringResource(R.string.action_download))
-                    }
+                    ) { Text(stringResource(R.string.action_download)) }
                 },
                 dismissButton = {
                     TextButton(onClick = {
                         missingPluginDialog.value = null
                         launchCustomTab("https://matsuridayo.github.io/nb4a-plugin/")
-                    }) {
-                        Text(stringResource(R.string.action_learn_more))
-                    }
+                    }) { Text(stringResource(R.string.action_learn_more)) }
                 },
             )
         }
@@ -507,7 +514,11 @@ class MainActivity : ThemedActivity(),
             label = "dockColor",
         )
         val fabCorner by animateDpAsState(
-            targetValue = if (isConnected) 16.dp else 28.dp,
+            targetValue = if (isConnected) 18.dp else 28.dp,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMedium,
+            ),
             label = "fabCornerMorph",
         )
 
@@ -515,22 +526,22 @@ class MainActivity : ThemedActivity(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(32.dp),
             color = dockContainerColor,
-            tonalElevation = 4.dp,
-            shadowElevation = 2.dp,
+            tonalElevation = 6.dp,
+            shadowElevation = 3.dp,
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 18.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
+                    .padding(start = 16.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Column(
+                Row(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(20.dp))
                         .clickable(enabled = isConnected && !testing) {
                             testing = true
                             testStatusText = null
@@ -545,26 +556,38 @@ class MainActivity : ThemedActivity(),
                                 }
                             }
                         }
-                        .padding(vertical = 4.dp),
+                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    val statusLabel = when (state) {
-                        BaseService.State.Connected -> testStatusText ?: stringResource(R.string.vpn_connected)
-                        BaseService.State.Connecting -> stringResource(R.string.connecting)
-                        BaseService.State.Stopping -> stringResource(R.string.stopping)
-                        else -> stringResource(R.string.not_connected)
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (isConnected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                                else MaterialTheme.colorScheme.surfaceContainerHighest
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
                         if (testing) {
-                            LoadingIndicator(modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                        } else if (isConnected) {
+                            LoadingIndicator(modifier = Modifier.size(22.dp))
+                        } else {
                             Icon(
-                                imageVector = Icons.Rounded.Speed,
+                                imageVector = if (isConnected) Icons.Rounded.Speed else Icons.Rounded.Shield,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(16.dp),
+                                tint = if (isConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp),
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
+                        }
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        val statusLabel = when (state) {
+                            BaseService.State.Connected -> testStatusText ?: stringResource(R.string.vpn_connected)
+                            BaseService.State.Connecting -> stringResource(R.string.connecting)
+                            BaseService.State.Stopping -> stringResource(R.string.stopping)
+                            else -> stringResource(R.string.not_connected)
                         }
                         Text(
                             text = statusLabel,
@@ -574,28 +597,29 @@ class MainActivity : ThemedActivity(),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        val txStr = Formatter.formatFileSize(this@MainActivity, txRate)
+                        val rxStr = Formatter.formatFileSize(this@MainActivity, rxRate)
+                        Text(
+                            text = if (isConnected) "↑ $txStr/s  •  ↓ $rxStr/s" else stringResource(R.string.connection_test_pending),
+                            style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
+                            color = if (isConnected) {
+                                MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f)
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
-                    Spacer(modifier = Modifier.height(2.dp))
-                    val txStr = Formatter.formatFileSize(this@MainActivity, txRate)
-                    val rxStr = Formatter.formatFileSize(this@MainActivity, rxRate)
-                    Text(
-                        text = if (isConnected) "↑ $txStr/s  •  ↓ $rxStr/s" else stringResource(R.string.connection_test_pending),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (isConnected) {
-                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 FloatingActionButton(
                     onClick = onToggleConnection,
                     shape = RoundedCornerShape(fabCorner),
+                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 2.dp),
                     containerColor = if (isConnected) {
                         MaterialTheme.colorScheme.errorContainer
                     } else {
@@ -606,7 +630,7 @@ class MainActivity : ThemedActivity(),
                     } else {
                         MaterialTheme.colorScheme.onPrimary
                     },
-                    modifier = Modifier.size(54.dp),
+                    modifier = Modifier.size(56.dp),
                 ) {
                     if (isTransitioning) {
                         LoadingIndicator(

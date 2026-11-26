@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,13 +47,18 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,6 +68,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -98,10 +105,9 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val store = rememberComposePreferenceStore(DataStore.configurationStore)
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-    LaunchedEffect(Unit) {
-        DataStore.initGlobal()
-    }
+    LaunchedEffect(Unit) { DataStore.initGlobal() }
 
     fun notifyNeedReload() {
         if (DataStore.serviceState.canStop) {
@@ -133,6 +139,7 @@ fun SettingsScreen(
     val currentThemeId = store.getInt(Key.APP_THEME, 2)
     val currentThemeSeed = ReNekoBoxThemeSeeds.firstOrNull { it.id == currentThemeId }
         ?: ReNekoBoxThemeSeeds.first()
+    val currentNightMode = store.getString(Key.NIGHT_THEME, "0").toIntOrNull() ?: 0
 
     val enableHevTun = store.getBoolean(Key.ENABLE_HEV_TUN, false)
     val speedInterval = store.getString(Key.SPEED_INTERVAL, "1000")
@@ -140,12 +147,12 @@ fun SettingsScreen(
     val appendHttpProxy = store.getBoolean(Key.APPEND_HTTP_PROXY, false)
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
+            LargeTopAppBar(
                 title = {
                     Text(
                         text = stringResource(R.string.settings),
-                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                     )
                 },
@@ -154,6 +161,11 @@ fun SettingsScreen(
                         Icon(Icons.Rounded.Menu, contentDescription = "Menu")
                     }
                 },
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.largeTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                ),
             )
         },
     ) { padding ->
@@ -163,6 +175,76 @@ fun SettingsScreen(
                 .padding(top = padding.calculateTopPadding()),
             contentPadding = PaddingValues(bottom = 28.dp),
         ) {
+            // Material 3 Expressive Appearance Hero Card
+            item {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    shape = RoundedCornerShape(28.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    tonalElevation = 1.dp,
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(18.dp))
+                                .clickable { showThemeDialog = true }
+                                .padding(4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.theme),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    text = currentThemeSeed.name,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.secondary,
+                                    MaterialTheme.colorScheme.tertiary,
+                                ).forEach { swatch ->
+                                    Box(
+                                        modifier = Modifier
+                                            .size(26.dp)
+                                            .clip(CircleShape)
+                                            .background(swatch),
+                                    )
+                                }
+                            }
+                        }
+
+                        val nightLabels = listOf("Auto", "Dark", "Light")
+                        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                            nightLabels.forEachIndexed { idx, label ->
+                                SegmentedButton(
+                                    selected = currentNightMode == idx,
+                                    onClick = {
+                                        store.putString(Key.NIGHT_THEME, idx.toString())
+                                        AppThemeState.updateNightTheme(idx)
+                                    },
+                                    shape = SegmentedButtonDefaults.itemShape(idx, nightLabels.size),
+                                ) {
+                                    Text(label, fontWeight = FontWeight.SemiBold)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             // General Settings
             item {
                 PrefCategory(titleRes = R.string.general_settings) {
@@ -173,32 +255,6 @@ fun SettingsScreen(
                         summaryRes = R.string.auto_connect_summary,
                         icon = Icons.Rounded.RestartAlt,
                         position = ExpressiveGroupPosition.TOP,
-                    )
-                    PrefActionRow(
-                        title = stringResource(R.string.theme),
-                        summary = currentThemeSeed.name,
-                        icon = Icons.Rounded.ColorLens,
-                        trailing = {
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(currentThemeSeed.primary),
-                            )
-                        },
-                        onClick = { showThemeDialog = true },
-                    )
-                    StoreListPref(
-                        store = store,
-                        key = Key.NIGHT_THEME,
-                        titleRes = R.string.night_mode,
-                        entriesRes = R.array.night_mode,
-                        entryValuesRes = R.array.int_array_4,
-                        defaultValue = "0",
-                        icon = Icons.Rounded.DarkMode,
-                        onChanged = { newVal ->
-                            AppThemeState.updateNightTheme(newVal.toIntOrNull() ?: 0)
-                        },
                     )
                     StoreListPref(
                         store = store,
@@ -414,16 +470,8 @@ fun SettingsScreen(
                         icon = Icons.Rounded.RuleFolder,
                     )
                     if (rulesProvider == 4) {
-                        StoreEditTextPref(
-                            store = store,
-                            key = Key.RULES_GEOSITE_URL,
-                            titleRes = R.string.rules_geosite_url,
-                        )
-                        StoreEditTextPref(
-                            store = store,
-                            key = Key.RULES_GEOIP_URL,
-                            titleRes = R.string.rules_geoip_url,
-                        )
+                        StoreEditTextPref(store = store, key = Key.RULES_GEOSITE_URL, titleRes = R.string.rules_geosite_url)
+                        StoreEditTextPref(store = store, key = Key.RULES_GEOIP_URL, titleRes = R.string.rules_geoip_url)
                     }
                     StoreEditTextPref(
                         store = store,
@@ -447,12 +495,7 @@ fun SettingsScreen(
                         position = ExpressiveGroupPosition.TOP,
                         onChanged = { notifyNeedReload(); true },
                     )
-                    StoreEditTextPref(
-                        store = store,
-                        key = Key.FRAGMENT_LENGTH,
-                        titleRes = R.string.fragment_length,
-                        defaultValue = "100-200",
-                    )
+                    StoreEditTextPref(store = store, key = Key.FRAGMENT_LENGTH, titleRes = R.string.fragment_length, defaultValue = "100-200")
                     StoreEditTextPref(
                         store = store,
                         key = Key.FRAGMENT_INTERVAL,
@@ -475,13 +518,7 @@ fun SettingsScreen(
                         position = ExpressiveGroupPosition.TOP,
                         onChanged = { notifyNeedReload() },
                     )
-                    StoreListPref(
-                        store = store,
-                        key = "domain_strategy_for_remote",
-                        titleRes = R.string.domain_strategy_for_remote,
-                        entriesRes = R.array.dns_network_select,
-                        defaultValue = "auto",
-                    )
+                    StoreListPref(store = store, key = "domain_strategy_for_remote", titleRes = R.string.domain_strategy_for_remote, entriesRes = R.array.dns_network_select, defaultValue = "auto")
                     StoreEditTextPref(
                         store = store,
                         key = Key.DIRECT_DNS,
@@ -490,20 +527,8 @@ fun SettingsScreen(
                         icon = Icons.Rounded.Dns,
                         onChanged = { notifyNeedReload() },
                     )
-                    StoreListPref(
-                        store = store,
-                        key = "domain_strategy_for_direct",
-                        titleRes = R.string.domain_strategy_for_direct,
-                        entriesRes = R.array.dns_network_select,
-                        defaultValue = "auto",
-                    )
-                    StoreListPref(
-                        store = store,
-                        key = "domain_strategy_for_server",
-                        titleRes = R.string.domain_strategy_for_server,
-                        entriesRes = R.array.dns_network_select,
-                        defaultValue = "auto",
-                    )
+                    StoreListPref(store = store, key = "domain_strategy_for_direct", titleRes = R.string.domain_strategy_for_direct, entriesRes = R.array.dns_network_select, defaultValue = "auto")
+                    StoreListPref(store = store, key = "domain_strategy_for_server", titleRes = R.string.domain_strategy_for_server, entriesRes = R.array.dns_network_select, defaultValue = "auto")
                     StoreSwitchPref(
                         store = store,
                         key = Key.ENABLE_DNS_ROUTING,
@@ -601,45 +626,13 @@ fun SettingsScreen(
                             true
                         },
                     )
-                    StoreSwitchPref(
-                        store = store,
-                        key = Key.NETWORK_CHANGE_RESET_CONNECTIONS,
-                        titleRes = R.string.network_change_reset_connections,
-                        defaultValue = true,
-                    )
-                    StoreSwitchPref(
-                        store = store,
-                        key = Key.WAKE_RESET_CONNECTIONS,
-                        titleRes = R.string.wake_reset_connections,
-                    )
-                    StoreSwitchPref(
-                        store = store,
-                        key = Key.GLOBAL_ALLOW_INSECURE,
-                        titleRes = R.string.global_allow_insecure,
-                        icon = Icons.Rounded.LockOpen,
-                    )
-                    StoreSwitchPref(
-                        store = store,
-                        key = Key.ALLOW_INSECURE_ON_REQUEST,
-                        titleRes = R.string.allow_insecure_on_request_sum,
-                    )
-                    StoreListPref(
-                        store = store,
-                        key = Key.APP_TLS_VERSION,
-                        titleRes = R.string.app_tls_version,
-                        entriesRes = R.array.app_tls_version,
-                        defaultValue = "1.2",
-                    )
-                    StoreSwitchPref(
-                        store = store,
-                        key = Key.SHOW_BOTTOM_BAR,
-                        titleRes = R.string.show_bottom_bar,
-                    )
-                    PrefActionRow(
-                        title = stringResource(R.string.reset_settings),
-                        icon = Icons.Rounded.RestartAlt,
-                        onClick = { showResetConfirm = true },
-                    )
+                    StoreSwitchPref(store = store, key = Key.NETWORK_CHANGE_RESET_CONNECTIONS, titleRes = R.string.network_change_reset_connections, defaultValue = true)
+                    StoreSwitchPref(store = store, key = Key.WAKE_RESET_CONNECTIONS, titleRes = R.string.wake_reset_connections)
+                    StoreSwitchPref(store = store, key = Key.GLOBAL_ALLOW_INSECURE, titleRes = R.string.global_allow_insecure, icon = Icons.Rounded.LockOpen)
+                    StoreSwitchPref(store = store, key = Key.ALLOW_INSECURE_ON_REQUEST, titleRes = R.string.allow_insecure_on_request_sum)
+                    StoreListPref(store = store, key = Key.APP_TLS_VERSION, titleRes = R.string.app_tls_version, entriesRes = R.array.app_tls_version, defaultValue = "1.2")
+                    StoreSwitchPref(store = store, key = Key.SHOW_BOTTOM_BAR, titleRes = R.string.show_bottom_bar)
+                    PrefActionRow(title = stringResource(R.string.reset_settings), icon = Icons.Rounded.RestartAlt, onClick = { showResetConfirm = true })
                     PrefActionRow(
                         title = stringResource(R.string.clear_cache),
                         summary = stringResource(R.string.clear_cache_summary),
@@ -759,32 +752,9 @@ fun SettingsScreen(
             title = { Text(stringResource(R.string.connection_test_url)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(
-                        value = url,
-                        onValueChange = { url = it },
-                        label = { Text("URL") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    OutlinedTextField(
-                        value = concurrent,
-                        onValueChange = { concurrent = it.filter(Char::isDigit) },
-                        label = { Text(stringResource(R.string.test_concurrency)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    OutlinedTextField(
-                        value = timeout,
-                        onValueChange = { timeout = it.filter(Char::isDigit) },
-                        label = { Text(stringResource(R.string.connection_test_timeout)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    OutlinedTextField(value = url, onValueChange = { url = it }, label = { Text("URL") }, singleLine = true, shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = concurrent, onValueChange = { concurrent = it.filter(Char::isDigit) }, label = { Text(stringResource(R.string.test_concurrency)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = timeout, onValueChange = { timeout = it.filter(Char::isDigit) }, label = { Text(stringResource(R.string.connection_test_timeout)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth())
                 }
             },
             confirmButton = {
@@ -799,9 +769,7 @@ fun SettingsScreen(
                 ) { Text(stringResource(android.R.string.ok)) }
             },
             dismissButton = {
-                TextButton(onClick = { showUrlTestDialog = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
+                TextButton(onClick = { showUrlTestDialog = false }) { Text(stringResource(android.R.string.cancel)) }
             },
         )
     }
@@ -813,14 +781,7 @@ fun SettingsScreen(
             shape = RoundedCornerShape(28.dp),
             title = { Text("Log buffer size (KB)") },
             text = {
-                OutlinedTextField(
-                    value = buf,
-                    onValueChange = { buf = it.filter(Char::isDigit) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                OutlinedTextField(value = buf, onValueChange = { buf = it.filter(Char::isDigit) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth())
             },
             confirmButton = {
                 Button(
@@ -833,9 +794,7 @@ fun SettingsScreen(
                 ) { Text(stringResource(android.R.string.ok)) }
             },
             dismissButton = {
-                TextButton(onClick = { showLogBufDialog = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
+                TextButton(onClick = { showLogBufDialog = false }) { Text(stringResource(android.R.string.cancel)) }
             },
         )
     }
@@ -857,9 +816,7 @@ fun SettingsScreen(
                 ) { Text(stringResource(R.string.enable_anyway)) }
             },
             dismissButton = {
-                TextButton(onClick = { showAppendHttpConfirm = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
+                TextButton(onClick = { showAppendHttpConfirm = false }) { Text(stringResource(android.R.string.cancel)) }
             },
         )
     }
@@ -881,9 +838,7 @@ fun SettingsScreen(
                 ) { Text(stringResource(R.string.yes)) }
             },
             dismissButton = {
-                TextButton(onClick = { showResetConfirm = false }) {
-                    Text(stringResource(R.string.no))
-                }
+                TextButton(onClick = { showResetConfirm = false }) { Text(stringResource(R.string.no)) }
             },
         )
     }
@@ -912,9 +867,7 @@ fun SettingsScreen(
                 ) { Text(stringResource(android.R.string.ok)) }
             },
             dismissButton = {
-                TextButton(onClick = { showClearCacheConfirm = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
+                TextButton(onClick = { showClearCacheConfirm = false }) { Text(stringResource(android.R.string.cancel)) }
             },
         )
     }

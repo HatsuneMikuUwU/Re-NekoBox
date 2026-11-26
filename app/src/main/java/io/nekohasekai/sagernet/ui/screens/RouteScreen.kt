@@ -18,20 +18,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountTree
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.FolderZip
 import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.rounded.NearMe
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.RestartAlt
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -58,6 +64,7 @@ import io.nekohasekai.sagernet.ui.AssetsActivity
 import io.nekohasekai.sagernet.ui.RouteSettingsActivity
 import io.nekohasekai.sagernet.ui.components.ExpressiveEmptyState
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
+import io.nekohasekai.sagernet.ui.components.ExpressiveIconBadge
 import io.nekohasekai.sagernet.ui.components.ExpressivePillBadge
 import io.nekohasekai.sagernet.ui.components.ExpressiveSurfaceItem
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +78,7 @@ fun RouteScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     var rules by remember { mutableStateOf<List<RuleEntity>>(emptyList()) }
     var showResetDialog by remember { mutableStateOf(false) }
@@ -95,12 +103,12 @@ fun RouteScreen(
     }
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
+            LargeTopAppBar(
                 title = {
                     Text(
                         text = stringResource(R.string.menu_route),
-                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                     )
                 },
@@ -124,6 +132,11 @@ fun RouteScreen(
                         Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.route_add))
                     }
                 },
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.largeTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                ),
             )
         },
     ) { padding ->
@@ -143,7 +156,7 @@ fun RouteScreen(
                     .fillMaxSize()
                     .padding(top = padding.calculateTopPadding()),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
                 itemsIndexed(rules, key = { _, r -> r.id }) { idx, rule ->
                     val pos = when {
@@ -152,11 +165,11 @@ fun RouteScreen(
                         idx == rules.lastIndex -> ExpressiveGroupPosition.BOTTOM
                         else -> ExpressiveGroupPosition.MIDDLE
                     }
-                    val outboundColor = when (rule.outbound) {
-                        -2L -> Color(0xFFE53935) // Block
-                        -1L -> Color(0xFF43A047) // Direct
-                        0L -> Color(0xFF1E88E5)  // Proxy
-                        else -> Color(0xFF8E24AA) // Custom / Profile
+                    val (outboundColor, outboundIcon) = when (rule.outbound) {
+                        -2L -> Color(0xFFE53935) to Icons.Rounded.Block
+                        -1L -> Color(0xFF43A047) to Icons.Rounded.NearMe
+                        0L -> Color(0xFF1E88E5) to Icons.Rounded.Public
+                        else -> Color(0xFF8E24AA) to Icons.Rounded.Tune
                     }
 
                     ExpressiveSurfaceItem(
@@ -172,9 +185,15 @@ fun RouteScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                                .padding(horizontal = 14.dp, vertical = 14.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
+                            ExpressiveIconBadge(
+                                icon = outboundIcon,
+                                containerColor = outboundColor.copy(alpha = 0.14f),
+                                contentColor = outboundColor,
+                            )
+                            Spacer(Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = rule.displayName(),
@@ -185,7 +204,7 @@ fun RouteScreen(
                                 )
                                 val summary = rule.mkSummary()
                                 if (summary.isNotBlank()) {
-                                    Spacer(modifier = Modifier.height(3.dp))
+                                    Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = summary,
                                         style = MaterialTheme.typography.bodySmall,
@@ -194,7 +213,7 @@ fun RouteScreen(
                                         overflow = TextOverflow.Ellipsis,
                                     )
                                 }
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(6.dp))
                                 ExpressivePillBadge(
                                     text = rule.displayOutbound(),
                                     containerColor = outboundColor.copy(alpha = 0.14f),

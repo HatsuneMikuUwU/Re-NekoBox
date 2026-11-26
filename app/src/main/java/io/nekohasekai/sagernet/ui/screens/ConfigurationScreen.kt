@@ -5,6 +5,8 @@ import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,17 +45,18 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -66,7 +69,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -82,7 +87,6 @@ import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.ProxyGroup
 import io.nekohasekai.sagernet.database.SagerDatabase
-import io.nekohasekai.sagernet.fmt.toUniversalLink
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.parseProxies
 import io.nekohasekai.sagernet.ktx.readableMessage
@@ -113,6 +117,7 @@ fun ConfigurationScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     var groups by remember { mutableStateOf<List<ProxyGroup>>(emptyList()) }
     var selectedGroupId by remember { mutableLongStateOf(DataStore.selectedGroup) }
@@ -159,9 +164,33 @@ fun ConfigurationScreen(
         }
     }
 
-    LaunchedEffect(refreshSignal, selectedGroupId) {
-        reloadData()
+    fun runPingAll() {
+        if (isTestingAll || profiles.isEmpty()) return
+        isTestingAll = true
+        runOnDefaultDispatcher {
+            profiles.forEach { entity ->
+                val addr = entity.requireBean().serverAddress
+                val rtt = runCatching { Libcore.icmpPing(addr, 3000) }.getOrDefault(-1)
+                if (rtt >= 0) {
+                    entity.status = 1
+                    entity.ping = rtt
+                    entity.error = null
+                } else {
+                    entity.status = 2
+                    entity.ping = 0
+                    entity.error = "timeout"
+                }
+                SagerDatabase.proxyDao.updateProxy(entity)
+            }
+            onMainDispatcher {
+                isTestingAll = false
+                reloadData()
+                onShowMessage(context.getString(R.string.connection_test_finished))
+            }
+        }
     }
+
+    LaunchedEffect(refreshSignal, selectedGroupId) { reloadData() }
 
     DisposableEffect(Unit) {
         val profileListener = object : ProfileManager.Listener {
@@ -219,12 +248,12 @@ fun ConfigurationScreen(
     }
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
+            LargeTopAppBar(
                 title = {
                     Text(
                         text = if (selectMode) stringResource(R.string.select_profile) else stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                     )
                 },
@@ -282,30 +311,7 @@ fun ConfigurationScreen(
                                     text = { Text(stringResource(R.string.connection_test_icmp_ping)) },
                                     onClick = {
                                         showMoreMenu = false
-                                        if (!isTestingAll) {
-                                            isTestingAll = true
-                                            runOnDefaultDispatcher {
-                                                profiles.forEach { entity ->
-                                                    val addr = entity.requireBean().serverAddress
-                                                    val rtt = runCatching { Libcore.icmpPing(addr, 3000) }.getOrDefault(-1)
-                                                    if (rtt >= 0) {
-                                                        entity.status = 1
-                                                        entity.ping = rtt
-                                                        entity.error = null
-                                                    } else {
-                                                        entity.status = 2
-                                                        entity.ping = 0
-                                                        entity.error = "timeout"
-                                                    }
-                                                    SagerDatabase.proxyDao.updateProxy(entity)
-                                                }
-                                                onMainDispatcher {
-                                                    isTestingAll = false
-                                                    reloadData()
-                                                    onShowMessage(context.getString(R.string.connection_test_finished))
-                                                }
-                                            }
-                                        }
+                                        runPingAll()
                                     },
                                 )
                                 DropdownMenuItem(
@@ -350,8 +356,10 @@ fun ConfigurationScreen(
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                 ),
             )
         },
@@ -399,20 +407,38 @@ fun ConfigurationScreen(
                 }
             }
 
-            if (isTestingAll) {
+            // Expressive quick action strip for active group
+            if (!selectMode && profiles.isNotEmpty()) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 6.dp),
+                        .padding(horizontal = 18.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    LoadingIndicator(modifier = Modifier.size(22.dp))
+                    val reachable = profiles.count { it.status == 1 }
                     Text(
-                        text = stringResource(R.string.connection_test_testing),
+                        text = if (reachable > 0) "${profiles.size} nodes  •  $reachable reachable" else "${profiles.size} nodes",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    FilledTonalButton(
+                        onClick = { runPingAll() },
+                        enabled = !isTestingAll,
+                        shape = CircleShape,
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp),
+                        modifier = Modifier.height(34.dp),
+                    ) {
+                        if (isTestingAll) {
+                            LoadingIndicator(modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(stringResource(R.string.connection_test_testing), style = MaterialTheme.typography.labelMedium)
+                        } else {
+                            Icon(Icons.Rounded.Bolt, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Ping", style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
                 }
             }
 
@@ -429,7 +455,7 @@ fun ConfigurationScreen(
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(3.dp),
                 ) {
                     itemsIndexed(filteredProfiles, key = { _, p -> p.id }) { index, entity ->
                         val position = when {
@@ -457,8 +483,7 @@ fun ConfigurationScreen(
                                 }
                             },
                             onEdit = {
-                                val intent = entity.settingIntent(context, false)
-                                context.startActivity(intent)
+                                context.startActivity(entity.settingIntent(context, false))
                             },
                             onShareQr = {
                                 qrDialogData = entity.displayName() to entity.toStdLink()
@@ -491,7 +516,7 @@ fun ConfigurationScreen(
     if (showAddSheet) {
         ModalBottomSheet(
             onDismissRequest = { showAddSheet = false },
-            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
         ) {
             Column(
                 modifier = Modifier
@@ -502,7 +527,7 @@ fun ConfigurationScreen(
             ) {
                 Text(
                     text = stringResource(R.string.add_profile),
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
@@ -550,11 +575,11 @@ fun ConfigurationScreen(
                                 action()
                             },
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(18.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 14.dp),
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+                                Icon(icon, contentDescription = null, modifier = Modifier.size(22.dp))
                                 Spacer(Modifier.height(4.dp))
                                 Text(
                                     text = stringResource(labelRes),
@@ -658,9 +683,7 @@ fun ConfigurationScreen(
                         }
                     },
                     shape = CircleShape,
-                ) {
-                    Text(stringResource(R.string.yes))
-                }
+                ) { Text(stringResource(R.string.yes)) }
             },
             dismissButton = {
                 TextButton(onClick = { deleteConfirmEntity = null }) {
@@ -691,13 +714,48 @@ private fun ProfileExpressiveCard(
         position = position,
         selected = selected,
         onClick = onSelect,
+        modifier = Modifier.animateContentSize(),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = 14.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            // Expressive active indicator pill
+            if (selected) {
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .height(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                )
+                Spacer(Modifier.width(10.dp))
+            }
+
+            // Protocol monogram badge
+            val protoTag = entity.displayType().take(2).uppercase()
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(
+                        if (selected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.secondaryContainer
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = protoTag,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+
+            Spacer(Modifier.width(12.dp))
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = entity.displayName(),
@@ -717,7 +775,7 @@ private fun ProfileExpressiveCard(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -725,14 +783,14 @@ private fun ProfileExpressiveCard(
                     ExpressivePillBadge(
                         text = entity.displayType(),
                         containerColor = if (selected) {
-                            MaterialTheme.colorScheme.primary
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
                         } else {
-                            MaterialTheme.colorScheme.secondaryContainer
+                            MaterialTheme.colorScheme.surfaceContainerHighest
                         },
                         contentColor = if (selected) {
-                            MaterialTheme.colorScheme.onPrimary
+                            MaterialTheme.colorScheme.primary
                         } else {
-                            MaterialTheme.colorScheme.onSecondaryContainer
+                            MaterialTheme.colorScheme.onSurfaceVariant
                         },
                     )
 
@@ -749,7 +807,7 @@ private fun ProfileExpressiveCard(
                         )
                     } else if (entity.status == 2 || entity.status == 3) {
                         ExpressivePillBadge(
-                            text = entity.error?.take(18) ?: "Error",
+                            text = entity.error?.take(16) ?: "Error",
                             containerColor = MaterialTheme.colorScheme.errorContainer,
                             contentColor = MaterialTheme.colorScheme.onErrorContainer,
                         )
@@ -760,7 +818,7 @@ private fun ProfileExpressiveCard(
                         val rxStr = Formatter.formatFileSize(context, entity.rx)
                         Text(
                             text = "↑$txStr ↓$rxStr",
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                         )
@@ -788,34 +846,22 @@ private fun ProfileExpressiveCard(
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.share_qr_nfc)) },
                             leadingIcon = { Icon(Icons.Rounded.QrCode2, null) },
-                            onClick = {
-                                menuExpanded = false
-                                onShareQr()
-                            },
+                            onClick = { menuExpanded = false; onShareQr() },
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.action_export_clipboard)) },
                             leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
-                            onClick = {
-                                menuExpanded = false
-                                onCopyLink()
-                            },
+                            onClick = { menuExpanded = false; onCopyLink() },
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.duplicate)) },
                             leadingIcon = { Icon(Icons.Rounded.Share, null) },
-                            onClick = {
-                                menuExpanded = false
-                                onDuplicate()
-                            },
+                            onClick = { menuExpanded = false; onDuplicate() },
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
                             leadingIcon = { Icon(Icons.Rounded.Delete, null, tint = MaterialTheme.colorScheme.error) },
-                            onClick = {
-                                menuExpanded = false
-                                onDelete()
-                            },
+                            onClick = { menuExpanded = false; onDelete() },
                         )
                     }
                 }
