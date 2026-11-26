@@ -13,13 +13,9 @@ import android.text.format.Formatter
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,8 +39,6 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Shield
-import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material3.AlertDialog
@@ -414,15 +408,6 @@ class MainActivity : ThemedActivity(),
             },
             label = "dockColor",
         )
-        val fabCorner by animateDpAsState(
-            targetValue = if (isConnected) 18.dp else 28.dp,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMedium,
-            ),
-            label = "fabCornerMorph",
-        )
-
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -457,30 +442,12 @@ class MainActivity : ThemedActivity(),
                                 }
                             }
                         }
-                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                        .padding(horizontal = 10.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (isConnected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
-                                else MaterialTheme.colorScheme.surfaceContainerHighest
-                            ),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (testing) {
-                            LoadingIndicator(modifier = Modifier.size(22.dp))
-                        } else {
-                            Icon(
-                                imageVector = if (isConnected) Icons.Rounded.Speed else Icons.Rounded.Shield,
-                                contentDescription = null,
-                                tint = if (isConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp),
-                            )
-                        }
+                    if (testing) {
+                        LoadingIndicator(modifier = Modifier.size(20.dp))
                     }
 
                     Column(modifier = Modifier.weight(1f)) {
@@ -519,7 +486,7 @@ class MainActivity : ThemedActivity(),
 
                 FloatingActionButton(
                     onClick = onToggleConnection,
-                    shape = RoundedCornerShape(fabCorner),
+                    shape = CircleShape,
                     elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 2.dp),
                     containerColor = if (isConnected) {
                         MaterialTheme.colorScheme.errorContainer

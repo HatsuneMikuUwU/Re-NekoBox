@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.ContentPaste
 import androidx.compose.material.icons.rounded.Delete
@@ -315,7 +314,6 @@ fun ConfigurationScreen(
                                             else stringResource(R.string.connection_test)
                                         )
                                     },
-                                    leadingIcon = { Icon(Icons.Rounded.Bolt, contentDescription = null) },
                                     enabled = !isTestingAll && profiles.isNotEmpty(),
                                     onClick = { showMoreMenu = false; runPingAll() },
                                 )
