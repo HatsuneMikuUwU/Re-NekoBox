@@ -16,7 +16,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,7 +62,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -409,10 +407,25 @@ class MainActivity : ThemedActivity(),
             label = "dockColor",
         )
         Surface(
+            onClick = {
+                testing = true
+                testStatusText = getString(R.string.connection_test_testing)
+                runOnDefaultDispatcher {
+                    val result = runCatching { onUrlTest() }
+                    onMainDispatcher {
+                        testing = false
+                        testStatusText = result.fold(
+                            onSuccess = { getString(R.string.connection_test_available, it) },
+                            onFailure = { getString(R.string.connection_test_error, it.readableMessage) },
+                        )
+                    }
+                }
+            },
+            enabled = isConnected && !testing,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            shape = RoundedCornerShape(32.dp),
+            shape = CircleShape,
             color = dockContainerColor,
             tonalElevation = 6.dp,
             shadowElevation = 3.dp,
@@ -420,66 +433,39 @@ class MainActivity : ThemedActivity(),
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
+                    .padding(start = 22.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(20.dp))
-                        .clickable(enabled = isConnected && !testing) {
-                            testing = true
-                            testStatusText = null
-                            runOnDefaultDispatcher {
-                                val result = runCatching { onUrlTest() }
-                                onMainDispatcher {
-                                    testing = false
-                                    testStatusText = result.fold(
-                                        onSuccess = { getString(R.string.connection_test_available, it) },
-                                        onFailure = { getString(R.string.connection_test_error, it.readableMessage) },
-                                    )
-                                }
-                            }
-                        }
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    if (testing) {
-                        LoadingIndicator(modifier = Modifier.size(20.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    val statusLabel = when (state) {
+                        BaseService.State.Connected -> testStatusText ?: stringResource(R.string.vpn_connected)
+                        BaseService.State.Connecting -> stringResource(R.string.connecting)
+                        BaseService.State.Stopping -> stringResource(R.string.stopping)
+                        else -> stringResource(R.string.not_connected)
                     }
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        val statusLabel = when (state) {
-                            BaseService.State.Connected -> testStatusText ?: stringResource(R.string.vpn_connected)
-                            BaseService.State.Connecting -> stringResource(R.string.connecting)
-                            BaseService.State.Stopping -> stringResource(R.string.stopping)
-                            else -> stringResource(R.string.not_connected)
-                        }
-                        Text(
-                            text = statusLabel,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isConnected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        val txStr = Formatter.formatFileSize(this@MainActivity, txRate)
-                        val rxStr = Formatter.formatFileSize(this@MainActivity, rxRate)
-                        Text(
-                            text = if (isConnected) "↑ $txStr/s  •  ↓ $rxStr/s" else stringResource(R.string.connection_test_pending),
-                            style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
-                            color = if (isConnected) {
-                                MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f)
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
+                    Text(
+                        text = statusLabel,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isConnected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    val txStr = Formatter.formatFileSize(this@MainActivity, txRate)
+                    val rxStr = Formatter.formatFileSize(this@MainActivity, rxRate)
+                    Text(
+                        text = if (isConnected) "↑ $txStr/s  •  ↓ $rxStr/s" else stringResource(R.string.connection_test_pending),
+                        style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
+                        color = if (isConnected) {
+                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f)
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
