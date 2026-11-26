@@ -16,7 +16,7 @@ class SwitchActivity : ThemedActivity() {
 
         setComposeContent {
             ConfigurationScreen(
-                onOpenDrawer = { finish() },
+                onBack = { finish() },
                 refreshSignal = 0,
                 onShowMessage = { showComposeSnackbar(it) },
                 selectMode = true,

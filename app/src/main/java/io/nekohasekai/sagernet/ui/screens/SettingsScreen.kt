@@ -10,10 +10,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,17 +21,17 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.BugReport
+import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.CleaningServices
-import androidx.compose.material.icons.rounded.ColorLens
 import androidx.compose.material.icons.rounded.Construction
-import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Dashboard
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.Memory
-import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.NetworkCheck
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.RestartAlt
@@ -42,12 +40,11 @@ import androidx.compose.material.icons.rounded.RuleFolder
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.SettingsEthernet
 import androidx.compose.material.icons.rounded.Speed
+import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -60,15 +57,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -98,14 +94,17 @@ import java.io.File
 
 @Composable
 fun SettingsScreen(
-    onOpenDrawer: () -> Unit,
+    clashApiEnabled: Boolean,
+    onOpenTools: () -> Unit,
+    onOpenLogcat: () -> Unit,
+    onOpenDashboard: () -> Unit,
+    onOpenAbout: () -> Unit,
     onClashApiChanged: (Boolean) -> Unit,
     onHideFromRecentAppsChanged: (Boolean) -> Unit,
     onShowMessage: (String, String?, (() -> Unit)?) -> Unit,
 ) {
     val context = LocalContext.current
     val store = rememberComposePreferenceStore(DataStore.configurationStore)
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     LaunchedEffect(Unit) { DataStore.initGlobal() }
 
@@ -147,24 +146,17 @@ fun SettingsScreen(
     val appendHttpProxy = store.getBoolean(Key.APPEND_HTTP_PROXY, false)
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            LargeTopAppBar(
+            TopAppBar(
                 title = {
                     Text(
                         text = stringResource(R.string.settings),
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                     )
                 },
-                navigationIcon = {
-                    IconButton(onClick = onOpenDrawer) {
-                        Icon(Icons.Rounded.Menu, contentDescription = "Menu")
-                    }
-                },
-                scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                 ),
             )
         },
@@ -639,6 +631,40 @@ fun SettingsScreen(
                         icon = Icons.Rounded.CleaningServices,
                         position = ExpressiveGroupPosition.BOTTOM,
                         onClick = { showClearCacheConfirm = true },
+                    )
+                }
+            }
+
+            // Tools, Log, Dashboard & About
+            item {
+                PrefCategory(titleRes = R.string.menu_tools) {
+                    PrefActionRow(
+                        title = stringResource(R.string.menu_tools),
+                        summary = "${stringResource(R.string.tools_network)} • ${stringResource(R.string.backup)}",
+                        icon = Icons.Rounded.Build,
+                        position = ExpressiveGroupPosition.TOP,
+                        onClick = onOpenTools,
+                    )
+                    PrefActionRow(
+                        title = stringResource(R.string.menu_log),
+                        icon = Icons.Rounded.Terminal,
+                        position = ExpressiveGroupPosition.MIDDLE,
+                        onClick = onOpenLogcat,
+                    )
+                    if (clashApiEnabled) {
+                        PrefActionRow(
+                            title = stringResource(R.string.menu_dashboard),
+                            icon = Icons.Rounded.Dashboard,
+                            position = ExpressiveGroupPosition.MIDDLE,
+                            onClick = onOpenDashboard,
+                        )
+                    }
+                    PrefActionRow(
+                        title = stringResource(R.string.menu_about),
+                        summary = SagerNet.appVersionNameForDisplay,
+                        icon = Icons.Rounded.Info,
+                        position = ExpressiveGroupPosition.BOTTOM,
+                        onClick = onOpenAbout,
                     )
                 }
             }

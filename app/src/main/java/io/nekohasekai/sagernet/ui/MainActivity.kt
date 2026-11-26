@@ -42,7 +42,6 @@ import androidx.compose.material.icons.rounded.AccountTree
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.FolderCopy
-import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Router
@@ -53,32 +52,24 @@ import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -118,7 +109,6 @@ import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.parseProxies
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
-import io.nekohasekai.sagernet.ui.components.ExpressiveIconBadge
 import io.nekohasekai.sagernet.ui.screens.AboutScreen
 import io.nekohasekai.sagernet.ui.screens.ConfigurationScreen
 import io.nekohasekai.sagernet.ui.screens.GroupScreen
@@ -207,107 +197,30 @@ class MainActivity : ThemedActivity(),
         val alwaysShowBar by showBottomBarFlow.collectAsState()
         val refreshTick by profileRefreshSignal.collectAsState()
 
-        val drawerState = rememberDrawerState(DrawerValue.Closed)
-        val scope = rememberCoroutineScope()
-
         val subImport by pendingSubscriptionImport.collectAsState()
         val profImport by pendingProfileImport.collectAsState()
         val pluginMissing by missingPluginDialog.collectAsState()
         val previewHint by showPreviewDialog.collectAsState()
 
-        BackHandler(enabled = drawerState.isOpen || destination != MainDestination.CONFIGURATION) {
-            when {
-                drawerState.isOpen -> scope.launch { drawerState.close() }
-                destination != MainDestination.CONFIGURATION -> {
-                    currentDestination.value = MainDestination.CONFIGURATION
-                }
+        val isSettingsSubScreen = destination == MainDestination.TOOLS ||
+            destination == MainDestination.ABOUT ||
+            destination == MainDestination.LOGCAT ||
+            destination == MainDestination.TRAFFIC
+
+        BackHandler(enabled = destination != MainDestination.CONFIGURATION) {
+            currentDestination.value = if (isSettingsSubScreen) {
+                MainDestination.SETTINGS
+            } else {
+                MainDestination.CONFIGURATION
             }
         }
 
-        val showConnectionDock = destination == MainDestination.CONFIGURATION || alwaysShowBar
+        val showConnectionDock = !isSettingsSubScreen && (destination == MainDestination.CONFIGURATION || alwaysShowBar)
 
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                ModalDrawerSheet(
-                    drawerShape = RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp),
-                    drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            ExpressiveIconBadge(
-                                icon = Icons.Rounded.Shield,
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(44.dp),
-                            )
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.app_name),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                                Text(
-                                    text = SagerNet.appVersionNameForDisplay,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f),
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    MainDestination.entries.forEach { dest ->
-                        if (dest == MainDestination.TRAFFIC && !clashApiEnabled) return@forEach
-                        NavigationDrawerItem(
-                            label = {
-                                Text(
-                                    text = stringResource(dest.titleRes),
-                                    style = MaterialTheme.typography.labelLarge,
-                                )
-                            },
-                            icon = { Icon(dest.icon, contentDescription = null) },
-                            selected = destination == dest,
-                            onClick = {
-                                currentDestination.value = dest
-                                scope.launch { drawerState.close() }
-                            },
-                            shape = CircleShape,
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                        )
-                    }
-
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp))
-
-                    NavigationDrawerItem(
-                        label = { Text(stringResource(R.string.document), style = MaterialTheme.typography.labelLarge) },
-                        icon = { Icon(Icons.AutoMirrored.Rounded.HelpOutline, contentDescription = null) },
-                        selected = false,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            launchCustomTab("https://matsuridayo.github.io/")
-                        },
-                        shape = CircleShape,
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    )
-                }
-            },
-        ) {
-            Scaffold(
-                snackbarHost = { SnackbarHost(hostState = composeSnackbarHostState) },
-                bottomBar = {
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = composeSnackbarHostState) },
+            bottomBar = {
+                if (!isSettingsSubScreen) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         AnimatedVisibility(
                             visible = showConnectionDock,
@@ -349,55 +262,56 @@ class MainActivity : ThemedActivity(),
                             }
                         }
                     }
-                },
-            ) { innerPadding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = innerPadding.calculateBottomPadding()),
-                ) {
-                    val onOpenDrawer: () -> Unit = { scope.launch { drawerState.open() } }
-                    AnimatedContent(
-                        targetState = destination,
-                        transitionSpec = { fadeIn() togetherWith fadeOut() },
-                        label = "mainDestinationTransition",
-                    ) { target ->
-                        when (target) {
-                            MainDestination.CONFIGURATION -> ConfigurationScreen(
-                                onOpenDrawer = onOpenDrawer,
-                                refreshSignal = refreshTick,
-                                onShowMessage = { showComposeSnackbar(it) },
-                            )
-                            MainDestination.GROUP -> GroupScreen(
-                                onOpenDrawer = onOpenDrawer,
-                                onShowMessage = { showComposeSnackbar(it) },
-                            )
-                            MainDestination.ROUTE -> RouteScreen(
-                                onOpenDrawer = onOpenDrawer,
-                                onShowMessage = { showComposeSnackbar(it) },
-                            )
-                            MainDestination.SETTINGS -> SettingsScreen(
-                                onOpenDrawer = onOpenDrawer,
-                                onClashApiChanged = { enableClashApiFlow.value = it },
-                                onHideFromRecentAppsChanged = { applyHideFromRecentApps(it) },
-                                onShowMessage = { msg, actionLabel, onAction ->
-                                    showComposeSnackbar(msg, actionLabel = actionLabel, onAction = onAction)
-                                },
-                            )
-                            MainDestination.TRAFFIC -> WebviewScreen(onOpenDrawer = onOpenDrawer)
-                            MainDestination.TOOLS -> ToolsScreen(
-                                onOpenDrawer = onOpenDrawer,
-                                onShowMessage = { showComposeSnackbar(it) },
-                            )
-                            MainDestination.LOGCAT -> LogcatScreen(
-                                onOpenDrawer = onOpenDrawer,
-                                onShowMessage = { showComposeSnackbar(it) },
-                            )
-                            MainDestination.ABOUT -> AboutScreen(
-                                onOpenDrawer = onOpenDrawer,
-                                onShowMessage = { showComposeSnackbar(it) },
-                            )
-                        }
+                }
+            },
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = innerPadding.calculateBottomPadding()),
+            ) {
+                val backToSettings: () -> Unit = { currentDestination.value = MainDestination.SETTINGS }
+                AnimatedContent(
+                    targetState = destination,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                    label = "mainDestinationTransition",
+                ) { target ->
+                    when (target) {
+                        MainDestination.CONFIGURATION -> ConfigurationScreen(
+                            refreshSignal = refreshTick,
+                            onShowMessage = { showComposeSnackbar(it) },
+                        )
+                        MainDestination.GROUP -> GroupScreen(
+                            onShowMessage = { showComposeSnackbar(it) },
+                        )
+                        MainDestination.ROUTE -> RouteScreen(
+                            onShowMessage = { showComposeSnackbar(it) },
+                        )
+                        MainDestination.SETTINGS -> SettingsScreen(
+                            clashApiEnabled = clashApiEnabled,
+                            onOpenTools = { currentDestination.value = MainDestination.TOOLS },
+                            onOpenLogcat = { currentDestination.value = MainDestination.LOGCAT },
+                            onOpenDashboard = { currentDestination.value = MainDestination.TRAFFIC },
+                            onOpenAbout = { currentDestination.value = MainDestination.ABOUT },
+                            onClashApiChanged = { enableClashApiFlow.value = it },
+                            onHideFromRecentAppsChanged = { applyHideFromRecentApps(it) },
+                            onShowMessage = { msg, actionLabel, onAction ->
+                                showComposeSnackbar(msg, actionLabel = actionLabel, onAction = onAction)
+                            },
+                        )
+                        MainDestination.TRAFFIC -> WebviewScreen(onBack = backToSettings)
+                        MainDestination.TOOLS -> ToolsScreen(
+                            onBack = backToSettings,
+                            onShowMessage = { showComposeSnackbar(it) },
+                        )
+                        MainDestination.LOGCAT -> LogcatScreen(
+                            onBack = backToSettings,
+                            onShowMessage = { showComposeSnackbar(it) },
+                        )
+                        MainDestination.ABOUT -> AboutScreen(
+                            onBack = backToSettings,
+                            onShowMessage = { showComposeSnackbar(it) },
+                        )
                     }
                 }
             }

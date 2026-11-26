@@ -1,6 +1,7 @@
 package io.nekohasekai.sagernet.ui.screens
 
 import android.content.Intent
+import android.os.SystemClock
 import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +27,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.ContentCopy
@@ -33,14 +35,13 @@ import androidx.compose.material.icons.rounded.ContentPaste
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.FileOpen
-import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -50,7 +51,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -59,19 +60,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -102,24 +102,22 @@ import io.nekohasekai.sagernet.ui.profile.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android.os.SystemClock
-import java.net.InetSocketAddress
-import java.net.Socket
 import moe.matsuri.nb4a.proxy.anytls.AnyTLSSettingsActivity
 import moe.matsuri.nb4a.proxy.config.ConfigSettingActivity
 import moe.matsuri.nb4a.proxy.shadowtls.ShadowTLSSettingsActivity
+import java.net.InetSocketAddress
+import java.net.Socket
 
 @Composable
 fun ConfigurationScreen(
-    onOpenDrawer: () -> Unit,
     refreshSignal: Int,
     onShowMessage: (String) -> Unit,
     selectMode: Boolean = false,
+    onBack: (() -> Unit)? = null,
     onProfileSelected: ((ProxyEntity) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     var groups by remember { mutableStateOf<List<ProxyGroup>>(emptyList()) }
     var selectedGroupId by remember { mutableLongStateOf(DataStore.selectedGroup) }
@@ -256,19 +254,19 @@ fun ConfigurationScreen(
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            LargeTopAppBar(
+            TopAppBar(
                 title = {
                     Text(
                         text = if (selectMode) stringResource(R.string.select_profile) else stringResource(R.string.app_name),
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                     )
                 },
                 navigationIcon = {
-                    if (!selectMode) {
-                        IconButton(onClick = onOpenDrawer) {
-                            Icon(Icons.Rounded.Menu, contentDescription = "Menu")
+                    if (selectMode && onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
                         }
                     }
                 },
@@ -317,10 +315,7 @@ fun ConfigurationScreen(
                             DropdownMenu(expanded = showMoreMenu, onDismissRequest = { showMoreMenu = false }) {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.connection_test_icmp_ping)) },
-                                    onClick = {
-                                        showMoreMenu = false
-                                        runPingAll()
-                                    },
+                                    onClick = { showMoreMenu = false; runPingAll() },
                                 )
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.connection_test_clear_results)) },
@@ -364,10 +359,8 @@ fun ConfigurationScreen(
                         }
                     }
                 },
-                scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                 ),
             )
         },
@@ -415,7 +408,6 @@ fun ConfigurationScreen(
                 }
             }
 
-            // Expressive quick action strip for active group
             if (!selectMode && profiles.isNotEmpty()) {
                 Row(
                     modifier = Modifier
@@ -490,12 +482,8 @@ fun ConfigurationScreen(
                                     }
                                 }
                             },
-                            onEdit = {
-                                context.startActivity(entity.settingIntent(context, false))
-                            },
-                            onShareQr = {
-                                qrDialogData = entity.displayName() to entity.toStdLink()
-                            },
+                            onEdit = { context.startActivity(entity.settingIntent(context, false)) },
+                            onShareQr = { qrDialogData = entity.displayName() to entity.toStdLink() },
                             onCopyLink = {
                                 SagerNet.trySetPrimaryClip(entity.toStdLink())
                                 onShowMessage(context.getString(R.string.copy_success))
@@ -730,7 +718,6 @@ private fun ProfileExpressiveCard(
                 .padding(horizontal = 14.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Expressive active indicator pill
             if (selected) {
                 Box(
                     modifier = Modifier
@@ -742,7 +729,6 @@ private fun ProfileExpressiveCard(
                 Spacer(Modifier.width(10.dp))
             }
 
-            // Protocol monogram badge
             val protoTag = entity.displayType().take(2).uppercase()
             Box(
                 modifier = Modifier
