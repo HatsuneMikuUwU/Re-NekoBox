@@ -45,9 +45,9 @@
     <string name="group_status_empty">Empty group</string>
     <string name="group_status_empty_subscription">Not updated yet</string>
     <string name="group_status_proxies">%d Proxies</string>
-    <string name="group_status_proxies_subscription">%d Proxies | Updated on %s</string>
+    <string name="group_status_proxies_subscription">%1$d Proxies | Updated on %2$s</string>
     <string name="group_no_difference">%s: No difference</string>
-    <string name="group_updated">%s: Updated %d proxies</string>
+    <string name="group_updated">%1$s: Updated %2$d proxies</string>
     <string name="group_show_diff">Diff</string>
     <string name="group_diff">Diff (%s)</string>
     <string name="group_delete_confirm_prompt">Are you sure you want to remove this group?</string>
@@ -421,7 +421,7 @@
     <string name="server_dns_subscription_sum">Optional DNS used only to resolve server domains in this subscription. Leave empty to use the default behavior. Accepts https://, tls://, quic:// or host[:port].</string>
     <string name="server_dns_invalid">Invalid custom server DNS. Use https://, tls://, quic:// or host[:port], or leave empty.</string>
     <string name="subscription_used">%s Used</string>
-    <string name="subscription_traffic">%s Used / %s Remaining</string>
+    <string name="subscription_traffic">%1$s Used / %2$s Remaining</string>
     <string name="subscription_expire">Expire: %s</string>
     <string name="subscription_import">Import subscription</string>
     <string name="subscription_import_message">Confirm you want to import subscription %s? If you
@@ -453,8 +453,8 @@
     <string name="shadowsocks_plugin_simple_obfs">Simple Obfs (Shadowsocks Android Plugin)</string>
     <string name="shadowsocks_plugin_v2ray">V2Ray (Shadowsocks Android Plugin)</string>
 
-    <string name="traffic_uplink" translatable="false">%s | %s/s ↑</string>
-    <string name="traffic_downlink" translatable="false">%s | %s/s ↓</string>
+    <string name="traffic_uplink" translatable="false">%1$s | %2$s/s ↑</string>
+    <string name="traffic_downlink" translatable="false">%1$s | %2$s/s ↓</string>
 
     <string name="traffic_uplink_total" translatable="false">%s ↑</string>
     <string name="traffic_downlink_total" translatable="false">%s ↓</string>

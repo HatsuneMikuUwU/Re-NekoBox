@@ -1,7 +1,5 @@
 package moe.matsuri.nb4a.proxy
 
-
-
 class PreferenceBindingManager {
     val items = mutableListOf<PreferenceBinding>()
 
@@ -23,6 +21,4 @@ class PreferenceBindingManager {
             it.writeToCache()
         }
     }
-    }
-
 }
