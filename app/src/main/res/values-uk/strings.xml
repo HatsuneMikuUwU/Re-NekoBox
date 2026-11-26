@@ -313,8 +313,6 @@
     <string name="v2rayn" translatable="false">V2RayN</string>
     <string name="available" translatable="false">%dмс</string>
     <string name="unavailable">Недоступний</string>
-    <string name="always_show_address">Завжди показувати адресу</string>
-    <string name="always_show_address_sum">Завжди відображати адресу сервера на картці конфігурації</string>
     <string name="clear_traffic_statistics">Очистити статистику трафіку</string>
     <string name="connection_test">Тест з\'єднання</string>
     <string name="connection_test_clear_results">Очистити результати тесту</string>
@@ -475,7 +473,6 @@
     <string name="domain_strategy_for_remote">Стратегія доменів для віддаленого</string>
     <string name="domain_strategy_for_direct">Стратегія доменів для прямого</string>
     <string name="domain_strategy_for_server">Стратегія доменів для адреси сервера</string>
-    <string name="show_bottom_bar">Показувати нижню панель, як у SagerNet</string>
     <string name="utls_fingerprint">Відбиток uTLS</string>
     <string name="custom_outbound_json">Власний JSON вихідного з\'єднання</string>
     <string name="custom_config_json">Власний JSON конфігурації</string>
@@ -495,7 +492,6 @@
     <string name="action_shadowtls" translatable="false">ShadowTLS</string>
     <string name="protocol_version">Версія протоколу</string>
     <string name="share_subscription">Поділитися підпискою</string>
-    <string name="show_group_in_notification">Показувати назву групи у сповіщенні</string>
     <string name="reset_connections">Скинути з\'єднання</string>
     <string name="remove_duplicate">Видалити дублікати серверів</string>
     <string name="mtu_help">Довге натискання на налаштування, щоб встановити власний MTU.</string>

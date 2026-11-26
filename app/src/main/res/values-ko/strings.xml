@@ -243,7 +243,6 @@
     <string name="profile_config">프로파일 구성</string>
     <string name="delete">삭제</string>
     <string name="delete_confirm_prompt">이 프로파일을 삭제하시겠습니까?</string>
-    <string name="confirm_profile_delete">프로파일 삭제 확인</string>
     <string name="share_qr_nfc">QR 코드</string>
     <string name="add_profile_methods_scan_qr_code">QR 코드 스캔</string>
     <string name="add_profile_methods_manual_settings">수동 설정</string>
@@ -295,8 +294,6 @@
     <string name="probe_interval">밸런서 관찰 간격</string>
     <string name="standard">표준</string>
     <string name="unavailable">사용 불가</string>
-    <string name="always_show_address">항상 주소 표시</string>
-    <string name="always_show_address_sum">구성 카드에 항상 서버 주소 표시</string>
     <string name="clear_traffic_statistics">트래픽 통계 지우기</string>
     <string name="connection_test">연결 테스트</string>
     <string name="connection_test_clear_results">테스트 결과 지우기</string>
@@ -465,7 +462,6 @@
     <string name="domain_strategy_for_remote">원격용 도메인 전략</string>
     <string name="domain_strategy_for_direct">직접용 도메인 전략</string>
     <string name="domain_strategy_for_server">서버 주소용 도메인 전략</string>
-    <string name="show_bottom_bar">SagerNet처럼 하단 바 표시</string>
     <string name="utls_fingerprint">uTLS 지문</string>
     <string name="custom_outbound_json">사용자 지정 아웃바운드 JSON</string>
     <string name="custom_config_json">사용자 지정 구성 JSON</string>
@@ -484,7 +480,6 @@
     <string name="landing_proxy">랜딩 프록시</string>
     <string name="protocol_version">프로토콜 버전</string>
     <string name="share_subscription">구독 공유</string>
-    <string name="show_group_in_notification">알림에 그룹 이름 표시</string>
     <string name="reset_connections">연결 재설정</string>
     <string name="remove_duplicate">중복 서버 제거</string>
     <string name="mtu_help">설정을 길게 눌러 사용자 지정 MTU를 설정하세요.</string>

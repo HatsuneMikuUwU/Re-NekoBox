@@ -3,10 +3,7 @@ package io.nekohasekai.sagernet.ui.screens
 import android.content.Intent
 import android.os.Build
 import android.widget.Toast
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -48,10 +45,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -64,7 +57,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -77,7 +69,6 @@ import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.triggerFullRestart
 import io.nekohasekai.sagernet.ui.AppManagerActivity
-import io.nekohasekai.sagernet.ui.components.ColorThemePickerDialog
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
 import io.nekohasekai.sagernet.ui.components.MtuPickerDialog
 import io.nekohasekai.sagernet.ui.components.PrefActionRow
@@ -87,8 +78,6 @@ import io.nekohasekai.sagernet.ui.components.StoreListPref
 import io.nekohasekai.sagernet.ui.components.StoreSwitchPref
 import io.nekohasekai.sagernet.ui.components.rememberComposePreferenceStore
 import io.nekohasekai.sagernet.ui.profile.ConfigEditActivity
-import io.nekohasekai.sagernet.ui.theme.AppThemeState
-import io.nekohasekai.sagernet.ui.theme.ReNekoBoxThemeSeeds
 import io.nekohasekai.sagernet.utils.AppLocale
 import java.io.File
 
@@ -126,7 +115,6 @@ fun SettingsScreen(
         )
     }
 
-    var showThemeDialog by remember { mutableStateOf(false) }
     var showMtuDialog by remember { mutableStateOf(false) }
     var showLocalProxyDialog by remember { mutableStateOf(false) }
     var showUrlTestDialog by remember { mutableStateOf(false) }
@@ -134,11 +122,6 @@ fun SettingsScreen(
     var showAppendHttpConfirm by remember { mutableStateOf(false) }
     var showResetConfirm by remember { mutableStateOf(false) }
     var showClearCacheConfirm by remember { mutableStateOf(false) }
-
-    val currentThemeId = store.getInt(Key.APP_THEME, 2)
-    val currentThemeSeed = ReNekoBoxThemeSeeds.firstOrNull { it.id == currentThemeId }
-        ?: ReNekoBoxThemeSeeds.first()
-    val currentNightMode = store.getString(Key.NIGHT_THEME, "0").toIntOrNull() ?: 0
 
     val enableHevTun = store.getBoolean(Key.ENABLE_HEV_TUN, false)
     val speedInterval = store.getString(Key.SPEED_INTERVAL, "1000")
@@ -167,76 +150,6 @@ fun SettingsScreen(
                 .padding(top = padding.calculateTopPadding()),
             contentPadding = PaddingValues(bottom = 28.dp),
         ) {
-            // Material 3 Expressive Appearance Hero Card
-            item {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    tonalElevation = 1.dp,
-                ) {
-                    Column(
-                        modifier = Modifier.padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(14.dp),
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(18.dp))
-                                .clickable { showThemeDialog = true }
-                                .padding(4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.theme),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                                Text(
-                                    text = currentThemeSeed.name,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.secondary,
-                                    MaterialTheme.colorScheme.tertiary,
-                                ).forEach { swatch ->
-                                    Box(
-                                        modifier = Modifier
-                                            .size(26.dp)
-                                            .clip(CircleShape)
-                                            .background(swatch),
-                                    )
-                                }
-                            }
-                        }
-
-                        val nightLabels = listOf("Auto", "Dark", "Light")
-                        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                            nightLabels.forEachIndexed { idx, label ->
-                                SegmentedButton(
-                                    selected = currentNightMode == idx,
-                                    onClick = {
-                                        store.putString(Key.NIGHT_THEME, idx.toString())
-                                        AppThemeState.updateNightTheme(idx)
-                                    },
-                                    shape = SegmentedButtonDefaults.itemShape(idx, nightLabels.size),
-                                ) {
-                                    Text(label, fontWeight = FontWeight.SemiBold)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
             // General Settings
             item {
                 PrefCategory(titleRes = R.string.general_settings) {
@@ -320,23 +233,6 @@ fun SettingsScreen(
                         summaryRes = R.string.show_direct_speed_sum,
                         defaultValue = true,
                         onChanged = { notifyNeedReload(); true },
-                    )
-                    StoreSwitchPref(
-                        store = store,
-                        key = "showGroupInNotification",
-                        titleRes = R.string.show_group_in_notification,
-                    )
-                    StoreSwitchPref(
-                        store = store,
-                        key = Key.CONFIRM_PROFILE_DELETE,
-                        titleRes = R.string.confirm_profile_delete,
-                        defaultValue = true,
-                    )
-                    StoreSwitchPref(
-                        store = store,
-                        key = Key.ALWAYS_SHOW_ADDRESS,
-                        titleRes = R.string.always_show_address,
-                        summaryRes = R.string.always_show_address_sum,
                     )
                     if (Build.VERSION.SDK_INT >= 28) {
                         StoreSwitchPref(
@@ -623,7 +519,6 @@ fun SettingsScreen(
                     StoreSwitchPref(store = store, key = Key.GLOBAL_ALLOW_INSECURE, titleRes = R.string.global_allow_insecure, icon = Icons.Rounded.LockOpen)
                     StoreSwitchPref(store = store, key = Key.ALLOW_INSECURE_ON_REQUEST, titleRes = R.string.allow_insecure_on_request_sum)
                     StoreListPref(store = store, key = Key.APP_TLS_VERSION, titleRes = R.string.app_tls_version, entriesRes = R.array.app_tls_version, defaultValue = "1.2")
-                    StoreSwitchPref(store = store, key = Key.SHOW_BOTTOM_BAR, titleRes = R.string.show_bottom_bar)
                     PrefActionRow(title = stringResource(R.string.reset_settings), icon = Icons.Rounded.RestartAlt, onClick = { showResetConfirm = true })
                     PrefActionRow(
                         title = stringResource(R.string.clear_cache),
@@ -669,17 +564,6 @@ fun SettingsScreen(
                 }
             }
         }
-    }
-
-    if (showThemeDialog) {
-        ColorThemePickerDialog(
-            currentThemeId = currentThemeId,
-            onSelect = { seed ->
-                AppThemeState.updateAppTheme(seed.id)
-                if (DataStore.serviceState.started) SagerNet.reloadService()
-            },
-            onDismiss = { showThemeDialog = false },
-        )
     }
 
     if (showMtuDialog) {

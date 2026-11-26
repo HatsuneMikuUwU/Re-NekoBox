@@ -12,8 +12,6 @@ object Key {
     const val CLEAR_CACHE = "clearCache"
 
     const val APP_EXPERT = "isExpert"
-    const val APP_THEME = "appTheme"
-    const val NIGHT_THEME = "nightTheme"
     const val APP_LANGUAGE = "appLanguage"
     const val SERVICE_MODE = "serviceMode"
     const val MODE_VPN = "vpn"
@@ -62,7 +60,6 @@ object Key {
     const val LOG_LEVEL = "logLevel"
     const val LOG_BUF_SIZE = "logBufSize"
     const val MTU = "mtu"
-    const val ALWAYS_SHOW_ADDRESS = "alwaysShowAddress"
 
     const val RULES_GEOSITE_URL = "rulesGeositeUrl"
     const val RULES_GEOIP_URL = "rulesGeoipUrl"
@@ -73,8 +70,6 @@ object Key {
 
     const val ACQUIRE_WAKE_LOCK = "acquireWakeLock"
     const val HIDE_FROM_RECENT_APPS = "hideFromRecentApps"
-    const val SHOW_BOTTOM_BAR = "showBottomBar"
-    const val CONFIRM_PROFILE_DELETE = "confirmProfileDelete"
     const val GROUP_LAYOUT_MODE = "groupLayoutMode"
     const val PROFILE_CARD_STYLE = "profileCardStyle"
 

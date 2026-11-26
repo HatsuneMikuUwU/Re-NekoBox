@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.app.ActivityCompat
-import io.nekohasekai.sagernet.ui.theme.AppThemeState
 import io.nekohasekai.sagernet.ui.theme.ReNekoBoxTheme
 import io.nekohasekai.sagernet.utils.Theme
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +46,6 @@ abstract class ThemedActivity : AppCompatActivity() {
             Theme.applyDialog(this)
         }
         Theme.applyNightTheme()
-        AppThemeState.syncFromDataStore()
 
         super.onCreate(savedInstanceState)
         if (!isDialog) {
@@ -95,7 +93,6 @@ abstract class ThemedActivity : AppCompatActivity() {
         super.onConfigurationChanged(newConfig)
         if (newConfig.uiMode != uiMode) {
             uiMode = newConfig.uiMode
-            AppThemeState.syncFromDataStore()
             ActivityCompat.recreate(this)
         }
     }

@@ -284,8 +284,6 @@
     <string name="probe_interval">負載平衡器觀測間隔</string>
     <string name="standard">標準</string>
     <string name="unavailable">無法使用</string>
-    <string name="always_show_address">始終顯示位址</string>
-    <string name="always_show_address_sum">使用在設定檔卡片中顯示伺服器位址</string>
     <string name="clear_traffic_statistics">清除流量統計資料</string>
     <string name="connection_test">連線測試</string>
     <string name="connection_test_tcp_ping_unavailable">TCPing 無法使用</string>
@@ -455,7 +453,6 @@
     <string name="mux_brutal">TCP Brutal 擁塞控制演算法</string>
     <string name="mux_brutal_up_mbps">上傳頻寬 (Mbps)</string>
     <string name="mux_brutal_down_mbps">下載頻寬 (Mbps)</string>
-    <string name="confirm_profile_delete">刪除配置檔案確認</string>
     <string name="language">語言</string>
     <string name="strict_route">嚴格路由</string>
     <string name="filter">過濾</string>
@@ -489,7 +486,6 @@
     <string name="domain_strategy_for_remote">域名策略（遠端）</string>
     <string name="domain_strategy_for_direct">域名策略（直連）</string>
     <string name="domain_strategy_for_server">域名策略（伺服器地址）</string>
-    <string name="show_bottom_bar">像 SagerNet 一樣顯示底欄</string>
     <string name="utls_fingerprint">uTLS 指紋</string>
     <string name="custom_outbound_json">自定義出站 JSON</string>
     <string name="custom_config_json">自定義配置 JSON</string>
@@ -508,7 +504,6 @@
     <string name="landing_proxy">落地代理</string>
     <string name="protocol_version">協議版本</string>
     <string name="share_subscription">分享訂閱</string>
-    <string name="show_group_in_notification">在通知中顯示組名</string>
     <string name="reset_connections">重置連線</string>
     <string name="remove_duplicate">刪除重複的伺服器</string>
     <string name="mtu_help">長按設定項以設定自定義 MTU。</string>

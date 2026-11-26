@@ -278,8 +278,6 @@
     <string name="connection_test_clear_results">المقاصة نتائج الاختبار</string>
     <string name="connection_test">اختبار الاتصال</string>
     <string name="clear_traffic_statistics">مسح إحصائيات حركة المرور</string>
-    <string name="always_show_address_sum">اعرض دائمًا عنوان الخادم على بطاقة التكوين</string>
-    <string name="always_show_address">اعرض العنوان دائمًا</string>
     <string name="unavailable">غير متوفره</string>
     <string name="standard">معيار</string>
     <string name="probe_interval">الفاصل الزمني لرصد الموازن</string>

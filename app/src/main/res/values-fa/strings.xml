@@ -318,8 +318,6 @@
     <string name="v2rayn" translatable="false">V2RayN</string>
     <string name="available" translatable="false">%dms</string>
     <string name="unavailable">در دسترس نیست</string>
-    <string name="always_show_address">نشانی‌ها همواره نمایش داده شود</string>
-    <string name="always_show_address_sum">همیشه نشانی سرور را روی کارت پیکربندی نمایش دهید</string>
     <string name="clear_traffic_statistics">پاک کردن اطلاعات ترافیک</string>
     <string name="connection_test">آزمایش اتصال</string>
     <string name="connection_test_clear_results">پاک کردن نتایج آزمایش</string>
@@ -501,7 +499,6 @@
     <string name="domain_strategy_for_remote">راهبرد دامنه برای ارتباط از راه دور</string>
     <string name="domain_strategy_for_direct">راهبرد دامنه برای ارتباط مستقیم</string>
     <string name="domain_strategy_for_server">راهبرد دامنه برای نشانی‌های سرور</string>
-    <string name="show_bottom_bar">نمایش نوار پایین مانند SagerNet</string>
     <string name="utls_fingerprint">اثر انگشت uTLS</string>
     <string name="custom_outbound_json">خروجی سفارشی JSON</string>
     <string name="custom_config_json">پراکسی سفارشی JSON</string>
@@ -521,7 +518,6 @@
     <string name="action_shadowtls" translatable="false">ShadowTLS</string>
     <string name="protocol_version">نسخه پروتکل</string>
     <string name="share_subscription">اشتراک‌گذاری گروه اشتراکی</string>
-    <string name="show_group_in_notification">نمایش نام گروه در نوار اعلان</string>
     <string name="reset_connections">بازنشانی اتصالات</string>
     <string name="remove_duplicate">حذف سرورهای تکراری</string>
     <string name="mtu_help">برای تنظیم MTU سفارشی، تنظیمات را مدتی فشار دهید.</string>
@@ -566,7 +562,6 @@
     <string name="mux_brutal">TCP Brutal</string>
     <string name="mux_brutal_up_mbps">آپلود (Mbps)</string>
     <string name="mux_brutal_down_mbps">دانلود (Mbps)</string>
-    <string name="confirm_profile_delete">تأیید حذف نمایه</string>
     <string name="language">زبان</string>
     <string name="strict_route">مسیریابی سخت‌گیرانه</string>
     <string name="filter">فیلتر</string>

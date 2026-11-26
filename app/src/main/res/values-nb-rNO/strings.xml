@@ -149,8 +149,6 @@
     <string name="connection_test_icmp_ping_unavailable">ICMPing er ikke tilgjengelig</string>
     <string name="connection_test_tcp_ping_unavailable">TCPing utilgjengelig</string>
     <string name="clear_traffic_statistics">Slett trafikkstatistikk</string>
-    <string name="always_show_address_sum">Vis alltid serveradressen på konfigurasjonskortet</string>
-    <string name="always_show_address">Vis alltid adresse</string>
     <string name="probe_interval">Balanser observasjonsintervall</string>
     <string name="random">Tilfeldig</string>
     <string name="list">Liste</string>

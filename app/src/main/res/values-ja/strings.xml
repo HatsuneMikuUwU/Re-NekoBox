@@ -249,7 +249,6 @@
     <string name="profile_config">プロファイル設定</string>
     <string name="delete">削除</string>
     <string name="delete_confirm_prompt">このプロファイルを削除してもよろしいですか？</string>
-    <string name="confirm_profile_delete">プロファイル削除の確認</string>
     <string name="share_qr_nfc">QR コード</string>
     <string name="add_profile_methods_scan_qr_code">QR コードをスキャン</string>
     <string name="add_profile_methods_manual_settings">手動設定</string>
@@ -301,8 +300,6 @@
     <string name="probe_interval">バランサーの観測間隔</string>
     <string name="standard">標準</string>
     <string name="unavailable">利用不可</string>
-    <string name="always_show_address">常にアドレスを表示</string>
-    <string name="always_show_address_sum">設定カードに常にサーバーアドレスを表示</string>
     <string name="clear_traffic_statistics">トラフィック統計をクリア</string>
     <string name="connection_test">接続テスト</string>
     <string name="connection_test_clear_results">テスト結果をクリア</string>
@@ -471,7 +468,6 @@
     <string name="domain_strategy_for_remote">リモートのドメイン戦略</string>
     <string name="domain_strategy_for_direct">ダイレクトのドメイン戦略</string>
     <string name="domain_strategy_for_server">サーバーアドレスのドメイン戦略</string>
-    <string name="show_bottom_bar">SagerNet のようなボトムバーを表示</string>
     <string name="utls_fingerprint">uTLS フィンガープリント</string>
     <string name="custom_outbound_json">カスタムアウトバウンド JSON</string>
     <string name="custom_config_json">カスタム設定 JSON</string>
@@ -490,7 +486,6 @@
     <string name="landing_proxy">ランディングプロキシ</string>
     <string name="protocol_version">プロトコルバージョン</string>
     <string name="share_subscription">サブスクリプションを共有</string>
-    <string name="show_group_in_notification">通知にグループ名を表示</string>
     <string name="reset_connections">接続をリセット</string>
     <string name="remove_duplicate">重複したサーバーを削除</string>
     <string name="mtu_help">設定を長押ししてカスタム MTU を設定します。</string>

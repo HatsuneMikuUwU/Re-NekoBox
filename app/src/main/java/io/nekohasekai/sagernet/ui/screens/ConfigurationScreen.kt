@@ -494,13 +494,7 @@ fun ConfigurationScreen(
                                 }
                             },
                             onDelete = {
-                                if (DataStore.confirmProfileDelete) {
-                                    deleteConfirmEntity = entity
-                                } else {
-                                    runOnDefaultDispatcher {
-                                        ProfileManager.deleteProfile(entity.groupId, entity.id)
-                                    }
-                                }
+                                deleteConfirmEntity = entity
                             },
                         )
                     }
@@ -759,16 +753,14 @@ private fun ProfileExpressiveCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (DataStore.alwaysShowAddress || selected) {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = entity.displayAddress(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = entity.displayAddress(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

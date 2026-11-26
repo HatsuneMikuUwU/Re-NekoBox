@@ -101,7 +101,6 @@
     <string name="ws_browser_forwarding">Transfert de Navigateur</string>
     <string name="group_filter">Filtre</string>
     <string name="clear_profiles">Effacer</string>
-    <string name="always_show_address">Toujours afficher l\'adresse</string>
     <string name="undo">Annuler</string>
     <string name="enable">Activer</string>
     <string name="standard">Standard</string>

@@ -12,15 +12,12 @@ import android.os.RemoteException
 import android.text.format.Formatter
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -147,7 +144,6 @@ class MainActivity : ThemedActivity(),
     private val txRateFlow = MutableStateFlow(0L)
     private val rxRateFlow = MutableStateFlow(0L)
     private val enableClashApiFlow = MutableStateFlow(DataStore.enableClashAPI)
-    private val showBottomBarFlow = MutableStateFlow(DataStore.showBottomBar)
     private val profileRefreshSignal = MutableStateFlow(0)
 
     private val pendingSubscriptionImport = MutableStateFlow<ProxyGroup?>(null)
@@ -194,7 +190,6 @@ class MainActivity : ThemedActivity(),
         val txRate by txRateFlow.collectAsState()
         val rxRate by rxRateFlow.collectAsState()
         val clashApiEnabled by enableClashApiFlow.collectAsState()
-        val alwaysShowBar by showBottomBarFlow.collectAsState()
         val refreshTick by profileRefreshSignal.collectAsState()
 
         val subImport by pendingSubscriptionImport.collectAsState()
@@ -215,32 +210,24 @@ class MainActivity : ThemedActivity(),
             }
         }
 
-        val showConnectionDock = !isSettingsSubScreen && (destination == MainDestination.CONFIGURATION || alwaysShowBar)
-
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = composeSnackbarHostState) },
             bottomBar = {
                 if (!isSettingsSubScreen) {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        AnimatedVisibility(
-                            visible = showConnectionDock,
-                            enter = slideInVertically { it / 2 } + fadeIn(),
-                            exit = slideOutVertically { it / 2 } + fadeOut(),
-                        ) {
-                            ExpressiveConnectionDock(
-                                state = serviceState,
-                                txRate = txRate,
-                                rxRate = rxRate,
-                                onToggleConnection = {
-                                    if (DataStore.serviceState.canStop) {
-                                        SagerNet.stopService()
-                                    } else {
-                                        connect.launch(null)
-                                    }
-                                },
-                                onUrlTest = { urlTest() },
-                            )
-                        }
+                        ExpressiveConnectionDock(
+                            state = serviceState,
+                            txRate = txRate,
+                            rxRate = rxRate,
+                            onToggleConnection = {
+                                if (DataStore.serviceState.canStop) {
+                                    SagerNet.stopService()
+                                } else {
+                                    connect.launch(null)
+                                }
+                            },
+                            onUrlTest = { urlTest() },
+                        )
                         NavigationBar(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer,
                             tonalElevation = 2.dp,
@@ -727,7 +714,6 @@ class MainActivity : ThemedActivity(),
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
         when (key) {
             Key.SERVICE_MODE -> onBinderDied()
-            Key.SHOW_BOTTOM_BAR -> showBottomBarFlow.value = DataStore.showBottomBar
             Key.ENABLE_CLASH_API -> enableClashApiFlow.value = DataStore.enableClashAPI
             Key.PROXY_APPS, Key.BYPASS_MODE, Key.INDIVIDUAL -> {
                 if (DataStore.serviceState.canStop) {
