@@ -19,7 +19,7 @@ open class RoomPreferenceDataStore(private val kvPairDao: KeyValuePair.Dao) :
     override fun getInt(key: String, defValue: Int) = getInt(key) ?: defValue
     override fun getLong(key: String, defValue: Long) = getLong(key) ?: defValue
     override fun getString(key: String, defValue: String?) = getString(key) ?: defValue
-    override fun getStringSet(key: String, defValue: MutableSet<String>?) =
+    override fun getStringSet(key: String, defValue: Set<String>?) =
         getStringSet(key) ?: defValue
 
     fun putBoolean(key: String, value: Boolean?) =
@@ -57,7 +57,7 @@ open class RoomPreferenceDataStore(private val kvPairDao: KeyValuePair.Dao) :
         fireChangeListener(key)
     }
 
-    override fun putStringSet(key: String, values: MutableSet<String>?) =
+    override fun putStringSet(key: String, values: Set<String>?) =
         if (values == null) remove(key) else {
             kvPairDao.put(KeyValuePair(key).put(values))
             fireChangeListener(key)

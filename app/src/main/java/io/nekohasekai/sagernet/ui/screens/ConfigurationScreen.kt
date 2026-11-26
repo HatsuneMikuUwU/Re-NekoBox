@@ -102,7 +102,9 @@ import io.nekohasekai.sagernet.ui.profile.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import libcore.Libcore
+import android.os.SystemClock
+import java.net.InetSocketAddress
+import java.net.Socket
 import moe.matsuri.nb4a.proxy.anytls.AnyTLSSettingsActivity
 import moe.matsuri.nb4a.proxy.config.ConfigSettingActivity
 import moe.matsuri.nb4a.proxy.shadowtls.ShadowTLSSettingsActivity
@@ -169,8 +171,14 @@ fun ConfigurationScreen(
         isTestingAll = true
         runOnDefaultDispatcher {
             profiles.forEach { entity ->
-                val addr = entity.requireBean().serverAddress
-                val rtt = runCatching { Libcore.icmpPing(addr, 3000) }.getOrDefault(-1)
+                val bean = entity.requireBean()
+                val rtt = runCatching {
+                    val start = SystemClock.elapsedRealtime()
+                    Socket().use { sock ->
+                        sock.connect(InetSocketAddress(bean.serverAddress, bean.serverPort), 3000)
+                    }
+                    (SystemClock.elapsedRealtime() - start).toInt().coerceAtLeast(1)
+                }.getOrDefault(-1)
                 if (rtt >= 0) {
                     entity.status = 1
                     entity.ping = rtt

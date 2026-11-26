@@ -30,6 +30,7 @@ import io.nekohasekai.sagernet.aidl.ISagerNetService
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.bg.SagerConnection
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.ui.ThemedActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -197,16 +198,6 @@ fun ThemedActivity.startFilesForResult(
     snackbar(getString(R.string.file_manager_missing)).show()
 }
 
-fun Fragment.startFilesForResult(
-    launcher: ActivityResultLauncher<String>, input: String
-) {
-    try {
-        return launcher.launch(input)
-    } catch (_: ActivityNotFoundException) {
-    } catch (_: SecurityException) {
-    }
-    (requireActivity() as ThemedActivity).snackbar(getString(R.string.file_manager_missing)).show()
-}
 
 
 

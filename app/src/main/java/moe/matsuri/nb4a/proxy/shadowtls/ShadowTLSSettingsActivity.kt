@@ -1,4 +1,5 @@
 package moe.matsuri.nb4a.proxy.shadowtls
+import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
 import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
 

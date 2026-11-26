@@ -77,8 +77,6 @@ class GroupSettingsActivity : ThemedActivity() {
                     DataStore.groupType = entity.type
                     DataStore.groupOrder = entity.order
                     DataStore.groupIsSelector = entity.isSelector
-                    DataStore.groupFrontProxy = entity.frontProxy
-                    DataStore.groupLandingProxy = entity.landingProxy
                     val sub = entity.subscription ?: SubscriptionBean().applyDefaultValues()
                     DataStore.subscriptionLink = sub.link ?: ""
                     DataStore.subscriptionForceResolve = sub.forceResolve ?: false

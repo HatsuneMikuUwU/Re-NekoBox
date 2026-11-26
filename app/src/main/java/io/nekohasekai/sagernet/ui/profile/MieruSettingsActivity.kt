@@ -18,6 +18,8 @@
  ******************************************************************************/
 
 package io.nekohasekai.sagernet.ui.profile
+import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
+import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
 import io.nekohasekai.sagernet.ui.components.ComposePreferenceStore
 
 import android.os.Bundle

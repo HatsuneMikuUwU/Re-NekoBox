@@ -61,7 +61,7 @@ class HysteriaSettingsActivity : ProfileSettingsActivity<HysteriaBean>() {
 
     override fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean {
         val version = store.getString(Key.SERVER_PROTOCOL, "2").toIntOrNull() ?: 2
-        return if (version == HysteriaBean.PROTOCOL_VERSION_2) {
+        return if (version == 2) {
             key !in setOf(
                 Key.SERVER_AUTH_TYPE,
                 Key.SERVER_ALPN,
