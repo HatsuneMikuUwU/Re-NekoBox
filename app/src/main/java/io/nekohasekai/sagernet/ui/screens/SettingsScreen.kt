@@ -70,7 +70,7 @@ import io.nekohasekai.sagernet.ui.components.FloatingTopBar
 import io.nekohasekai.sagernet.ui.components.LocalBottomInset
 import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
-import top.yukonga.miuix.kmp.blur.layerBackdrop
+import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import io.nekohasekai.sagernet.ui.components.MtuPickerDialog
 import io.nekohasekai.sagernet.ui.components.PrefActionRow
 import io.nekohasekai.sagernet.ui.components.PrefCategory
@@ -137,7 +137,7 @@ fun SettingsScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .then(if (topBackdrop != null) Modifier.layerBackdrop(topBackdrop) else Modifier),
+                .blurBackdropSource(topBackdrop),
         ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),

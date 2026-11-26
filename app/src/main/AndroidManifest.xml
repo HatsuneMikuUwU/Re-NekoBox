@@ -5,6 +5,7 @@
 
     <uses-sdk tools:overrideLibrary="top.yukonga.miuix.kmp.blur,top.yukonga.miuix.kmp.shader" />
 
+
     <permission
         android:name="${applicationId}.SERVICE"
         android:protectionLevel="signature" />

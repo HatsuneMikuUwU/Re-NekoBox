@@ -63,7 +63,7 @@ import io.nekohasekai.sagernet.ui.components.FloatingTopBar
 import io.nekohasekai.sagernet.ui.components.LocalBottomInset
 import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
-import top.yukonga.miuix.kmp.blur.layerBackdrop
+import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
 import io.nekohasekai.sagernet.ui.components.ExpressiveIconBadge
 import io.nekohasekai.sagernet.ui.components.ExpressivePillBadge
@@ -109,7 +109,7 @@ fun RouteScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .then(if (topBackdrop != null) Modifier.layerBackdrop(topBackdrop) else Modifier),
+                .blurBackdropSource(topBackdrop),
         ) {
         if (rules.isEmpty()) {
             ExpressiveEmptyState(

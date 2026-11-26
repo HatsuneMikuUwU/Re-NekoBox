@@ -111,7 +111,7 @@ import io.nekohasekai.sagernet.ui.components.barGlass
 import io.nekohasekai.sagernet.ui.components.bottomScrim
 import io.nekohasekai.sagernet.ui.components.floatingTabBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
-import top.yukonga.miuix.kmp.blur.layerBackdrop
+import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import io.nekohasekai.sagernet.ui.screens.AboutScreen
 import io.nekohasekai.sagernet.ui.screens.ConfigurationScreen
 import io.nekohasekai.sagernet.ui.screens.GroupScreen
@@ -237,7 +237,7 @@ class MainActivity : ThemedActivity(),
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .then(if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier),
+                    .blurBackdropSource(backdrop),
             ) {
                 val backToSettings: () -> Unit = { currentDestination.value = MainDestination.SETTINGS }
                 AnimatedContent(

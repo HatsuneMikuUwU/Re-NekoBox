@@ -45,7 +45,7 @@ import io.nekohasekai.sagernet.ui.components.FloatingTopBar
 import io.nekohasekai.sagernet.ui.components.LocalBottomInset
 import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
-import top.yukonga.miuix.kmp.blur.layerBackdrop
+import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -91,7 +91,7 @@ fun LogcatScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .then(if (topBackdrop != null) Modifier.layerBackdrop(topBackdrop) else Modifier),
+                .blurBackdropSource(topBackdrop),
         ) {
         Column(
             modifier = Modifier

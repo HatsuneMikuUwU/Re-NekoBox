@@ -38,7 +38,7 @@ import io.nekohasekai.sagernet.ui.components.FloatingTopBar
 import io.nekohasekai.sagernet.ui.components.LocalBottomInset
 import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
-import top.yukonga.miuix.kmp.blur.layerBackdrop
+import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import moe.matsuri.nb4a.utils.WebViewUtil
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -58,7 +58,7 @@ fun WebviewScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .then(if (topBackdrop != null) Modifier.layerBackdrop(topBackdrop) else Modifier),
+                .blurBackdropSource(topBackdrop),
         ) {
         AndroidView(
             modifier = Modifier
