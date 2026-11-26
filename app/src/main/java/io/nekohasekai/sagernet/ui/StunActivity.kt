@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package io.nekohasekai.sagernet.ui
 
 import android.os.Bundle

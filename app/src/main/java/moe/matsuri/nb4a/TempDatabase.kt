@@ -16,7 +16,7 @@ abstract class TempDatabase : RoomDatabase() {
         private val instance by lazy {
             Room.inMemoryDatabaseBuilder(SagerNet.application, TempDatabase::class.java)
                 .allowMainThreadQueries()
-                .fallbackToDestructiveMigration()
+                .fallbackToDestructiveMigration(true)
                 .setQueryExecutor { GlobalScope.launch { it.run() } }
                 .build()
         }
