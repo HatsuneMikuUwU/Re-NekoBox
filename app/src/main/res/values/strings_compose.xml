@@ -20,4 +20,5 @@
     <string name="route_network">Network</string>
     <string name="route_protocol">Protocol</string>
     <string name="route_outbound">Outbound</string>
+    <string name="service_mode_transproxy">Transparent Proxy</string>
 </resources>
