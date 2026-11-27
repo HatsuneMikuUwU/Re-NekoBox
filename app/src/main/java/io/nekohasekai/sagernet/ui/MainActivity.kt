@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +38,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountTree
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.FolderCopy
@@ -48,6 +51,7 @@ import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -55,6 +59,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
@@ -63,6 +68,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -103,10 +109,12 @@ import io.nekohasekai.sagernet.ktx.parseProxies
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import androidx.compose.ui.graphics.Color
+import io.nekohasekai.sagernet.ui.components.FloatingSideSheet
 import io.nekohasekai.sagernet.ui.components.FloatingTabBar
 import io.nekohasekai.sagernet.ui.components.FloatingTabBarMargin
 import io.nekohasekai.sagernet.ui.components.LocalBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.LocalBottomInset
+import io.nekohasekai.sagernet.ui.components.LocalSideSheetTrigger
 import io.nekohasekai.sagernet.ui.components.barGlass
 import io.nekohasekai.sagernet.ui.components.bottomScrim
 import io.nekohasekai.sagernet.ui.components.floatingTabBarSpace
@@ -156,6 +164,7 @@ class MainActivity : ThemedActivity(),
     private val txRateFlow = MutableStateFlow(0L)
     private val rxRateFlow = MutableStateFlow(0L)
     private val enableClashApiFlow = MutableStateFlow(DataStore.enableClashAPI)
+    private val useSideSheetNavFlow = MutableStateFlow(DataStore.useSideSheetNav)
     private val profileRefreshSignal = MutableStateFlow(0)
 
     private val pendingSubscriptionImport = MutableStateFlow<ProxyGroup?>(null)
@@ -202,6 +211,8 @@ class MainActivity : ThemedActivity(),
         val txRate by txRateFlow.collectAsState()
         val rxRate by rxRateFlow.collectAsState()
         val clashApiEnabled by enableClashApiFlow.collectAsState()
+        val useSideSheetNav by useSideSheetNavFlow.collectAsState()
+        var sideSheetOpen by remember { mutableStateOf(false) }
         val refreshTick by profileRefreshSignal.collectAsState()
 
         val subImport by pendingSubscriptionImport.collectAsState()
@@ -214,26 +225,41 @@ class MainActivity : ThemedActivity(),
             destination == MainDestination.LOGCAT ||
             destination == MainDestination.TRAFFIC
 
-        BackHandler(enabled = destination != MainDestination.CONFIGURATION) {
-            currentDestination.value = if (isSettingsSubScreen) {
-                MainDestination.SETTINGS
+        LaunchedEffect(useSideSheetNav, isSettingsSubScreen) {
+            if (!useSideSheetNav || isSettingsSubScreen) {
+                sideSheetOpen = false
+            }
+        }
+
+        BackHandler(enabled = sideSheetOpen || destination != MainDestination.CONFIGURATION) {
+            if (sideSheetOpen) {
+                sideSheetOpen = false
             } else {
-                MainDestination.CONFIGURATION
+                currentDestination.value = if (isSettingsSubScreen) {
+                    MainDestination.SETTINGS
+                } else {
+                    MainDestination.CONFIGURATION
+                }
             }
         }
 
         val bottomTabs = remember { MainDestination.entries.filter { it.inBottomBar } }
         val backdrop = rememberBlurBackdrop()
         val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-        val bottomInset = if (!isSettingsSubScreen) {
-            floatingTabBarSpace() + 86.dp
-        } else {
-            navBarInset
+        val bottomInset = when {
+            isSettingsSubScreen -> navBarInset
+            useSideSheetNav -> navBarInset + FloatingTabBarMargin + 82.dp
+            else -> floatingTabBarSpace() + 86.dp
         }
 
         CompositionLocalProvider(
             LocalBottomInset provides bottomInset,
             LocalBlurBackdrop provides backdrop,
+            LocalSideSheetTrigger provides if (useSideSheetNav && !isSettingsSubScreen) {
+                { sideSheetOpen = true }
+            } else {
+                null
+            },
         ) {
         Box(
             modifier = Modifier
@@ -271,6 +297,7 @@ class MainActivity : ThemedActivity(),
                             onOpenAbout = { currentDestination.value = MainDestination.ABOUT },
                             onClashApiChanged = { enableClashApiFlow.value = it },
                             onHideFromRecentAppsChanged = { applyHideFromRecentApps(it) },
+                            onUseSideSheetNavChanged = { useSideSheetNavFlow.value = it },
                             onShowMessage = { msg, actionLabel, onAction ->
                                 showComposeSnackbar(msg, actionLabel = actionLabel, onAction = onAction)
                             },
@@ -299,7 +326,13 @@ class MainActivity : ThemedActivity(),
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .height(floatingTabBarSpace() + 104.dp)
+                        .height(
+                            if (useSideSheetNav) {
+                                navBarInset + FloatingTabBarMargin + 96.dp
+                            } else {
+                                floatingTabBarSpace() + 104.dp
+                            }
+                        )
                         .background(fadeBrush),
                 )
 
@@ -326,27 +359,87 @@ class MainActivity : ThemedActivity(),
                             }
                         },
                         onUrlTest = { urlTest() },
-                        modifier = if (tabBarWidthPx > 0) {
+                        modifier = if (!useSideSheetNav && tabBarWidthPx > 0) {
                             Modifier.width(with(density) { tabBarWidthPx.toDp() })
                         } else {
                             Modifier.fillMaxWidth().padding(horizontal = 24.dp)
                         },
                     )
-                    FloatingTabBar(
+                    if (!useSideSheetNav) {
+                        FloatingTabBar(
+                            items = bottomTabs,
+                            selectedIndex = { bottomTabs.indexOf(destination).coerceAtLeast(0) },
+                            onSelected = { idx -> currentDestination.value = bottomTabs[idx] },
+                            modifier = Modifier.onSizeChanged { tabBarWidthPx = it.width },
+                            iconContent = { dest, _ ->
+                                Icon(dest.icon, contentDescription = null, modifier = Modifier.size(22.dp))
+                            },
+                            labelContent = { dest, _ ->
+                                Text(
+                                    text = stringResource(dest.titleRes),
+                                    fontSize = 11.sp,
+                                    lineHeight = 14.sp,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
+                        )
+                    }
+                }
+
+                if (useSideSheetNav) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .fillMaxHeight()
+                            .width(20.dp)
+                            .pointerInput(Unit) {
+                                detectHorizontalDragGestures { _, dragAmount ->
+                                    if (dragAmount > 16f) sideSheetOpen = true
+                                }
+                            },
+                    )
+
+                    FloatingSideSheet(
+                        visible = sideSheetOpen,
+                        onDismiss = { sideSheetOpen = false },
                         items = bottomTabs,
-                        selectedIndex = { bottomTabs.indexOf(destination).coerceAtLeast(0) },
+                        selectedIndex = bottomTabs.indexOf(destination).coerceAtLeast(0),
                         onSelected = { idx -> currentDestination.value = bottomTabs[idx] },
-                        modifier = Modifier.onSizeChanged { tabBarWidthPx = it.width },
+                        backdrop = backdrop,
+                        header = {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 20.dp, end = 8.dp, top = 14.dp, bottom = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.app_name),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                                IconButton(onClick = { sideSheetOpen = false }) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Close,
+                                        contentDescription = stringResource(R.string.close_navigation),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        },
                         iconContent = { dest, _ ->
                             Icon(dest.icon, contentDescription = null, modifier = Modifier.size(22.dp))
                         },
                         labelContent = { dest, _ ->
                             Text(
                                 text = stringResource(dest.titleRes),
-                                fontSize = 11.sp,
-                                lineHeight = 14.sp,
                                 maxLines = 1,
-                                softWrap = false,
                                 overflow = TextOverflow.Ellipsis,
                             )
                         },
@@ -752,6 +845,7 @@ class MainActivity : ThemedActivity(),
         when (key) {
             Key.SERVICE_MODE -> onBinderDied()
             Key.ENABLE_CLASH_API -> enableClashApiFlow.value = DataStore.enableClashAPI
+            Key.USE_SIDE_SHEET_NAV -> useSideSheetNavFlow.value = DataStore.useSideSheetNav
             Key.PROXY_APPS, Key.BYPASS_MODE, Key.INDIVIDUAL -> {
                 if (DataStore.serviceState.canStop) {
                     showComposeSnackbar(

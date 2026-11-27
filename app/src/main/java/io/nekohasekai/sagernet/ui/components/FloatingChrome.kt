@@ -2,12 +2,20 @@ package io.nekohasekai.sagernet.ui.components
 
 import android.os.Build
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +30,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -33,12 +46,15 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -136,6 +152,7 @@ val FloatingTabBarMargin = 12.dp
 
 val LocalBottomInset = compositionLocalOf { 0.dp }
 val LocalBlurBackdrop = compositionLocalOf<LayerBackdrop?> { null }
+val LocalSideSheetTrigger = compositionLocalOf<(() -> Unit)?> { null }
 val LocalEditorListState = compositionLocalOf<LazyListState?> { null }
 val LocalEditorContentPadding = compositionLocalOf<PaddingValues?> { null }
 
@@ -364,6 +381,7 @@ fun FloatingTopBar(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val sideSheetTrigger = LocalSideSheetTrigger.current
             if (onBack != null) {
                 FloatingGlassButton(
                     contentDescription = "Back",
@@ -372,6 +390,15 @@ fun FloatingTopBar(
                     size = FloatingBarHeight,
                 ) {
                     Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, tint = cs.onSurface)
+                }
+            } else if (sideSheetTrigger != null) {
+                FloatingGlassButton(
+                    contentDescription = "Open navigation",
+                    onClick = sideSheetTrigger,
+                    backdrop = backdrop,
+                    size = FloatingBarHeight,
+                ) {
+                    Icon(Icons.Rounded.Menu, contentDescription = null, tint = cs.onSurface)
                 }
             }
             if (!title.isNullOrBlank()) {
@@ -780,6 +807,189 @@ private suspend inline fun AwaitPointerEventScope.awaitDragOrUp(pointerId: Point
         } else {
             val hasDragged = dragEvent.previousPosition != dragEvent.position
             if (hasDragged) return dragEvent
+        }
+    }
+}
+
+@Composable
+fun <T> FloatingSideSheet(
+    visible: Boolean,
+    onDismiss: () -> Unit,
+    items: List<T>,
+    selectedIndex: Int,
+    onSelected: (index: Int) -> Unit,
+    modifier: Modifier = Modifier,
+    backdrop: LayerBackdrop? = LocalBlurBackdrop.current,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    indicatorColor: Color = MaterialTheme.colorScheme.primary,
+    contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    activeContentColor: Color = indicatorColor,
+    header: (@Composable () -> Unit)? = null,
+    footer: (@Composable () -> Unit)? = null,
+    iconContent: @Composable (item: T, index: Int) -> Unit,
+    labelContent: @Composable (item: T, index: Int) -> Unit,
+) {
+    val density = LocalDensity.current
+    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
+    val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
+    val dragOffsetPx = remember { Animatable(0f) }
+    val dismissThresholdPx = with(density) { 80.dp.toPx() }
+    val sheetShape = RoundedCornerShape(28.dp)
+
+    LaunchedEffect(visible) {
+        if (visible) {
+            dragOffsetPx.snapTo(0f)
+        }
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(animationSpec = spring(stiffness = 500f)),
+            exit = fadeOut(animationSpec = spring(stiffness = 600f)),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.36f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onDismiss,
+                    ),
+            )
+        }
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = slideInHorizontally(
+                animationSpec = spring(dampingRatio = 0.86f, stiffness = 420f),
+                initialOffsetX = { fullWidth -> if (isLtr) -fullWidth else fullWidth },
+            ) + fadeIn(animationSpec = spring(stiffness = 500f)),
+            exit = slideOutHorizontally(
+                animationSpec = spring(dampingRatio = 0.95f, stiffness = 500f),
+                targetOffsetX = { fullWidth -> if (isLtr) -fullWidth else fullWidth },
+            ) + fadeOut(animationSpec = spring(stiffness = 600f)),
+            modifier = Modifier.align(Alignment.CenterStart),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+                    .padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 24.dp)
+                    .widthIn(min = 256.dp, max = 288.dp)
+                    .graphicsLayer { translationX = dragOffsetPx.value }
+                    .pointerInput(isLtr) {
+                        detectHorizontalDragGestures(
+                            onHorizontalDrag = { _, dragAmount ->
+                                val next = dragOffsetPx.value + dragAmount
+                                val clamped = if (isLtr) next.coerceAtMost(0f) else next.coerceAtLeast(0f)
+                                scope.launch { dragOffsetPx.snapTo(clamped) }
+                            },
+                            onDragEnd = {
+                                val shouldDismiss = if (isLtr) {
+                                    dragOffsetPx.value < -dismissThresholdPx
+                                } else {
+                                    dragOffsetPx.value > dismissThresholdPx
+                                }
+                                if (shouldDismiss) {
+                                    onDismiss()
+                                } else {
+                                    scope.launch {
+                                        dragOffsetPx.animateTo(0f, spring(dampingRatio = 0.85f, stiffness = 450f))
+                                    }
+                                }
+                            },
+                            onDragCancel = {
+                                scope.launch {
+                                    dragOffsetPx.animateTo(0f, spring(dampingRatio = 0.85f, stiffness = 450f))
+                                }
+                            },
+                        )
+                    }
+                    .barGlass(
+                        backdrop = backdrop,
+                        shape = sheetShape,
+                        containerColor = containerColor,
+                        strokeCornerRadius = 28.dp,
+                    )
+                    .clip(sheetShape),
+            ) {
+                if (header != null) {
+                    header()
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    items.forEachIndexed { index, item ->
+                        val isSelected = index == selectedIndex
+                        val itemBg by animateColorAsState(
+                            targetValue = if (isSelected) {
+                                indicatorColor.copy(alpha = 0.15f)
+                            } else {
+                                Color.Transparent
+                            },
+                            label = "sideSheetItemBg",
+                        )
+                        val itemContentColor by animateColorAsState(
+                            targetValue = if (isSelected) activeContentColor else contentColor,
+                            label = "sideSheetItemContent",
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .clip(CircleShape)
+                                .background(itemBg, CircleShape)
+                                .semantics(mergeDescendants = true) {
+                                    selected = isSelected
+                                    role = Role.Tab
+                                }
+                                .clickable {
+                                    if (!isSelected) {
+                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        onSelected(index)
+                                    }
+                                    onDismiss()
+                                }
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        ) {
+                            CompositionLocalProvider(LocalContentColor provides itemContentColor) {
+                                iconContent(item, index)
+                                ProvideTextStyle(
+                                    MaterialTheme.typography.titleSmall.copy(
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    ),
+                                ) {
+                                    labelContent(item, index)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (footer != null) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+                    )
+                    footer()
+                }
+            }
         }
     }
 }

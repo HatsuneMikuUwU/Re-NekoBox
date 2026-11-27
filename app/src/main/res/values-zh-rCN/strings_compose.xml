@@ -18,4 +18,9 @@
     <string name="route_protocol">协议</string>
     <string name="route_outbound">出站</string>
     <string name="service_mode_transproxy">透明代理</string>
+    <string name="ui_customisation">界面自定义</string>
+    <string name="use_side_sheet_nav">侧边栏导航</string>
+    <string name="use_side_sheet_nav_summary">将底部悬浮标签栏替换为 AnimeX 风格悬浮侧边栏</string>
+    <string name="open_navigation">打开导航</string>
+    <string name="close_navigation">关闭导航</string>
 </resources>
