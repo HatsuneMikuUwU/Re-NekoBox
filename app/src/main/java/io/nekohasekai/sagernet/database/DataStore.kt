@@ -113,7 +113,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var concurrentDial by configurationStore.boolean(Key.CONCURRENT_DIAL)
 
     var allowAccess by configurationStore.boolean(Key.ALLOW_ACCESS)
-    var speedInterval by configurationStore.stringToInt(Key.SPEED_INTERVAL)
+    var speedInterval by configurationStore.stringToInt(Key.SPEED_INTERVAL) { 1000 }
 
     var globalCustomConfig by configurationStore.string(Key.GLOBAL_CUSTOM_CONFIG) { "" }
 
