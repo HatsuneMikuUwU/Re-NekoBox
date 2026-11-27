@@ -158,6 +158,7 @@ fun ConfigurationScreen(
     selectMode: Boolean = false,
     onBack: (() -> Unit)? = null,
     onProfileSelected: ((ProxyEntity) -> Unit)? = null,
+    onSearchActiveChanged: (Boolean) -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
