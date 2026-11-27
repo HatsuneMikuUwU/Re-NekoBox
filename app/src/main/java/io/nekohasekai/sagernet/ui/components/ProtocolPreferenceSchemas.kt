@@ -13,6 +13,22 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CallSplit
+import androidx.compose.material.icons.rounded.Dns
+import androidx.compose.material.icons.rounded.Extension
+import androidx.compose.material.icons.rounded.Hub
+import androidx.compose.material.icons.rounded.Key
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.LockOpen
+import androidx.compose.material.icons.rounded.Numbers
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Router
+import androidx.compose.material.icons.rounded.Security
+import androidx.compose.material.icons.rounded.Speed
+import androidx.compose.material.icons.rounded.SwapVert
+import androidx.compose.material.icons.rounded.Title
+import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.VerifiedUser
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -25,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -112,6 +129,7 @@ fun ProtocolPreferenceComposeScreen(
                                     PrefSwitchRow(
                                         title = titleStr,
                                         summary = summaryStr,
+                                        icon = iconForProtocolField(item.key),
                                         checked = store.getBoolean(item.key, def),
                                         onCheckedChange = { store.putBoolean(item.key, it) },
                                         enabled = enabled,
@@ -145,6 +163,7 @@ fun ProtocolPreferenceComposeScreen(
                                         entries = entries,
                                         entryValues = values,
                                         defaultValue = item.defaultValue,
+                                        icon = iconForProtocolField(item.key),
                                         enabled = enabled,
                                         position = pos,
                                     )
@@ -167,6 +186,7 @@ fun ProtocolPreferenceComposeScreen(
                                         key = item.key,
                                         title = titleStr,
                                         defaultValue = item.defaultValue,
+                                        icon = iconForProtocolField(item.key),
                                         isPassword = isPassword,
                                         isNumber = isNumber,
                                         multiline = isMultiline,
@@ -183,12 +203,35 @@ fun ProtocolPreferenceComposeScreen(
     }
 }
 
+private fun iconForProtocolField(key: String): ImageVector {
+    val k = key.lowercase()
+    return when {
+        k == "name" || k == "profilename" -> Icons.Rounded.Title
+        k.contains("address") || k == "host" || k == "serverhost" || k == "obfshost" -> Icons.Rounded.Dns
+        k.contains("port") -> Icons.Rounded.Numbers
+        k.contains("allowinsecure") || k.contains("insecure") -> Icons.Rounded.LockOpen
+        k.contains("password") || k.contains("privatekey") || k.contains("pubkey") || k.contains("publickey") || k.contains("psk") || k.contains("presharedkey") || k.contains("userkey") || k.contains("shortid") -> Icons.Rounded.Key
+        k.contains("uuid") || k.contains("userid") || k.contains("username") || k.contains("alterid") -> Icons.Rounded.Person
+        k.contains("cert") || k.contains("pinned") -> Icons.Rounded.Security
+        k.contains("sni") || k.contains("alpn") || k.contains("utls") || k.contains("ech") || k.contains("fingerprint") -> Icons.Rounded.VerifiedUser
+        k.contains("encrypt") || k.contains("method") || k.contains("security") || k.contains("auth") -> Icons.Rounded.Lock
+        k.contains("upload") || k.contains("download") -> Icons.Rounded.SwapVert
+        k.contains("mux") || k.contains("brutal") || k.contains("concurrency") || k.contains("streams") || k.contains("reuse") -> Icons.Rounded.CallSplit
+        k.contains("mtu") || k.contains("kcp") || k.contains("quic") || k.contains("congestion") || k.contains("window") || k.contains("rtt") || k.contains("hop") || k.contains("udp") || k.contains("suot") || k.contains("packet") -> Icons.Rounded.Speed
+        k.contains("plugin") || k.contains("config") || k.contains("extra") -> Icons.Rounded.Extension
+        k.contains("local") || k.contains("reserved") || k.contains("outbound") -> Icons.Rounded.Router
+        k.contains("network") || k.contains("protocol") || k.contains("type") || k.contains("mode") || k.contains("obfs") || k.contains("path") || k.contains("header") || k.contains("earlydata") -> Icons.Rounded.Hub
+        else -> Icons.Rounded.Tune
+    }
+}
+
 @Composable
 private fun PureComposeEditTextRow(
     store: ComposePreferenceStore,
     key: String,
     title: String,
     defaultValue: String,
+    icon: ImageVector?,
     isPassword: Boolean,
     isNumber: Boolean,
     multiline: Boolean,
@@ -207,6 +250,7 @@ private fun PureComposeEditTextRow(
     PrefActionRow(
         title = title,
         summary = displaySummary,
+        icon = icon,
         enabled = enabled,
         position = position,
         onClick = { showDialog = true },

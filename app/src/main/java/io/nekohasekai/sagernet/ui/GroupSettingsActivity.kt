@@ -14,6 +14,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Checklist
+import androidx.compose.material.icons.rounded.Devices
+import androidx.compose.material.icons.rounded.FilterAlt
+import androidx.compose.material.icons.rounded.Timer
+import androidx.compose.material.icons.rounded.VpnLock
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Dns
@@ -195,6 +200,7 @@ class GroupSettingsActivity : ThemedActivity() {
                                 StoreSwitchPref(
                                     store = store,
                                     key = Key.GROUP_IS_SELECTOR,
+                                    icon = Icons.Rounded.Checklist,
                                     titleRes = R.string.use_selector,
                                     position = ExpressiveGroupPosition.BOTTOM,
                                 )
@@ -221,12 +227,14 @@ class GroupSettingsActivity : ThemedActivity() {
                                     StoreSwitchPref(
                                         store = store,
                                         key = Key.SUBSCRIPTION_FORCE_RESOLVE,
+                                        icon = Icons.Rounded.Dns,
                                         titleRes = R.string.force_resolve,
                                         summaryRes = R.string.force_resolve_sum,
                                     )
                                     StoreSwitchPref(
                                         store = store,
                                         key = Key.SUBSCRIPTION_DEDUPLICATION,
+                                        icon = Icons.Rounded.FilterList,
                                         titleRes = R.string.deduplication,
                                         summaryRes = R.string.deduplication_sum,
                                     )
@@ -242,6 +250,7 @@ class GroupSettingsActivity : ThemedActivity() {
                                     StoreEditTextPref(
                                         store = store,
                                         key = "subscriptionFilterRegex",
+                                        icon = Icons.Rounded.FilterAlt,
                                         titleRes = R.string.filter_regex,
                                         position = ExpressiveGroupPosition.BOTTOM,
                                     )
@@ -253,6 +262,7 @@ class GroupSettingsActivity : ThemedActivity() {
                                     StoreSwitchPref(
                                         store = store,
                                         key = Key.SUBSCRIPTION_UPDATE_WHEN_CONNECTED_ONLY,
+                                        icon = Icons.Rounded.VpnLock,
                                         titleRes = R.string.update_when_connected_only,
                                         summaryRes = R.string.update_when_connected_only_sum,
                                         position = ExpressiveGroupPosition.TOP,
@@ -260,6 +270,7 @@ class GroupSettingsActivity : ThemedActivity() {
                                     StoreEditTextPref(
                                         store = store,
                                         key = Key.SUBSCRIPTION_USER_AGENT,
+                                        icon = Icons.Rounded.Devices,
                                         titleRes = R.string.subscription_user_agent,
                                     )
                                     StoreSwitchPref(
@@ -271,6 +282,7 @@ class GroupSettingsActivity : ThemedActivity() {
                                     StoreEditTextPref(
                                         store = store,
                                         key = Key.SUBSCRIPTION_AUTO_UPDATE_DELAY,
+                                        icon = Icons.Rounded.Timer,
                                         titleRes = R.string.auto_update_delay,
                                         defaultValue = "1440",
                                         isNumber = true,

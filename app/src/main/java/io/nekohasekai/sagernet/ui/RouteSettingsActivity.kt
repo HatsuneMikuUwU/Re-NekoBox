@@ -15,6 +15,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Http
+import androidx.compose.material.icons.rounded.Input
+import androidx.compose.material.icons.rounded.Lan
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.MyLocation
+import androidx.compose.material.icons.rounded.SettingsInputComponent
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Delete
@@ -226,24 +232,28 @@ class RouteSettingsActivity : ThemedActivity() {
                                 StoreEditTextPref(
                                     store = store,
                                     key = Key.ROUTE_IP,
+                                    icon = Icons.Rounded.LocationOn,
                                     titleRes = R.string.route_ip,
                                     multiline = true,
                                 )
                                 StoreEditTextPref(
                                     store = store,
                                     key = Key.ROUTE_PORT,
+                                    icon = Icons.Rounded.SettingsInputComponent,
                                     titleRes = R.string.route_port,
                                     multiline = true,
                                 )
                                 StoreEditTextPref(
                                     store = store,
                                     key = Key.ROUTE_SOURCE,
+                                    icon = Icons.Rounded.MyLocation,
                                     titleRes = R.string.route_source,
                                     multiline = true,
                                 )
                                 StoreEditTextPref(
                                     store = store,
                                     key = Key.ROUTE_SOURCE_PORT,
+                                    icon = Icons.Rounded.Input,
                                     titleRes = R.string.route_source_port,
                                     multiline = true,
                                 )
@@ -257,6 +267,7 @@ class RouteSettingsActivity : ThemedActivity() {
                                 StoreListPref(
                                     store = store,
                                     key = Key.ROUTE_NETWORK,
+                                    icon = Icons.Rounded.Lan,
                                     titleRes = R.string.route_network,
                                     entriesRes = R.array.route_protocol_entry,
                                     entryValuesRes = R.array.route_protocol_value,
@@ -264,6 +275,7 @@ class RouteSettingsActivity : ThemedActivity() {
                                 StoreEditTextPref(
                                     store = store,
                                     key = Key.ROUTE_PROTOCOL,
+                                    icon = Icons.Rounded.Http,
                                     titleRes = R.string.route_protocol,
                                     multiline = true,
                                 )
