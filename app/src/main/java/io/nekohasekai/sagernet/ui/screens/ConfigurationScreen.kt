@@ -314,7 +314,7 @@ fun ConfigurationScreen(
                 title = stringResource(R.string.no_proxies_found),
                 subtitle = stringResource(R.string.add_profile),
                 actionLabel = if (!selectMode) stringResource(R.string.add_profile) else null,
-                onAction = if (!selectMode) { { showAddSheet = true } } else null,
+                onAction = if (!selectMode) { { showAddMenu = true } } else null,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(top = topInset, bottom = bottomInset),
@@ -368,7 +368,7 @@ fun ConfigurationScreen(
                             title = stringResource(R.string.no_proxies_found),
                             subtitle = stringResource(R.string.add_profile),
                             actionLabel = if (!selectMode) stringResource(R.string.add_profile) else null,
-                            onAction = if (!selectMode) { { showAddSheet = true } } else null,
+                            onAction = if (!selectMode) { { showAddMenu = true } } else null,
                             modifier = Modifier.fillParentMaxHeight(0.7f),
                         )
                     }

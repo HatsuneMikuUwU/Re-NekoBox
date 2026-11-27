@@ -98,6 +98,7 @@ import androidx.compose.material.icons.rounded.ViewStream
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.VpnKey
 import androidx.compose.material.icons.rounded.WorkspacePremium
+import androidx.compose.material.icons.rounded.Edit
 
 sealed interface PrefText {
     data class Res(@StringRes val id: Int) : PrefText
@@ -258,6 +259,75 @@ fun ProtocolPreferenceComposeScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PureComposeEditTextRow(
+    store: ComposePreferenceStore,
+    key: String,
+    title: String,
+    defaultValue: String,
+    icon: ImageVector?,
+    isPassword: Boolean,
+    isNumber: Boolean,
+    multiline: Boolean,
+    enabled: Boolean,
+    position: ExpressiveGroupPosition,
+) {
+    val currentValue = store.getString(key, defaultValue)
+    var showDialog by remember { mutableStateOf(false) }
+
+    val displaySummary = when {
+        currentValue.isBlank() -> stringResource(R.string.not_set)
+        isPassword -> "•".repeat(currentValue.length.coerceAtMost(16))
+        else -> currentValue.lineSequence().firstOrNull { it.isNotBlank() } ?: currentValue
+    }
+
+    PrefActionRow(
+        title = title,
+        summary = displaySummary,
+        icon = icon,
+        enabled = enabled,
+        position = position,
+        onClick = { showDialog = true },
+    )
+
+    if (showDialog) {
+        var draft by remember(currentValue) { mutableStateOf(currentValue) }
+        AppDialog(
+            icon = icon ?: Icons.Rounded.Edit,
+            title = title,
+            onDismiss = { showDialog = false },
+            text = {
+                OutlinedTextField(
+                    value = draft,
+                    onValueChange = { draft = it },
+                    singleLine = !multiline,
+                    minLines = if (multiline) 4 else 1,
+                    maxLines = if (multiline) 8 else 1,
+                    shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = when {
+                            isNumber -> KeyboardType.Number
+                            isPassword -> KeyboardType.Password
+                            else -> KeyboardType.Text
+                        }
+                    ),
+                )
+            },
+            confirmButton = {
+                DialogConfirmButton(label = stringResource(android.R.string.ok)) {
+                    store.putString(key, draft)
+                    showDialog = false
+                }
+            },
+            dismissButton = {
+                DialogCancelButton(label = stringResource(android.R.string.cancel)) {
+                    showDialog = false
+                }
+            },
+        )
     }
 }
 
