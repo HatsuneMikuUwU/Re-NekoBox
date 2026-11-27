@@ -189,6 +189,18 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var appendHttpProxy by configurationStore.boolean(Key.APPEND_HTTP_PROXY)
     var httpProxyBypass by configurationStore.string(Key.HTTP_PROXY_BYPASS) { "" }
     var dnsHosts by configurationStore.string(Key.DNS_HOSTS) { "" }
+    var customDnsServers by configurationStore.string(Key.CUSTOM_DNS_SERVERS) { "" }
+    var adblockEnabled by configurationStore.boolean(Key.ADBLOCK_ENABLED) { false }
+    var adblockDnsReject by configurationStore.boolean(Key.ADBLOCK_DNS_REJECT) { true }
+    var adblockRouteReject by configurationStore.boolean(Key.ADBLOCK_ROUTE_REJECT) { true }
+    var adblockBundledFiltersRaw by configurationStore.string(Key.ADBLOCK_BUNDLED_FILTERS) { "" }
+    var adblockBundledFilters: Set<String>
+        get() = adblockBundledFiltersRaw.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+        set(value) { adblockBundledFiltersRaw = value.joinToString(",") }
+    var adblockBundledFiltersInitialized by configurationStore.boolean(Key.ADBLOCK_BUNDLED_FILTERS_INITIALIZED) { false }
+    var adblockCustomFilterUrls by configurationStore.string(Key.ADBLOCK_CUSTOM_FILTER_URLS) { "" }
+    var adblockCustomRules by configurationStore.string(Key.ADBLOCK_CUSTOM_RULES) { "" }
+    var adblockAllowlist by configurationStore.string(Key.ADBLOCK_ALLOWLIST) { "" }
     var strictRoute by configurationStore.boolean(Key.STRICT_ROUTE) { true }
     var connectionTestURL by configurationStore.string(Key.CONNECTION_TEST_URL) { CONNECTION_TEST_URL }
     var connectionTestConcurrent by configurationStore.int("connectionTestConcurrent") { 5 }

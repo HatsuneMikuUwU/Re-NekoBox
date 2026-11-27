@@ -60,6 +60,7 @@ import androidx.compose.material.icons.rounded.Construction
 import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Dns
+import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Lock
@@ -97,8 +98,11 @@ import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.CustomDnsServerStore
 import io.nekohasekai.sagernet.ktx.triggerFullRestart
 import io.nekohasekai.sagernet.ui.AppManagerActivity
+import io.nekohasekai.sagernet.ui.AdblockSettingsActivity
+import io.nekohasekai.sagernet.ui.CustomDnsServersActivity
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
 import io.nekohasekai.sagernet.ui.components.FloatingTopBar
 import io.nekohasekai.sagernet.ui.components.LocalBottomInset
@@ -412,7 +416,17 @@ fun SettingsScreen(
                         titleRes = R.string.ruleset_update_interval,
                         defaultValue = "0",
                         isNumber = true,
+                    )
+                    PrefActionRow(
+                        title = stringResource(R.string.adblock_settings),
+                        summary = stringResource(
+                            if (store.getBoolean(Key.ADBLOCK_ENABLED, false)) R.string.adblock_status_enabled else R.string.disable,
+                        ),
+                        icon = Icons.Rounded.Shield,
                         position = ExpressiveGroupPosition.BOTTOM,
+                        onClick = {
+                            context.startActivity(Intent(context, AdblockSettingsActivity::class.java))
+                        },
                     )
                 }
             }
@@ -480,6 +494,21 @@ fun SettingsScreen(
                         defaultValue = true,
                         icon = Icons.Rounded.Policy,
                         onChanged = { notifyNeedReload(); true },
+                    )
+                    val customDnsCount = remember(store.getString(Key.CUSTOM_DNS_SERVERS, "")) {
+                        CustomDnsServerStore.enabledServers().size
+                    }
+                    PrefActionRow(
+                        title = stringResource(R.string.custom_dns_servers),
+                        summary = if (customDnsCount > 0) {
+                            stringResource(R.string.custom_dns_enabled_count, customDnsCount)
+                        } else {
+                            stringResource(R.string.custom_dns_servers_sum)
+                        },
+                        icon = Icons.Rounded.Dns,
+                        onClick = {
+                            context.startActivity(Intent(context, CustomDnsServersActivity::class.java))
+                        },
                     )
                     StoreEditTextPref(
                         store = store,
