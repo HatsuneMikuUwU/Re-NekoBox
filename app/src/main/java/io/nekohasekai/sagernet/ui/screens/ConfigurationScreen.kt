@@ -167,8 +167,9 @@ fun ConfigurationScreen(
     fun runPingAll() {
         if (isTestingAll || profiles.isEmpty()) return
         isTestingAll = true
+        val snapshot = profiles.toList()
         runOnDefaultDispatcher {
-            profiles.forEach { entity ->
+            snapshot.forEach { entity ->
                 val bean = entity.requireBean()
                 val rtt = runCatching {
                     val start = SystemClock.elapsedRealtime()
@@ -177,16 +178,15 @@ fun ConfigurationScreen(
                     }
                     (SystemClock.elapsedRealtime() - start).toInt().coerceAtLeast(1)
                 }.getOrDefault(-1)
-                if (rtt >= 0) {
-                    entity.status = 1
-                    entity.ping = rtt
-                    entity.error = null
+                val updated = if (rtt >= 0) {
+                    entity.copy(status = 1, ping = rtt, error = null)
                 } else {
-                    entity.status = 2
-                    entity.ping = 0
-                    entity.error = "timeout"
+                    entity.copy(status = 2, ping = 0, error = "timeout")
                 }
-                SagerDatabase.proxyDao.updateProxy(entity)
+                SagerDatabase.proxyDao.updateProxy(updated)
+                onMainDispatcher {
+                    profiles = profiles.map { if (it.id == updated.id) updated else it }
+                }
             }
             onMainDispatcher {
                 isTestingAll = false
@@ -201,8 +201,22 @@ fun ConfigurationScreen(
     DisposableEffect(Unit) {
         val profileListener = object : ProfileManager.Listener {
             override suspend fun onAdd(profile: ProxyEntity) = reloadData()
-            override suspend fun onUpdated(data: List<TrafficData>) = reloadData()
-            override suspend fun onUpdated(profile: ProxyEntity, noTraffic: Boolean) = reloadData()
+            override suspend fun onUpdated(data: List<TrafficData>) {
+                if (data.isEmpty()) return
+                val byId = data.associateBy { it.id }
+                onMainDispatcher {
+                    profiles = profiles.map { entity ->
+                        val td = byId[entity.id]
+                        if (td != null) entity.copy(tx = td.tx, rx = td.rx) else entity
+                    }
+                }
+            }
+            override suspend fun onUpdated(profile: ProxyEntity, noTraffic: Boolean) {
+                onMainDispatcher {
+                    val updated = profile.copy()
+                    profiles = profiles.map { if (it.id == updated.id) updated else it }
+                }
+            }
             override suspend fun onRemoved(groupId: Long, profileId: Long) = reloadData()
         }
         val groupListener = object : GroupManager.Listener {
@@ -462,14 +476,10 @@ fun ConfigurationScreen(
                                         text = { Text(stringResource(R.string.connection_test_clear_results)) },
                                         onClick = {
                                             showMoreMenu = false
+                                            val cleared = profiles.map { it.copy(status = 0, ping = 0, error = null) }
+                                            profiles = cleared
                                             runOnDefaultDispatcher {
-                                                profiles.forEach {
-                                                    it.status = 0
-                                                    it.ping = 0
-                                                    it.error = null
-                                                }
-                                                SagerDatabase.proxyDao.updateProxy(profiles)
-                                                reloadData()
+                                                SagerDatabase.proxyDao.updateProxy(cleared)
                                             }
                                         },
                                     )
@@ -490,9 +500,10 @@ fun ConfigurationScreen(
                                         text = { Text(stringResource(R.string.clear_traffic_statistics)) },
                                         onClick = {
                                             showMoreMenu = false
+                                            val ids = profiles.map { it.id }.toLongArray()
+                                            profiles = profiles.map { it.copy(tx = 0L, rx = 0L) }
                                             runOnDefaultDispatcher {
-                                                ProfileManager.resetTraffic(profiles.map { it.id }.toLongArray())
-                                                reloadData()
+                                                ProfileManager.resetTraffic(ids)
                                             }
                                         },
                                     )
