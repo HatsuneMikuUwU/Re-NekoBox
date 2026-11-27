@@ -114,7 +114,7 @@ fun RouteScreen(
         if (rules.isEmpty()) {
             ExpressiveEmptyState(
                 icon = Icons.Rounded.AccountTree,
-                title = null,
+                title = stringResource(R.string.menu_route),
                 actionLabel = stringResource(R.string.route_add),
                 onAction = { context.startActivity(Intent(context, RouteSettingsActivity::class.java)) },
                 modifier = Modifier
@@ -225,7 +225,7 @@ fun RouteScreen(
 
         FloatingTopBar(
             backdrop = topBackdrop,
-            title = stringResource(R.string.menu_route),
+            title = null,
             actions = {
                 IconButton(onClick = {
                     context.startActivity(Intent(context, AssetsActivity::class.java))

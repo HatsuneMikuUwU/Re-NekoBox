@@ -127,7 +127,7 @@ fun GroupScreen(
         if (groups.isEmpty()) {
             ExpressiveEmptyState(
                 icon = Icons.Rounded.FolderCopy,
-                title = null,
+                title = stringResource(R.string.menu_group),
                 actionLabel = stringResource(R.string.group_create),
                 onAction = { context.startActivity(Intent(context, GroupSettingsActivity::class.java)) },
                 modifier = Modifier
@@ -191,7 +191,7 @@ fun GroupScreen(
 
         FloatingTopBar(
             backdrop = topBackdrop,
-            title = stringResource(R.string.menu_group),
+            title = null,
             actions = {
                 IconButton(onClick = { showUpdateAllDialog = true }) {
                     Icon(Icons.Rounded.Sync, contentDescription = stringResource(R.string.update_all_subscription))
