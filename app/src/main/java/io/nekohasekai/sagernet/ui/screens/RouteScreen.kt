@@ -72,7 +72,7 @@ fun RouteScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var rules by remember { mutableStateOf<List<RuleEntity>>(emptyList()) }
+    var rules by remember { mutableStateOf(SagerDatabase.rulesDao.allRules()) }
     var showResetDialog by remember { mutableStateOf(false) }
 
     fun reload() {

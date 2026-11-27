@@ -34,13 +34,11 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,8 +76,6 @@ import io.nekohasekai.sagernet.ui.components.ComposePreferenceStore
 import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
 import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceComposeScreen
 import io.nekohasekai.sagernet.ui.components.rememberComposePreferenceStore
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
 import androidx.compose.material.icons.rounded.WarningAmber
 import io.nekohasekai.sagernet.ui.components.AppDialog
@@ -118,12 +114,28 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
         isSubscription = intent.getBooleanExtra(EXTRA_IS_SUBSCRIPTION, false)
         DataStore.editingId = editingId
 
+        val initialMoveGroups: List<ProxyGroup> = if (editingId == 0L) {
+            DataStore.editingGroup = DataStore.selectedGroupForImport()
+            createEntity().applyDefaultValues().init()
+            emptyList()
+        } else {
+            val ent = proxyEntity
+            if (ent == null) {
+                finish()
+                return
+            }
+            DataStore.editingGroup = ent.groupId
+            (ent.requireBean() as T).init()
+            SagerDatabase.groupDao.allGroups()
+                .filter { it.type == GroupType.BASIC && it.id != ent.groupId }
+        }
+        DataStore.dirty = false
+
         setComposeContent {
-            var loaded by remember { mutableStateOf(false) }
             var showUnsavedDialog by remember { mutableStateOf(false) }
             var showDeleteDialog by remember { mutableStateOf(false) }
             var showMoveDialog by remember { mutableStateOf(false) }
-            var moveCandidateGroups by remember { mutableStateOf<List<ProxyGroup>>(emptyList()) }
+            val moveCandidateGroups = remember { initialMoveGroups }
             var moreMenuOpen by remember { mutableStateOf(false) }
 
             val store = rememberComposePreferenceStore(DataStore.profileCacheStore, markProfileDirty = true)
@@ -137,33 +149,6 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                 ActivityResultContracts.StartActivityForResult()
             ) {
                 proxyEntity?.requireBean()?.customOutboundJson = DataStore.serverCustomOutbound
-            }
-
-            LaunchedEffect(editingId) {
-                val ok = withContext(Dispatchers.IO) {
-                    if (editingId == 0L) {
-                        DataStore.editingGroup = DataStore.selectedGroupForImport()
-                        createEntity().applyDefaultValues().init()
-                        true
-                    } else {
-                        val ent = proxyEntity
-                        if (ent == null) {
-                            false
-                        } else {
-                            DataStore.editingGroup = ent.groupId
-                            (ent.requireBean() as T).init()
-                            moveCandidateGroups = SagerDatabase.groupDao.allGroups()
-                                .filter { it.type == GroupType.BASIC && it.id != ent.groupId }
-                            true
-                        }
-                    }
-                }
-                if (!ok) {
-                    finish()
-                } else {
-                    DataStore.dirty = false
-                    loaded = true
-                }
             }
 
             BackHandler(enabled = DataStore.dirty) {
@@ -186,23 +171,14 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                         .fillMaxSize()
                         .blurBackdropSource(backdrop),
                 ) {
-                    if (!loaded) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            LoadingIndicator()
-                        }
-                    } else {
-                        CompositionLocalProvider(
-                            LocalEditorListState provides listState,
-                            LocalEditorContentPadding provides PaddingValues(
-                                top = topInset + 6.dp,
-                                bottom = navBarInset + 88.dp,
-                            ),
-                        ) {
-                            ProfileSettingsContent(store)
-                        }
+                    CompositionLocalProvider(
+                        LocalEditorListState provides listState,
+                        LocalEditorContentPadding provides PaddingValues(
+                            top = topInset + 6.dp,
+                            bottom = navBarInset + 88.dp,
+                        ),
+                    ) {
+                        ProfileSettingsContent(store)
                     }
                 }
 

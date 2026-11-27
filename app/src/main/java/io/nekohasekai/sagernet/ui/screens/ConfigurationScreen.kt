@@ -149,9 +149,33 @@ fun ConfigurationScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var groups by remember { mutableStateOf<List<ProxyGroup>>(emptyList()) }
-    var selectedGroupId by remember { mutableLongStateOf(DataStore.selectedGroup) }
-    var profiles by remember { mutableStateOf<List<ProxyEntity>>(emptyList()) }
+    val initialSnapshot = remember {
+        var all = SagerDatabase.groupDao.allGroups()
+        if (all.isEmpty()) {
+            SagerDatabase.groupDao.createGroup(ProxyGroup(ungrouped = true))
+            all = SagerDatabase.groupDao.allGroups()
+        }
+        val active = all.firstOrNull { it.id == DataStore.selectedGroup } ?: all.firstOrNull()
+        val activeId = active?.id ?: DataStore.selectedGroup
+        if (active != null && DataStore.selectedGroup != active.id) {
+            DataStore.selectedGroup = active.id
+        }
+        val initialList = if (active != null) {
+            val list = SagerDatabase.proxyDao.getByGroup(active.id)
+            when (active.order) {
+                GroupOrder.BY_NAME -> list.sortedBy { it.displayName().lowercase() }
+                GroupOrder.BY_DELAY -> list.sortedBy { if (it.status == 1) it.ping else Int.MAX_VALUE }
+                else -> list.sortedBy { it.userOrder }
+            }
+        } else {
+            emptyList()
+        }
+        Triple(all, activeId, initialList)
+    }
+
+    var groups by remember { mutableStateOf(initialSnapshot.first) }
+    var selectedGroupId by remember { mutableLongStateOf(initialSnapshot.second) }
+    var profiles by remember { mutableStateOf(initialSnapshot.third) }
     var selectedProxyId by remember { mutableLongStateOf(DataStore.selectedProxy) }
 
     var searchActive by remember { mutableStateOf(false) }

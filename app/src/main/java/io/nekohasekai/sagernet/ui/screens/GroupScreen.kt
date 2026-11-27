@@ -87,7 +87,13 @@ fun GroupScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var groups by remember { mutableStateOf<List<Pair<ProxyGroup, Long>>>(emptyList()) }
+    var groups by remember {
+        mutableStateOf(
+            SagerDatabase.groupDao.allGroups().map { group ->
+                group to SagerDatabase.proxyDao.countByGroup(group.id)
+            }
+        )
+    }
     var showUpdateAllDialog by remember { mutableStateOf(false) }
     var deleteConfirmGroup by remember { mutableStateOf<ProxyGroup?>(null) }
     var qrData by remember { mutableStateOf<Pair<String, String>?>(null) }

@@ -34,11 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -65,8 +60,6 @@ import io.nekohasekai.sagernet.ui.components.StoreListPref
 import io.nekohasekai.sagernet.ui.components.StoreListPrefRaw
 import io.nekohasekai.sagernet.ui.components.rememberComposePreferenceStore
 import io.nekohasekai.sagernet.ui.profile.ConfigEditActivity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class RouteSettingsActivity : ThemedActivity() {
 
@@ -82,42 +75,36 @@ class RouteSettingsActivity : ThemedActivity() {
         val pkgName = intent.getStringExtra(EXTRA_PACKAGE_NAME)
         DataStore.editingId = editingId
 
+        val initialEntity = if (editingId == 0L) {
+            RuleEntity().apply {
+                if (!pkgName.isNullOrBlank()) packages = setOf(pkgName)
+            }
+        } else {
+            SagerDatabase.rulesDao.getById(editingId) ?: RuleEntity()
+        }
+        DataStore.routeName = initialEntity.name
+        DataStore.routeDomain = initialEntity.domains
+        DataStore.routeIP = initialEntity.ip
+        DataStore.routePort = initialEntity.port
+        DataStore.routeSourcePort = initialEntity.sourcePort
+        DataStore.routeNetwork = initialEntity.network
+        DataStore.routeSource = initialEntity.source
+        DataStore.routeProtocol = initialEntity.protocol
+        DataStore.routeRuleset = initialEntity.ruleset
+        DataStore.routeOutbound = when (initialEntity.outbound) {
+            0L -> 0
+            -1L -> 1
+            -2L -> 2
+            else -> 3
+        }
+        DataStore.routeOutboundRule = initialEntity.outbound
+        DataStore.routePackages = initialEntity.packages.joinToString("\n")
+        DataStore.serverConfig = initialEntity.config
+        DataStore.dirty = false
+
         setComposeContent {
             val context = LocalContext.current
-            var loaded by remember { mutableStateOf(false) }
             val store = rememberComposePreferenceStore(DataStore.profileCacheStore, markProfileDirty = true)
-
-            LaunchedEffect(editingId) {
-                withContext(Dispatchers.IO) {
-                    val entity = if (editingId == 0L) {
-                        RuleEntity().apply {
-                            if (!pkgName.isNullOrBlank()) packages = setOf(pkgName)
-                        }
-                    } else {
-                        SagerDatabase.rulesDao.getById(editingId) ?: RuleEntity()
-                    }
-                    DataStore.routeName = entity.name
-                    DataStore.routeDomain = entity.domains
-                    DataStore.routeIP = entity.ip
-                    DataStore.routePort = entity.port
-                    DataStore.routeSourcePort = entity.sourcePort
-                    DataStore.routeNetwork = entity.network
-                    DataStore.routeSource = entity.source
-                    DataStore.routeProtocol = entity.protocol
-                    DataStore.routeRuleset = entity.ruleset
-                    DataStore.routeOutbound = when (entity.outbound) {
-                        0L -> 0
-                        -1L -> 1
-                        -2L -> 2
-                        else -> 3
-                    }
-                    DataStore.routeOutboundRule = entity.outbound
-                    DataStore.routePackages = entity.packages.joinToString("\n")
-                    DataStore.serverConfig = entity.config
-                    DataStore.dirty = false
-                }
-                loaded = true
-            }
 
             val backdrop = rememberBlurBackdrop()
             val topInset = floatingTopBarSpace()
@@ -171,7 +158,6 @@ class RouteSettingsActivity : ThemedActivity() {
                         .fillMaxSize()
                         .blurBackdropSource(backdrop),
                 ) {
-                    if (loaded) {
                         LazyColumn(
                             state = listState,
                             modifier = Modifier.fillMaxSize(),
@@ -292,7 +278,6 @@ class RouteSettingsActivity : ThemedActivity() {
                             }
                         }
                     }
-                }
                 }
 
                 FloatingTopBar(

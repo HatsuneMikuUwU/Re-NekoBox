@@ -33,11 +33,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -64,8 +59,6 @@ import io.nekohasekai.sagernet.ui.components.StoreEditTextPref
 import io.nekohasekai.sagernet.ui.components.StoreListPref
 import io.nekohasekai.sagernet.ui.components.StoreSwitchPref
 import io.nekohasekai.sagernet.ui.components.rememberComposePreferenceStore
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.compose.material.icons.rounded.LayersClear
 import androidx.compose.material.icons.rounded.TravelExplore
 
@@ -81,33 +74,27 @@ class GroupSettingsActivity : ThemedActivity() {
         val editingId = intent.getLongExtra(EXTRA_GROUP_ID, 0L)
         DataStore.editingId = editingId
 
-        setComposeContent {
-            var loaded by remember { mutableStateOf(false) }
-            val store = rememberComposePreferenceStore(DataStore.profileCacheStore, markProfileDirty = true)
+        val initialEntity = if (editingId == 0L) {
+            ProxyGroup().applyDefaultValues()
+        } else {
+            SagerDatabase.groupDao.getById(editingId) ?: ProxyGroup().applyDefaultValues()
+        }
+        DataStore.groupName = initialEntity.name ?: ""
+        DataStore.groupType = initialEntity.type
+        DataStore.groupOrder = initialEntity.order
+        DataStore.groupIsSelector = initialEntity.isSelector
+        val initialSub = initialEntity.subscription ?: SubscriptionBean().applyDefaultValues()
+        DataStore.subscriptionLink = initialSub.link ?: ""
+        DataStore.subscriptionForceResolve = initialSub.forceResolve ?: false
+        DataStore.subscriptionDeduplication = initialSub.deduplication ?: false
+        DataStore.subscriptionUpdateWhenConnectedOnly = initialSub.updateWhenConnectedOnly ?: false
+        DataStore.subscriptionUserAgent = initialSub.customUserAgent ?: ""
+        DataStore.subscriptionAutoUpdate = initialSub.autoUpdate ?: false
+        DataStore.subscriptionAutoUpdateDelay = initialSub.autoUpdateDelay ?: 1440
+        DataStore.dirty = false
 
-            LaunchedEffect(editingId) {
-                withContext(Dispatchers.IO) {
-                    val entity = if (editingId == 0L) {
-                        ProxyGroup().applyDefaultValues()
-                    } else {
-                        SagerDatabase.groupDao.getById(editingId) ?: ProxyGroup().applyDefaultValues()
-                    }
-                    DataStore.groupName = entity.name ?: ""
-                    DataStore.groupType = entity.type
-                    DataStore.groupOrder = entity.order
-                    DataStore.groupIsSelector = entity.isSelector
-                    val sub = entity.subscription ?: SubscriptionBean().applyDefaultValues()
-                    DataStore.subscriptionLink = sub.link ?: ""
-                    DataStore.subscriptionForceResolve = sub.forceResolve ?: false
-                    DataStore.subscriptionDeduplication = sub.deduplication ?: false
-                    DataStore.subscriptionUpdateWhenConnectedOnly = sub.updateWhenConnectedOnly ?: false
-                    DataStore.subscriptionUserAgent = sub.customUserAgent ?: ""
-                    DataStore.subscriptionAutoUpdate = sub.autoUpdate ?: false
-                    DataStore.subscriptionAutoUpdateDelay = sub.autoUpdateDelay ?: 1440
-                    DataStore.dirty = false
-                }
-                loaded = true
-            }
+        setComposeContent {
+            val store = rememberComposePreferenceStore(DataStore.profileCacheStore, markProfileDirty = true)
 
             val groupType = store.getString(Key.GROUP_TYPE, "0").toIntOrNull() ?: 0
 
@@ -159,7 +146,6 @@ class GroupSettingsActivity : ThemedActivity() {
                         .fillMaxSize()
                         .blurBackdropSource(backdrop),
                 ) {
-                    if (loaded) {
                         LazyColumn(
                             state = listState,
                             modifier = Modifier.fillMaxSize(),
@@ -295,7 +281,6 @@ class GroupSettingsActivity : ThemedActivity() {
                             }
                         }
                     }
-                }
                 }
 
                 FloatingTopBar(
