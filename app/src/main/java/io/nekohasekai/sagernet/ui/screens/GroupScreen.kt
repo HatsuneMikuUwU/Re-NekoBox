@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DeleteSweep
@@ -76,6 +77,10 @@ import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
 import io.nekohasekai.sagernet.ui.components.ExpressivePillBadge
 import io.nekohasekai.sagernet.ui.components.ExpressiveSurfaceItem
+import io.nekohasekai.sagernet.ui.components.DraggableItem
+import io.nekohasekai.sagernet.ui.components.dragContainer
+import io.nekohasekai.sagernet.ui.components.moveItem
+import io.nekohasekai.sagernet.ui.components.rememberDragDropState
 import io.nekohasekai.sagernet.ui.components.QrCodeDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -167,8 +172,32 @@ fun GroupScreen(
                     .padding(top = topInset, bottom = bottomInset),
             )
         } else {
+            val listState = rememberLazyListState()
+            val canReorderGroups = groups.size > 1
+            val dragDropState = rememberDragDropState(
+                listState = listState,
+                onMove = { fromIndex, toIndex ->
+                    if (canReorderGroups) {
+                        groups = groups.moveItem(fromIndex, toIndex)
+                    }
+                },
+                onDragEnd = {
+                    if (canReorderGroups) {
+                        val reordered = groups.map { it.first }
+                        runOnDefaultDispatcher {
+                            reordered.forEachIndexed { idx, group ->
+                                group.userOrder = (idx + 1).toLong()
+                                SagerDatabase.groupDao.updateGroup(group)
+                            }
+                        }
+                    }
+                },
+            )
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .dragContainer(dragDropState, enabled = canReorderGroups),
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
@@ -184,6 +213,7 @@ fun GroupScreen(
                         idx == groups.lastIndex -> ExpressiveGroupPosition.BOTTOM
                         else -> ExpressiveGroupPosition.MIDDLE
                     }
+                    DraggableItem(dragDropState = dragDropState, index = idx) { _ ->
                     GroupExpressiveCard(
                         group = group,
                         profileCount = count,
@@ -243,6 +273,7 @@ fun GroupScreen(
                         },
                         onDelete = { deleteConfirmGroup = group },
                     )
+                    }
                 }
             }
         }

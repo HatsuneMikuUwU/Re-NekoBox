@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -107,6 +108,10 @@ import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import io.nekohasekai.sagernet.ui.components.ExpressiveSurfaceItem
+import io.nekohasekai.sagernet.ui.components.DraggableItem
+import io.nekohasekai.sagernet.ui.components.dragContainer
+import io.nekohasekai.sagernet.ui.components.moveItem
+import io.nekohasekai.sagernet.ui.components.rememberDragDropState
 import io.nekohasekai.sagernet.ui.components.QrCodeDialog
 import io.nekohasekai.sagernet.ui.profile.*
 import kotlinx.coroutines.Dispatchers
@@ -360,8 +365,38 @@ fun ConfigurationScreen(
                     .padding(top = topInset, bottom = bottomInset),
             )
         } else {
+            val listState = rememberLazyListState()
+            val canReorderProfiles = !selectMode && searchQuery.isBlank() && filteredProfiles.size > 1
+            val dragDropState = rememberDragDropState(
+                listState = listState,
+                headerCount = if (groups.size > 1) 1 else 0,
+                onMove = { fromIndex, toIndex ->
+                    if (canReorderProfiles) {
+                        profiles = profiles.moveItem(fromIndex, toIndex)
+                    }
+                },
+                onDragEnd = {
+                    if (canReorderProfiles) {
+                        val reordered = profiles.toList()
+                        val activeGroup = groups.firstOrNull { it.id == selectedGroupId }
+                        runOnDefaultDispatcher {
+                            reordered.forEachIndexed { idx, entity ->
+                                entity.userOrder = (idx + 1).toLong()
+                            }
+                            if (activeGroup != null && activeGroup.order != GroupOrder.ORIGIN) {
+                                activeGroup.order = GroupOrder.ORIGIN
+                                SagerDatabase.groupDao.updateGroup(activeGroup)
+                            }
+                            SagerDatabase.proxyDao.updateProxy(reordered)
+                        }
+                    }
+                },
+            )
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .dragContainer(dragDropState, enabled = canReorderProfiles),
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
@@ -431,6 +466,7 @@ fun ConfigurationScreen(
                             else -> ExpressiveGroupPosition.MIDDLE
                         }
                         val isSelected = entity.id == selectedProxyId
+                        DraggableItem(dragDropState = dragDropState, index = index) { _ ->
                         ProfileExpressiveCard(
                             entity = entity,
                             selected = isSelected,
@@ -463,6 +499,7 @@ fun ConfigurationScreen(
                                 deleteConfirmEntity = entity
                             },
                         )
+                        }
                     }
                 }
             }

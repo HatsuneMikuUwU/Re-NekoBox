@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountTree
 import androidx.compose.material.icons.rounded.Add
@@ -66,6 +67,10 @@ import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
 import io.nekohasekai.sagernet.ui.components.ExpressivePillBadge
 import io.nekohasekai.sagernet.ui.components.ExpressiveSurfaceItem
+import io.nekohasekai.sagernet.ui.components.DraggableItem
+import io.nekohasekai.sagernet.ui.components.dragContainer
+import io.nekohasekai.sagernet.ui.components.moveItem
+import io.nekohasekai.sagernet.ui.components.rememberDragDropState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -120,8 +125,32 @@ fun RouteScreen(
                     .padding(top = topInset, bottom = bottomInset),
             )
         } else {
+            val listState = rememberLazyListState()
+            val canReorderRules = rules.size > 1
+            val dragDropState = rememberDragDropState(
+                listState = listState,
+                onMove = { fromIndex, toIndex ->
+                    if (canReorderRules) {
+                        rules = rules.moveItem(fromIndex, toIndex)
+                    }
+                },
+                onDragEnd = {
+                    if (canReorderRules) {
+                        val reordered = rules.toList()
+                        runOnDefaultDispatcher {
+                            reordered.forEachIndexed { idx, rule ->
+                                rule.userOrder = (idx + 1).toLong()
+                            }
+                            SagerDatabase.rulesDao.updateRules(reordered)
+                        }
+                    }
+                },
+            )
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .dragContainer(dragDropState, enabled = canReorderRules),
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
@@ -144,6 +173,7 @@ fun RouteScreen(
                         else -> Color(0xFF8E24AA)
                     }
 
+                    DraggableItem(dragDropState = dragDropState, index = idx) { _ ->
                     ExpressiveSurfaceItem(
                         position = pos,
                         onClick = {
@@ -209,6 +239,7 @@ fun RouteScreen(
                                 )
                             }
                         }
+                    }
                     }
                 }
             }
