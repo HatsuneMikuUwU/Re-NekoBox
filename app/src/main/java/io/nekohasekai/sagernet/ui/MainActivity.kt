@@ -142,6 +142,8 @@ import io.nekohasekai.sagernet.ui.background.rememberActiveBackground
 import io.nekohasekai.sagernet.ui.components.AppDialog
 import io.nekohasekai.sagernet.ui.components.hapticClick
 import io.nekohasekai.sagernet.ui.components.AppMotion
+import io.nekohasekai.sagernet.ui.onboarding.Onboarding
+import io.nekohasekai.sagernet.ui.onboarding.OnboardingScreen
 import io.nekohasekai.sagernet.ui.settings.AppearanceSettingsSheet
 import io.nekohasekai.sagernet.ui.theme.Appearance
 import io.nekohasekai.sagernet.ui.components.DialogCancelButton
@@ -186,6 +188,7 @@ class MainActivity : ThemedActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Onboarding.init(this)
         MessageStore.setCurrentActivity(this)
 
         connection.connect(this, this)
@@ -196,7 +199,7 @@ class MainActivity : ThemedActivity(),
             onNewIntent(intent)
         }
 
-        if (Build.VERSION.SDK_INT >= 33) {
+        if (Onboarding.done.value && Build.VERSION.SDK_INT >= 33) {
             val checkPermission = ContextCompat.checkSelfPermission(this, POST_NOTIFICATIONS)
             if (checkPermission != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, arrayOf(POST_NOTIFICATIONS), 0)
@@ -208,7 +211,18 @@ class MainActivity : ThemedActivity(),
         }
 
         setComposeContent(renderBackground = false) {
-            MainExpressiveShell()
+            val onboardingDone by Onboarding.done.collectAsStateWithLifecycle()
+            AnimatedContent(
+                targetState = onboardingDone,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "onboardingTransition",
+            ) { done ->
+                if (done) {
+                    MainExpressiveShell()
+                } else {
+                    OnboardingScreen(onFinish = { Onboarding.complete() })
+                }
+            }
         }
     }
 

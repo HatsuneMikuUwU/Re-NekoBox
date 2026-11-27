@@ -773,4 +773,26 @@
     <string name="ui_change">更改</string>
     <string name="ui_expand">展开</string>
     <string name="ui_collapse">收起</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">欢迎使用 Re:NekoBox</string>
+    <string name="onboarding_welcome_body">由 sing-box 驱动的现代代理客户端，界面流畅清爽，专为 Android 打造。</string>
+    <string name="onboarding_routing_title">智能分流与多协议支持</string>
+    <string name="onboarding_routing_body">轻松管理订阅分组、20 余种代理协议以及灵活的路由分流规则。</string>
+    <string name="onboarding_customize_title">随心定制专属外观</string>
+    <string name="onboarding_customize_body">自由调整 Material You 配色、调色板风格、液态玻璃导航栏、界面缩放与动态背景。</string>
+    <string name="onboarding_connect_title">随时掌控连接状态</string>
+    <string name="onboarding_connect_body">一键启停代理、实时查看流量速率，并可随时进行一键延迟测速。</string>
+    <string name="onboarding_perm_notif_title">允许发送通知</string>
+    <string name="onboarding_perm_notif_cta">允许通知</string>
+    <string name="onboarding_perm_notif_body">用于显示 VPN 运行状态通知，并及时接收连接相关提醒。</string>
+    <string name="onboarding_perm_battery_title">保持后台稳定运行</string>
+    <string name="onboarding_perm_battery_cta">允许后台运行</string>
+    <string name="onboarding_perm_battery_body">关闭电池优化限制，防止系统在后台意外中断您的 VPN 连接。</string>
+    <string name="onboarding_skip">跳过</string>
+    <string name="onboarding_next">下一步</string>
+    <string name="onboarding_back">返回</string>
+    <string name="onboarding_start">开始使用</string>
+    <string name="onboarding_ready">完成</string>
+    <string name="onboarding_complete_permissions">完善权限</string>
 </resources>

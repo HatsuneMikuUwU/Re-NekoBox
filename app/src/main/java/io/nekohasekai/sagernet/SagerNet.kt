@@ -24,6 +24,7 @@ import io.nekohasekai.sagernet.ktx.isOss
 import io.nekohasekai.sagernet.ktx.isPreview
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.MainActivity
+import io.nekohasekai.sagernet.ui.onboarding.Onboarding
 import io.nekohasekai.sagernet.ui.theme.Appearance
 import io.nekohasekai.sagernet.utils.*
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
@@ -81,6 +82,7 @@ class SagerNet : Application(),
 
         if (isMainProcess) {
             Appearance.init(this)
+            Onboarding.init(this)
             Theme.apply(this)
             Theme.applyNightTheme()
             AppLocale.apply()

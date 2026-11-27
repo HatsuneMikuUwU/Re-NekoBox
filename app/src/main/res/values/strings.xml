@@ -851,4 +851,26 @@
     <string name="ui_change">Change</string>
     <string name="ui_expand">Expand</string>
     <string name="ui_collapse">Collapse</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Welcome to Re:NekoBox</string>
+    <string name="onboarding_welcome_body">A modern, expressive proxy client powered by sing-box. Fast, clean, and built for Android.</string>
+    <string name="onboarding_routing_title">Smart routing &amp; protocols</string>
+    <string name="onboarding_routing_body">Manage subscriptions, 20+ proxy protocols, and flexible routing rules with ease.</string>
+    <string name="onboarding_customize_title">Make it truly yours</string>
+    <string name="onboarding_customize_body">Customize Material You colors, palette styles, Liquid Glass bars, UI scale, and animated backgrounds.</string>
+    <string name="onboarding_connect_title">Stay connected effortlessly</string>
+    <string name="onboarding_connect_body">One-tap VPN control, real-time traffic speed, and instant latency testing right at your fingertips.</string>
+    <string name="onboarding_perm_notif_title">Allow notifications</string>
+    <string name="onboarding_perm_notif_cta">Allow notifications</string>
+    <string name="onboarding_perm_notif_body">Keep the VPN status notification visible and receive connection alerts reliably.</string>
+    <string name="onboarding_perm_battery_title">Run reliably in background</string>
+    <string name="onboarding_perm_battery_cta">Allow in background</string>
+    <string name="onboarding_perm_battery_body">Disable battery restrictions so Android doesn\'t kill your VPN connection in the background.</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_start">Get started</string>
+    <string name="onboarding_ready">Done</string>
+    <string name="onboarding_complete_permissions">Complete permissions</string>
 </resources>
