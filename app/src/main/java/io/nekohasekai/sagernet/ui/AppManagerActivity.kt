@@ -22,6 +22,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Deselect
+import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Checkbox
@@ -163,6 +166,7 @@ class AppManagerActivity : ThemedActivity() {
                                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.action_invert_selections)) },
+                                        leadingIcon = { Icon(Icons.Rounded.SwapHoriz, null) },
                                         onClick = {
                                             menuOpen = false
                                             val allVisible = filtered.map { it.packageName }.toSet()
@@ -172,6 +176,7 @@ class AppManagerActivity : ThemedActivity() {
                                     )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.clear_selections)) },
+                                        leadingIcon = { Icon(Icons.Rounded.Deselect, null) },
                                         onClick = {
                                             menuOpen = false
                                             persist(emptySet())
@@ -179,6 +184,7 @@ class AppManagerActivity : ThemedActivity() {
                                     )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.action_copy)) },
+                                        leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
                                         onClick = {
                                             menuOpen = false
                                             SagerNet.trySetPrimaryClip(selectedPackages.joinToString("\n"))

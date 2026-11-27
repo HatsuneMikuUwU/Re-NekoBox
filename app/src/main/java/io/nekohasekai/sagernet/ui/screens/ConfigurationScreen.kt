@@ -30,6 +30,15 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CleaningServices
+import androidx.compose.material.icons.rounded.ClearAll
+import androidx.compose.material.icons.rounded.DeleteSweep
+import androidx.compose.material.icons.rounded.FileCopy
+import androidx.compose.material.icons.rounded.FormatListNumbered
+import androidx.compose.material.icons.rounded.NetworkCheck
+import androidx.compose.material.icons.rounded.NetworkPing
+import androidx.compose.material.icons.rounded.SortByAlpha
+import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Search
@@ -42,7 +51,6 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material.icons.rounded.Router
-import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -432,12 +440,13 @@ fun ConfigurationScreen(
                                 DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
                                     val currentGroup = groups.firstOrNull { it.id == selectedGroupId }
                                     listOf(
-                                        GroupOrder.ORIGIN to R.string.group_order_origin,
-                                        GroupOrder.BY_NAME to R.string.group_order_by_name,
-                                        GroupOrder.BY_DELAY to R.string.group_order_by_delay,
-                                    ).forEach { (order, labelRes) ->
+                                        Triple(GroupOrder.ORIGIN, R.string.group_order_origin, Icons.Rounded.FormatListNumbered),
+                                        Triple(GroupOrder.BY_NAME, R.string.group_order_by_name, Icons.Rounded.SortByAlpha),
+                                        Triple(GroupOrder.BY_DELAY, R.string.group_order_by_delay, Icons.Rounded.Speed),
+                                    ).forEach { (order, labelRes, orderIcon) ->
                                         DropdownMenuItem(
                                             text = { Text(stringResource(labelRes)) },
+                                            leadingIcon = { Icon(orderIcon, null) },
                                             onClick = {
                                                 showSortMenu = false
                                                 if (currentGroup != null) {
@@ -464,16 +473,19 @@ fun ConfigurationScreen(
                                                 else stringResource(R.string.connection_test)
                                             )
                                         },
+                                        leadingIcon = { Icon(Icons.Rounded.NetworkCheck, null) },
                                         enabled = !isTestingAll && profiles.isNotEmpty(),
                                         onClick = { showMoreMenu = false; runPingAll() },
                                     )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.connection_test_icmp_ping)) },
+                                        leadingIcon = { Icon(Icons.Rounded.NetworkPing, null) },
                                         enabled = !isTestingAll && profiles.isNotEmpty(),
                                         onClick = { showMoreMenu = false; runPingAll() },
                                     )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.connection_test_clear_results)) },
+                                        leadingIcon = { Icon(Icons.Rounded.ClearAll, null) },
                                         onClick = {
                                             showMoreMenu = false
                                             val cleared = profiles.map { it.copy(status = 0, ping = 0, error = null) }
@@ -485,6 +497,7 @@ fun ConfigurationScreen(
                                     )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.connection_test_delete_unavailable)) },
+                                        leadingIcon = { Icon(Icons.Rounded.DeleteSweep, null) },
                                         onClick = {
                                             showMoreMenu = false
                                             runOnDefaultDispatcher {
@@ -498,6 +511,7 @@ fun ConfigurationScreen(
                                     )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.clear_traffic_statistics)) },
+                                        leadingIcon = { Icon(Icons.Rounded.CleaningServices, null) },
                                         onClick = {
                                             showMoreMenu = false
                                             val ids = profiles.map { it.id }.toLongArray()
@@ -829,7 +843,7 @@ private fun ProfileExpressiveCard(
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.duplicate)) },
-                            leadingIcon = { Icon(Icons.Rounded.Share, null) },
+                            leadingIcon = { Icon(Icons.Rounded.FileCopy, null) },
                             onClick = { menuExpanded = false; onDuplicate() },
                         )
                         DropdownMenuItem(

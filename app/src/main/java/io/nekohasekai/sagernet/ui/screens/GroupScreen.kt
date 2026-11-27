@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Delete
@@ -361,6 +362,7 @@ private fun GroupExpressiveCard(
                         }
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.clear_profiles)) },
+                            leadingIcon = { Icon(Icons.Rounded.DeleteSweep, null) },
                             onClick = { menuExpanded = false; onClearProfiles() },
                         )
                         if (!group.ungrouped) {
