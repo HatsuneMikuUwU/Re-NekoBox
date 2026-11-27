@@ -418,12 +418,12 @@ private fun GroupExpressiveCard(
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_export_clipboard)) },
                                 leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
-                                onClick = { menuOpen = false; onExportProfilesClipboard() },
+                                onClick = { menuExpanded = false; onExportProfilesClipboard() },
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_export_file)) },
                                 leadingIcon = { Icon(Icons.Rounded.FileDownload, null) },
-                                onClick = { menuOpen = false; onExportProfilesFile() },
+                                onClick = { menuExpanded = false; onExportProfilesFile() },
                             )
                         }
                         DropdownMenuItem(

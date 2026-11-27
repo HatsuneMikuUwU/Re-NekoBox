@@ -115,8 +115,7 @@ class RouteSettingsActivity : ThemedActivity() {
         }
         DataStore.routeOutbound = initialOutboundMode
         DataStore.routeOutboundRule = initialEntity.outbound
-        DataStore.routePackages = initialEntity.packages.joinToString("
-")
+        DataStore.routePackages = initialEntity.packages.joinToString("\n")
         DataStore.serverConfig = initialEntity.config
         DataStore.dirty = false
 
