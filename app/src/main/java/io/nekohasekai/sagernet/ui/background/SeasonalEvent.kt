@@ -1,38 +1,35 @@
 package io.nekohasekai.sagernet.ui.background
 
+import androidx.annotation.StringRes
+import io.nekohasekai.sagernet.R
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.Calendar
-
-private val MonthNames =
-    listOf(
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-    )
+import java.util.Locale
 
 enum class SeasonalEvent(
-    val label: String,
+    @StringRes val labelRes: Int,
     val background: BackgroundType,
     private val startMonth: Int,
     private val startDay: Int,
     val endMonth: Int,
     val endDay: Int,
 ) {
-    HALLOWEEN("Halloween", BackgroundType.HALLOWEEN, 10, 24, 11, 1),
-    NEW_YEAR("New Year", BackgroundType.FIREWORKS, 12, 31, 1, 1),
-    WINTER_HOLIDAYS("Winter Holidays", BackgroundType.SNOW, 12, 20, 1, 7),
+    HALLOWEEN(R.string.ui_season_halloween, BackgroundType.HALLOWEEN, 10, 24, 11, 1),
+    NEW_YEAR(R.string.ui_season_new_year, BackgroundType.FIREWORKS, 12, 31, 1, 1),
+    WINTER_HOLIDAYS(R.string.ui_season_winter_holidays, BackgroundType.SNOW, 12, 20, 1, 7),
     ;
 
     val endLabel: String
-        get() = "$endDay ${MonthNames[endMonth - 1]}"
+        get() {
+            val locale = Locale.getDefault()
+            val cal = Calendar.getInstance().apply {
+                set(Calendar.MONTH, endMonth - 1)
+                set(Calendar.DAY_OF_MONTH, endDay)
+            }
+            val pattern = if (locale.language == Locale.CHINESE.language) "M月d日" else "d MMMM"
+            return SimpleDateFormat(pattern, locale).format(cal.time)
+        }
 
     private fun isRunningOn(key: Int): Boolean {
         val start = startMonth * 100 + startDay

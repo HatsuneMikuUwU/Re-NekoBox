@@ -57,7 +57,9 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ui.components.AppDialog
 import io.nekohasekai.sagernet.ui.components.AppMotion
 import io.nekohasekai.sagernet.ui.components.DialogCancelButton
@@ -107,12 +109,12 @@ internal fun <T> OptionDialog(
         title = title,
         onDismiss = cancel,
         confirmButton = {
-            DialogConfirmButton("OK") {
+            DialogConfirmButton(stringResource(R.string.ui_ok)) {
                 confirmed = true
                 onDismiss()
             }
         },
-        dismissButton = { DialogCancelButton(label = "Cancel", onClick = cancel) },
+        dismissButton = { DialogCancelButton(label = stringResource(R.string.ui_cancel), onClick = cancel) },
         text = {
             Column(
                 Modifier.verticalScroll(rememberScrollState()),
@@ -211,7 +213,7 @@ internal fun SettingGroup(
             IconButton(onClick = toggle, shapes = IconButtonDefaults.shapes()) {
                 Icon(
                     Icons.Outlined.KeyboardArrowDown,
-                    contentDescription = if (expanded) "Collapse" else "Expand",
+                    contentDescription = stringResource(if (expanded) R.string.ui_collapse else R.string.ui_expand),
                     modifier = Modifier.rotate(rotation),
                     tint = cs.onSurface,
                 )

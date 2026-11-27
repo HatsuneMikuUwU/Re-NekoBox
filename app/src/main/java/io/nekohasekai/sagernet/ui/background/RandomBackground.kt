@@ -1,6 +1,8 @@
 package io.nekohasekai.sagernet.ui.background
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import io.nekohasekai.sagernet.R
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -10,11 +12,11 @@ import java.util.TimeZone
 import kotlin.random.Random
 
 enum class RandomInterval(
-    val label: String,
+    @StringRes val labelRes: Int,
 ) {
-    ON_LAUNCH("Every app launch"),
-    DAILY("Daily"),
-    EVERY_3_DAYS("Every 3 days"),
+    ON_LAUNCH(R.string.ui_random_on_launch),
+    DAILY(R.string.ui_random_daily),
+    EVERY_3_DAYS(R.string.ui_random_every_3_days),
 }
 
 object RandomBackground {

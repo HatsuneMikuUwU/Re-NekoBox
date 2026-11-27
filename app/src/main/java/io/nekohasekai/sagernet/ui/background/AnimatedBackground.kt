@@ -1,6 +1,8 @@
 package io.nekohasekai.sagernet.ui.background
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
+import io.nekohasekai.sagernet.R
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -11,22 +13,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 
 enum class BackgroundType(
-    val label: String,
-    val description: String,
+    @StringRes val labelRes: Int,
+    @StringRes val descriptionRes: Int,
 ) {
-    NONE("Off", "Plain background without animation"),
-    CIRCLES("Circles", "Soft circles drifting gently"),
-    RINGS("Ripples", "Concentric rings rippling like water"),
-    MESH("Mesh", "Undulating 3D low-poly mesh"),
-    SPACE("Space", "Stars rushing toward you"),
-    SHAPES("3D Shapes", "Spinning floating geometric solids"),
-    SNOW("Snow", "Snowflakes drifting in the breeze"),
-    GRID("Grid", "Breathing dots moving in waves"),
-    PARTICLES("Particles", "Drifting interconnected particles"),
-    LAVA("Lava", "Rising, falling, and merging lava blobs"),
-    HALLOWEEN("Halloween", "Flying bats and glowing pumpkins under the moon"),
-    FIREWORKS("Fireworks", "Rockets launching and bursting into colorful sparks"),
-    RANDOM("Random", "Switches automatically on your chosen schedule"),
+    NONE(R.string.ui_bg_none, R.string.ui_bg_none_desc),
+    CIRCLES(R.string.ui_bg_circles, R.string.ui_bg_circles_desc),
+    RINGS(R.string.ui_bg_rings, R.string.ui_bg_rings_desc),
+    MESH(R.string.ui_bg_mesh, R.string.ui_bg_mesh_desc),
+    SPACE(R.string.ui_bg_space, R.string.ui_bg_space_desc),
+    SHAPES(R.string.ui_bg_shapes, R.string.ui_bg_shapes_desc),
+    SNOW(R.string.ui_bg_snow, R.string.ui_bg_snow_desc),
+    GRID(R.string.ui_bg_grid, R.string.ui_bg_grid_desc),
+    PARTICLES(R.string.ui_bg_particles, R.string.ui_bg_particles_desc),
+    LAVA(R.string.ui_bg_lava, R.string.ui_bg_lava_desc),
+    HALLOWEEN(R.string.ui_bg_halloween, R.string.ui_bg_halloween_desc),
+    FIREWORKS(R.string.ui_bg_fireworks, R.string.ui_bg_fireworks_desc),
+    RANDOM(R.string.ui_bg_random, R.string.ui_bg_random_desc),
     ;
 
     companion object {

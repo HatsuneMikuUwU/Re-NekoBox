@@ -1,7 +1,9 @@
 package io.nekohasekai.sagernet.ui.theme
 
 import android.content.Context
+import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
+import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ui.background.BackgroundType
 import io.nekohasekai.sagernet.ui.background.RandomInterval
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,51 +13,51 @@ import java.util.Locale
 import kotlin.math.abs
 
 enum class ThemeMode(
-    val label: String,
+    @StringRes val labelRes: Int,
 ) {
-    SYSTEM("System"),
-    LIGHT("Light"),
-    DARK("Dark"),
+    SYSTEM(R.string.ui_theme_system),
+    LIGHT(R.string.ui_theme_light),
+    DARK(R.string.ui_theme_dark),
 }
 
 enum class AccentPalette(
-    val label: String,
+    @StringRes val labelRes: Int,
     val seed: Color,
 ) {
-    DEFAULT("Default", Color(0xFF415F91)),
-    OLIVE("Olive", Color(0xFF4A672D)),
-    PINK("Pink", Color(0xFFB94073)),
-    RED("Red", Color(0xFFBA1A1A)),
-    ORANGE("Orange", Color(0xFF944A00)),
-    AMBER("Amber", Color(0xFF8C5300)),
-    YELLOW("Yellow", Color(0xFF795900)),
-    LIME("Lime", Color(0xFF5E6400)),
-    GREEN("Green", Color(0xFF006D39)),
-    CYAN("Cyan", Color(0xFF006A64)),
-    TEAL("Teal", Color(0xFF006874)),
-    LIGHT_BLUE("Light Blue", Color(0xFF00639B)),
-    BLUE("Blue", Color(0xFF335BBC)),
-    INDIGO("Indigo", Color(0xFF5355A9)),
-    PURPLE("Purple", Color(0xFF6750A4)),
-    DEEP_PURPLE("Deep Purple", Color(0xFF7E42A4)),
-    BLUE_GREY("Blue Grey", Color(0xFF575D7E)),
-    BROWN("Brown", Color(0xFF7D524A)),
-    GREY("Grey", Color(0xFF5F6162)),
+    DEFAULT(R.string.ui_accent_default, Color(0xFF415F91)),
+    OLIVE(R.string.ui_accent_olive, Color(0xFF4A672D)),
+    PINK(R.string.ui_accent_pink, Color(0xFFB94073)),
+    RED(R.string.ui_accent_red, Color(0xFFBA1A1A)),
+    ORANGE(R.string.ui_accent_orange, Color(0xFF944A00)),
+    AMBER(R.string.ui_accent_amber, Color(0xFF8C5300)),
+    YELLOW(R.string.ui_accent_yellow, Color(0xFF795900)),
+    LIME(R.string.ui_accent_lime, Color(0xFF5E6400)),
+    GREEN(R.string.ui_accent_green, Color(0xFF006D39)),
+    CYAN(R.string.ui_accent_cyan, Color(0xFF006A64)),
+    TEAL(R.string.ui_accent_teal, Color(0xFF006874)),
+    LIGHT_BLUE(R.string.ui_accent_light_blue, Color(0xFF00639B)),
+    BLUE(R.string.ui_accent_blue, Color(0xFF335BBC)),
+    INDIGO(R.string.ui_accent_indigo, Color(0xFF5355A9)),
+    PURPLE(R.string.ui_accent_purple, Color(0xFF6750A4)),
+    DEEP_PURPLE(R.string.ui_accent_deep_purple, Color(0xFF7E42A4)),
+    BLUE_GREY(R.string.ui_accent_blue_grey, Color(0xFF575D7E)),
+    BROWN(R.string.ui_accent_brown, Color(0xFF7D524A)),
+    GREY(R.string.ui_accent_grey, Color(0xFF5F6162)),
 }
 
 enum class PaletteStyle(
-    val label: String,
+    @StringRes val labelRes: Int,
 ) {
-    TonalSpot("Tonal Spot"),
-    Neutral("Neutral"),
-    Vibrant("Vibrant"),
-    Expressive("Expressive"),
-    Rainbow("Rainbow"),
-    FruitSalad("Fruit Salad"),
-    Monochrome("Monochrome"),
-    Fidelity("Fidelity"),
-    Content("Content"),
-    Cmf("CMF"),
+    TonalSpot(R.string.ui_palette_tonal_spot),
+    Neutral(R.string.ui_palette_neutral),
+    Vibrant(R.string.ui_palette_vibrant),
+    Expressive(R.string.ui_palette_expressive),
+    Rainbow(R.string.ui_palette_rainbow),
+    FruitSalad(R.string.ui_palette_fruit_salad),
+    Monochrome(R.string.ui_palette_monochrome),
+    Fidelity(R.string.ui_palette_fidelity),
+    Content(R.string.ui_palette_content),
+    Cmf(R.string.ui_palette_cmf),
     ;
 
     val supportsSpec2025: Boolean
@@ -74,18 +76,18 @@ enum class PaletteStyle(
 }
 
 enum class BarEffect(
-    val label: String,
+    @StringRes val labelRes: Int,
 ) {
-    BLUR("Blur"),
-    LIQUID_GLASS("Liquid glass"),
+    BLUR(R.string.ui_bar_effect_blur),
+    LIQUID_GLASS(R.string.ui_bar_effect_liquid_glass),
 }
 
 enum class ColorSpec(
-    val label: String,
+    @StringRes val labelRes: Int,
 ) {
-    SPEC_2021("Material 3 (2021)"),
-    SPEC_2025("Expressive (2025)"),
-    SPEC_2026("Expressive (2026)"),
+    SPEC_2021(R.string.ui_color_spec_2021),
+    SPEC_2025(R.string.ui_color_spec_2025),
+    SPEC_2026(R.string.ui_color_spec_2026),
 }
 
 data class RoleOverrides(
@@ -104,14 +106,14 @@ data class RoleOverrides(
 }
 
 enum class PaletteRole(
-    val label: String,
+    @StringRes val labelRes: Int,
 ) {
-    PRIMARY("Primary"),
-    SECONDARY("Secondary"),
-    TERTIARY("Tertiary"),
-    NEUTRAL("Neutral"),
-    NEUTRAL_VARIANT("Neutral variant"),
-    ERROR("Error"),
+    PRIMARY(R.string.ui_role_primary),
+    SECONDARY(R.string.ui_role_secondary),
+    TERTIARY(R.string.ui_role_tertiary),
+    NEUTRAL(R.string.ui_role_neutral),
+    NEUTRAL_VARIANT(R.string.ui_role_neutral_variant),
+    ERROR(R.string.ui_role_error),
 }
 
 fun RoleOverrides.get(role: PaletteRole): Int =
@@ -138,13 +140,13 @@ fun RoleOverrides.withRole(
     }
 
 enum class ContrastPreset(
-    val label: String,
+    @StringRes val labelRes: Int,
     val value: Float,
 ) {
-    REDUCED("Reduced", -1f),
-    STANDARD("Standard", 0f),
-    MEDIUM("Medium", 0.5f),
-    HIGH("High", 1f),
+    REDUCED(R.string.ui_contrast_reduced, -1f),
+    STANDARD(R.string.ui_contrast_standard, 0f),
+    MEDIUM(R.string.ui_contrast_medium, 0.5f),
+    HIGH(R.string.ui_contrast_high, 1f),
 }
 
 const val CONTRAST_MIN = -1f
@@ -156,8 +158,8 @@ fun Float.coerceToContrast(): Float =
         if (abs(it) < 0.01f) 0f else it
     }
 
-fun Float.contrastLabel(): String {
-    ContrastPreset.entries.firstOrNull { abs(it.value - this) < 0.01f }?.let { return it.label }
+fun Float.contrastLabel(context: Context): String {
+    ContrastPreset.entries.firstOrNull { abs(it.value - this) < 0.01f }?.let { return context.getString(it.labelRes) }
     return String.format(Locale.US, "%+.1f", this)
 }
 

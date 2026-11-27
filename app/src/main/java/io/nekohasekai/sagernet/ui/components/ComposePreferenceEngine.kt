@@ -312,7 +312,7 @@ fun PrefActionRow(
                 Box(
                     modifier = Modifier
                         .size(24.dp)
-                        .clip(MaterialShapes.Clover4Leaf.toShape())
+                        .clip(MaterialShapes.Cookie9Sided.toShape())
                         .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                     contentAlignment = Alignment.Center,
                 ) {

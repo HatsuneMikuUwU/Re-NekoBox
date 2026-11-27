@@ -73,7 +73,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.nekohasekai.sagernet.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kmpalette.rememberPaletteState
 import com.materialkolor.palette.themeColors
@@ -119,15 +121,15 @@ internal fun ContrastDialog(onDismiss: () -> Unit) {
 
     AppDialog(
         icon = Icons.Outlined.Contrast,
-        title = "Contrast",
+        title = stringResource(R.string.ui_contrast),
         onDismiss = cancel,
         confirmButton = {
-            DialogConfirmButton("Save") {
+            DialogConfirmButton(stringResource(R.string.ui_save)) {
                 confirmed = true
                 onDismiss()
             }
         },
-        dismissButton = { DialogCancelButton(label = "Cancel", onClick = cancel) },
+        dismissButton = { DialogCancelButton(label = stringResource(R.string.ui_cancel), onClick = cancel) },
         text = {
             Column(
                 Modifier.verticalScroll(rememberScrollState()),
@@ -135,7 +137,7 @@ internal fun ContrastDialog(onDismiss: () -> Unit) {
             ) {
                 ContrastPreset.entries.forEach { preset ->
                     DialogOptionRow(
-                        label = preset.label,
+                        label = stringResource(preset.labelRes),
                         selected = kotlin.math.abs(selected - preset.value) < 0.01f,
                         onClick = {
                             selected = preset.value
@@ -158,15 +160,15 @@ internal fun ColorAnimationDialog(onDismiss: () -> Unit) {
 
     AppDialog(
         icon = Icons.Outlined.Timer,
-        title = "Animation duration",
+        title = stringResource(R.string.ui_animation_duration),
         onDismiss = onDismiss,
         confirmButton = {
-            DialogConfirmButton("Save") {
+            DialogConfirmButton(stringResource(R.string.ui_save)) {
                 Appearance.setColorAnimationMs(selected)
                 onDismiss()
             }
         },
-        dismissButton = { DialogCancelButton(label = "Cancel", onClick = onDismiss) },
+        dismissButton = { DialogCancelButton(label = stringResource(R.string.ui_cancel), onClick = onDismiss) },
         text = {
             Column(
                 Modifier.verticalScroll(rememberScrollState()),
@@ -174,7 +176,7 @@ internal fun ColorAnimationDialog(onDismiss: () -> Unit) {
             ) {
                 (COLOR_ANIM_OPTIONS_MS + original).distinct().sorted().forEach { ms ->
                     DialogOptionRow(
-                        label = if (ms == COLOR_ANIM_DEFAULT_MS) "$ms ms (default)" else "$ms ms",
+                        label = if (ms == COLOR_ANIM_DEFAULT_MS) stringResource(R.string.ui_animation_duration_default, ms) else stringResource(R.string.ui_animation_duration_ms, ms),
                         selected = ms == selected,
                         onClick = { selected = ms },
                     )
@@ -276,7 +278,7 @@ internal fun CustomColorSheet(onDismiss: () -> Unit) {
                 val image = decodeImageBitmap(context, uri)
                 if (image == null) {
                     extracting = false
-                    Toast.makeText(context, "Failed to read image", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.ui_failed_read_image, Toast.LENGTH_SHORT).show()
                 } else {
                     pendingImage = image
                 }
@@ -286,7 +288,7 @@ internal fun CustomColorSheet(onDismiss: () -> Unit) {
     var showCmfSheet by remember { mutableStateOf(false) }
     if (showCmfSheet) {
         ColorPickSheet(
-            title = "Tertiary seed (CMF)",
+            title = stringResource(R.string.ui_cmf_tertiary_seed),
             initial = settings.cmfTertiarySeed.let { if (it != 0) Color(it) else color },
             onApply = { Appearance.setCmfTertiarySeed(it.toArgb()) },
             onDismiss = { showCmfSheet = false },
@@ -294,18 +296,18 @@ internal fun CustomColorSheet(onDismiss: () -> Unit) {
     }
 
     ColorSheetScaffold(
-        startLabel = "Use preset",
+        startLabel = stringResource(R.string.ui_use_preset),
         onStart = {
             Appearance.setCustomSeed(0)
-            Toast.makeText(context, "Reverted to preset color", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.ui_reverted_preset_toast, Toast.LENGTH_SHORT).show()
             onDismiss()
         },
-        endLabel = "Done",
+        endLabel = stringResource(R.string.ui_done),
         onEnd = onDismiss,
         onDismiss = onDismiss,
     ) {
         ColorEditorGroup(
-            label = "Seed color",
+            label = stringResource(R.string.ui_seed_color),
             color = color,
             hexText = hexText,
             onHexChange = {
@@ -330,7 +332,7 @@ internal fun CustomColorSheet(onDismiss: () -> Unit) {
             ) {
                 ShapedIconBadge(Icons.Outlined.Image)
                 Text(
-                    if (extracting) "Reading image..." else "Extract color from image",
+                    stringResource(if (extracting) R.string.ui_reading_image else R.string.ui_extract_from_image),
                     modifier = Modifier.padding(start = 16.dp),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -344,7 +346,7 @@ internal fun CustomColorSheet(onDismiss: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(
-                        "Colors from image",
+                        stringResource(R.string.ui_colors_from_image),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -371,9 +373,9 @@ internal fun CustomColorSheet(onDismiss: () -> Unit) {
             Spacer(Modifier.height(SheetGroupGap))
             ColorRoleRow(
                 icon = Icons.Outlined.ColorLens,
-                title = "Tertiary seed (CMF)",
+                title = stringResource(R.string.ui_cmf_tertiary_seed),
                 argb = settings.cmfTertiarySeed,
-                emptyLabel = "Automatic from seed color",
+                emptyLabel = stringResource(R.string.ui_auto_from_seed),
                 autoColor = MaterialTheme.colorScheme.tertiary,
                 shape = groupedItemShape(0, 1),
                 onClick = { showCmfSheet = true },
@@ -388,7 +390,7 @@ internal fun CustomColorSheet(onDismiss: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Text(
-                    "Tonal palette",
+                    stringResource(R.string.ui_tonal_palette),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -404,9 +406,9 @@ internal fun RoleOverrideSheet(onDismiss: () -> Unit) {
     var editing by rememberSaveable { mutableStateOf<PaletteRole?>(null) }
 
     ColorSheetScaffold(
-        startLabel = "Reset all",
+        startLabel = stringResource(R.string.ui_reset_all),
         onStart = { Appearance.clearRoleOverrides() },
-        endLabel = "Done",
+        endLabel = stringResource(R.string.ui_done),
         onEnd = onDismiss,
         onDismiss = onDismiss,
         startEnabled = !settings.roleOverrides.isEmpty,
@@ -415,9 +417,9 @@ internal fun RoleOverrideSheet(onDismiss: () -> Unit) {
         roles.forEachIndexed { index, role ->
             ColorRoleRow(
                 icon = role.icon,
-                title = role.label,
+                title = stringResource(role.labelRes),
                 argb = settings.roleOverrides.get(role),
-                emptyLabel = "Automatic",
+                emptyLabel = stringResource(R.string.ui_automatic),
                 autoColor = role.themeColor(MaterialTheme.colorScheme),
                 shape = groupedItemShape(index, roles.size),
                 onClick = { editing = role },
@@ -428,7 +430,7 @@ internal fun RoleOverrideSheet(onDismiss: () -> Unit) {
 
     editing?.let { role ->
         ColorPickSheet(
-            title = role.label,
+            title = stringResource(role.labelRes),
             initial = settings.roleOverrides.get(role).let { if (it != 0) Color(it) else settings.seedColor },
             onApply = { Appearance.setRoleOverride(role, it.toArgb()) },
             onDismiss = { editing = null },
@@ -447,9 +449,9 @@ private fun ColorPickSheet(
     var hexText by remember { mutableStateOf(initial.toHexString()) }
 
     ColorSheetScaffold(
-        startLabel = "Cancel",
+        startLabel = stringResource(R.string.ui_cancel),
         onStart = onDismiss,
-        endLabel = "Apply",
+        endLabel = stringResource(R.string.ui_apply),
         onEnd = {
             onApply(color)
             onDismiss()
@@ -557,7 +559,7 @@ private fun ColorRoleRow(
             }
             if (argb != 0) {
                 IconButton(onClick = hapticClick(block = onReset), shapes = IconButtonDefaults.shapes()) {
-                    Icon(Icons.Outlined.Restore, contentDescription = "Reset")
+                    Icon(Icons.Outlined.Restore, contentDescription = stringResource(R.string.ui_reset))
                 }
             }
             SeedPreview(if (argb != 0) Color(argb) else autoColor)
@@ -640,7 +642,7 @@ private fun HsvSliders(
     fun emit() = onColor(Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, sat, value))))
 
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text("Hue", style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.ui_hue), style = MaterialTheme.typography.labelMedium)
         Slider(
             state = hueState,
             onValueChange = {
@@ -649,7 +651,7 @@ private fun HsvSliders(
                 emit()
             },
         )
-        Text("Saturation", style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.ui_saturation), style = MaterialTheme.typography.labelMedium)
         Slider(
             state = satState,
             onValueChange = {
@@ -658,7 +660,7 @@ private fun HsvSliders(
                 emit()
             },
         )
-        Text("Brightness", style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.ui_brightness), style = MaterialTheme.typography.labelMedium)
         Slider(
             state = valueState,
             onValueChange = {

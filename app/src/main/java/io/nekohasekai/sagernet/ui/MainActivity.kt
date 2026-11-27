@@ -392,7 +392,7 @@ class MainActivity : ThemedActivity(),
                     .padding(start = FloatingBarHorizontalPadding, top = FloatingBarTopPadding),
             ) {
                 FloatingGlassButton(
-                    contentDescription = "UI Customization",
+                    contentDescription = stringResource(R.string.ui_customization),
                     onClick = { showAppearanceSheet = true },
                     backdrop = backdrop,
                     size = FloatingBarHeight,

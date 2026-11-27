@@ -61,7 +61,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.nekohasekai.sagernet.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.nekohasekai.sagernet.ui.background.BackgroundType
 import io.nekohasekai.sagernet.ui.background.RandomInterval
@@ -98,13 +100,13 @@ internal fun UiScaleGroup() {
 
     SettingGroup(
         icon = Icons.Outlined.ZoomIn,
-        title = "UI scale",
+        title = stringResource(R.string.ui_scale_group),
         initiallyExpanded = false,
     ) {
         SwitchItem(
             icon = Icons.Outlined.AspectRatio,
-            title = "Auto scale",
-            subtitle = "Automatically match UI scale to your device screen width",
+            title = stringResource(R.string.ui_auto_scale),
+            subtitle = stringResource(R.string.ui_auto_scale_desc),
             shape = itemShape(0, 3),
             checked = settings.autoScaleUi,
             enabled = true,
@@ -112,12 +114,12 @@ internal fun UiScaleGroup() {
         )
         PrefItem(
             icon = Icons.Outlined.ZoomIn,
-            title = "Display scale",
+            title = stringResource(R.string.ui_display_scale),
             subtitle =
                 if (settings.autoScaleUi) {
-                    "Disabled while auto scale is active"
+                    stringResource(R.string.ui_scale_disabled_auto)
                 } else {
-                    "${settings.uiScale.toUiScalePercent()}% of system default"
+                    stringResource(R.string.ui_display_scale_desc, settings.uiScale.toUiScalePercent())
                 },
             shape = itemShape(1, 3),
             container = itemContainer(),
@@ -129,12 +131,12 @@ internal fun UiScaleGroup() {
         )
         PrefItem(
             icon = Icons.Outlined.FormatSize,
-            title = "Font size",
+            title = stringResource(R.string.ui_font_size),
             subtitle =
                 if (settings.autoScaleUi) {
-                    "Disabled while auto scale is active"
+                    stringResource(R.string.ui_scale_disabled_auto)
                 } else {
-                    "${settings.fontScale.toUiScalePercent()}% of default"
+                    stringResource(R.string.ui_font_size_desc, settings.fontScale.toUiScalePercent())
                 },
             shape = itemShape(2, 3),
             container = itemContainer(),
@@ -149,10 +151,9 @@ internal fun UiScaleGroup() {
     if (showDensityDialog) {
         LiveScaleDialog(
             icon = Icons.Outlined.ZoomIn,
-            title = "Display scale",
+            title = stringResource(R.string.ui_display_scale),
             description =
-                "Scales the entire app interface (elements and text) on top of system display zoom. " +
-                    "Applied when you tap Apply.",
+                stringResource(R.string.ui_display_scale_dialog_desc),
             currentScale = settings.uiScale,
             min = UI_SCALE_MIN,
             max = UI_SCALE_MAX,
@@ -167,10 +168,9 @@ internal fun UiScaleGroup() {
     if (showFontDialog) {
         LiveScaleDialog(
             icon = Icons.Outlined.FormatSize,
-            title = "Font size",
+            title = stringResource(R.string.ui_font_size),
             description =
-                "Adjusts text size only, on top of display scale and system font size. " +
-                    "Applied when you tap Apply.",
+                stringResource(R.string.ui_font_size_dialog_desc),
             currentScale = settings.fontScale,
             min = FONT_SCALE_MIN,
             max = FONT_SCALE_MAX,
@@ -205,19 +205,19 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
 
     SettingGroup(
         icon = Icons.Outlined.DesignServices,
-        title = "Customization",
+        title = stringResource(R.string.ui_customization),
         initiallyExpanded = initiallyExpanded,
     ) {
         PrefItem(
             icon = Icons.Outlined.Palette,
-            title = "Color scheme",
-            subtitle = "App theme will be generated from your selected color",
+            title = stringResource(R.string.ui_color_scheme),
+            subtitle = stringResource(R.string.ui_color_scheme_desc),
             shape = itemShape(0, itemCount),
             container = itemContainer(),
             content = cs.onSurface,
             enabled = !dynamicActive,
             onDisabledClick = {
-                Toast.makeText(ctx, "Turn off dynamic colors first to change color scheme", Toast.LENGTH_SHORT).show()
+                Toast.makeText(ctx, R.string.ui_color_scheme_disable_dynamic_toast, Toast.LENGTH_SHORT).show()
             },
             onClick = { showAccentSheet = true },
             badge = cs.primary,
@@ -226,19 +226,19 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
         )
         PrefItem(
             icon = Icons.Outlined.Colorize,
-            title = "Custom color",
+            title = stringResource(R.string.ui_custom_color),
             subtitle =
                 if (settings.customSeed != 0) {
-                    "Active, ${settings.seedColor.toHexString()}"
+                    stringResource(R.string.ui_custom_color_active, settings.seedColor.toHexString())
                 } else {
-                    "Pick any color or extract from an image"
+                    stringResource(R.string.ui_custom_color_desc)
                 },
             shape = itemShape(1, itemCount),
             container = itemContainer(),
             content = cs.onSurface,
             enabled = !dynamicActive,
             onDisabledClick = {
-                Toast.makeText(ctx, "Turn off dynamic colors first to use a custom color", Toast.LENGTH_SHORT).show()
+                Toast.makeText(ctx, R.string.ui_custom_color_disable_dynamic_toast, Toast.LENGTH_SHORT).show()
             },
             onClick = { showCustomColorSheet = true },
             badge = cs.primary,
@@ -246,8 +246,8 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
         )
         PrefItem(
             icon = Icons.Outlined.Style,
-            title = "Palette style",
-            subtitle = settings.paletteStyle.label,
+            title = stringResource(R.string.ui_palette_style),
+            subtitle = stringResource(settings.paletteStyle.labelRes),
             shape = itemShape(2, itemCount),
             container = itemContainer(),
             content = cs.onSurface,
@@ -257,21 +257,21 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
         )
         PrefItem(
             icon = Icons.Outlined.Tune,
-            title = "Color spec",
+            title = stringResource(R.string.ui_color_spec),
             subtitle =
                 if (settings.paletteStyle.forcesSpec2026) {
-                    "Expressive (2026), automatic for CMF style"
+                    stringResource(R.string.ui_color_spec_cmf_auto)
                 } else if (runningSpec != settings.colorSpec) {
-                    "${settings.colorSpec.label}, running as ${runningSpec.label} in ${settings.paletteStyle.label} style"
+                    stringResource(R.string.ui_color_spec_fallback, stringResource(stringResource(settings.colorSpec.labelRes)Res), stringResource(runningSpec.labelRes), stringResource(settings.paletteStyle.labelRes))
                 } else {
-                    settings.colorSpec.label
+                    stringResource(settings.colorSpec.labelRes)
                 },
             shape = itemShape(3, itemCount),
             container = itemContainer(),
             content = cs.onSurface,
             enabled = !settings.paletteStyle.forcesSpec2026,
             onDisabledClick = {
-                Toast.makeText(ctx, "CMF always uses Expressive (2026) spec", Toast.LENGTH_SHORT).show()
+                Toast.makeText(ctx, R.string.ui_color_spec_cmf_toast, Toast.LENGTH_SHORT).show()
             },
             onClick = { showSpecDialog = true },
             badge = cs.primary,
@@ -279,8 +279,8 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
         )
         PrefItem(
             icon = Icons.Outlined.Contrast,
-            title = "Contrast",
-            subtitle = settings.contrast.contrastLabel(),
+            title = stringResource(R.string.ui_contrast),
+            subtitle = settings.contrast.contrastLabel(ctx),
             shape = itemShape(4, itemCount),
             container = itemContainer(),
             content = cs.onSurface,
@@ -290,12 +290,12 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
         )
         PrefItem(
             icon = Icons.Outlined.Palette,
-            title = "Per-role colors",
+            title = stringResource(R.string.ui_per_role_colors),
             subtitle =
                 if (settings.roleOverrides.isEmpty) {
-                    "Lock primary, secondary, tertiary, and other palette roles"
+                    stringResource(R.string.ui_per_role_colors_desc)
                 } else {
-                    "${settings.roleOverrides.count} roles locked"
+                    stringResource(R.string.ui_per_role_colors_count, settings.roleOverrides.count)
                 },
             shape = itemShape(5, itemCount),
             container = itemContainer(),
@@ -306,8 +306,8 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
         )
         SwitchItem(
             icon = Icons.Outlined.Animation,
-            title = "Animate color changes",
-            subtitle = "Smoothly transition app colors when switching scheme, mode, or palette style",
+            title = stringResource(R.string.ui_animate_color),
+            subtitle = stringResource(R.string.ui_animate_color_desc),
             shape = itemShape(6, itemCount),
             checked = settings.animateColorChange,
             enabled = true,
@@ -316,8 +316,8 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
         if (settings.animateColorChange) {
             PrefItem(
                 icon = Icons.Outlined.Timer,
-                title = "Animation duration",
-                subtitle = "${settings.colorAnimationMs} ms",
+                title = stringResource(R.string.ui_animation_duration),
+                subtitle = stringResource(R.string.ui_animation_duration_ms, settings.colorAnimationMs),
                 shape = itemShape(7, itemCount),
                 container = itemContainer(),
                 content = cs.onSurface,
@@ -328,12 +328,12 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
         }
         SwitchItem(
             icon = Icons.Outlined.FormatColorFill,
-            title = "Dynamic colors",
+            title = stringResource(R.string.ui_dynamic_colors),
             subtitle =
                 if (DynamicColorSupported) {
-                    "Follow your wallpaper colors automatically (Material You)"
+                    stringResource(R.string.ui_dynamic_colors_desc)
                 } else {
-                    "Requires Android 12 or higher"
+                    stringResource(R.string.ui_requires_android_12)
                 },
             shape = itemShape(7 + animExtra, itemCount),
             checked = dynamicActive,
@@ -342,8 +342,8 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
         )
         SwitchItem(
             icon = Icons.Outlined.Contrast,
-            title = "AMOLED mode",
-            subtitle = "Pure black background in dark mode to save battery on OLED screens",
+            title = stringResource(R.string.ui_amoled_mode),
+            subtitle = stringResource(R.string.ui_amoled_mode_desc),
             shape = itemShape(8 + animExtra, itemCount),
             checked = settings.amoled,
             enabled = true,
@@ -351,12 +351,12 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
         )
         SwitchItem(
             icon = Icons.Outlined.BlurOn,
-            title = "Blur effect",
+            title = stringResource(R.string.ui_blur_effect),
             subtitle =
                 if (BlurSupported) {
-                    "Enable real-time blur effects across bars and dialogs"
+                    stringResource(R.string.ui_blur_effect_desc)
                 } else {
-                    "Requires Android 13 or higher"
+                    stringResource(R.string.ui_requires_android_13)
                 },
             shape = itemShape(9 + animExtra, itemCount),
             checked = settings.blur && BlurSupported,
@@ -365,19 +365,19 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
         )
         PrefItem(
             icon = Icons.Outlined.Tab,
-            title = "Bar effect",
+            title = stringResource(R.string.ui_bar_effect),
             subtitle =
                 if (barEffectEnabled) {
-                    "${settings.barEffect.label} for tab bar, toolbar, and search bar"
+                    stringResource(R.string.ui_bar_effect_desc, stringResource(settings.barEffect.labelRes))
                 } else {
-                    "Enable blur effect first"
+                    stringResource(R.string.ui_bar_effect_enable_blur)
                 },
             shape = itemShape(10 + animExtra, itemCount),
             container = itemContainer(),
             content = cs.onSurface,
             enabled = barEffectEnabled,
             onDisabledClick = {
-                Toast.makeText(ctx, "Enable blur effect first to configure this", Toast.LENGTH_SHORT).show()
+                Toast.makeText(ctx, R.string.ui_bar_effect_enable_blur_toast, Toast.LENGTH_SHORT).show()
             },
             onClick = { showBarEffectDialog = true },
             badge = cs.primary,
@@ -385,8 +385,8 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
         )
         SwitchItem(
             icon = Icons.Outlined.TouchApp,
-            title = "Haptics",
-            subtitle = "Subtle tactile feedback when tapping buttons, cards, switches, and sliders",
+            title = stringResource(R.string.ui_haptics),
+            subtitle = stringResource(R.string.ui_haptics_desc),
             shape = itemShape(11 + animExtra, itemCount),
             checked = settings.hapticsEnabled,
             enabled = true,
@@ -424,10 +424,10 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
     if (showStyleDialog) {
         OptionDialog(
             icon = Icons.Outlined.Style,
-            title = "Palette style",
+            title = stringResource(R.string.ui_palette_style),
             options = PaletteStyle.entries,
             selected = settings.paletteStyle,
-            label = { it.label },
+            label = { ctx.getString(it.labelRes) },
             onSelect = Appearance::setPaletteStyle,
             onDismiss = { showStyleDialog = false },
         )
@@ -436,10 +436,10 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
     if (showBarEffectDialog) {
         OptionDialog(
             icon = Icons.Outlined.Tab,
-            title = "Bar effect",
+            title = stringResource(R.string.ui_bar_effect),
             options = BarEffect.entries,
             selected = settings.barEffect,
-            label = { it.label },
+            label = { ctx.getString(it.labelRes) },
             onSelect = Appearance::setBarEffect,
             onDismiss = { showBarEffectDialog = false },
         )
@@ -448,10 +448,10 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
     if (showSpecDialog) {
         OptionDialog(
             icon = Icons.Outlined.Tune,
-            title = "Color spec",
+            title = stringResource(R.string.ui_color_spec),
             options = offeredSpecs,
             selected = if (settings.colorSpec in offeredSpecs) settings.colorSpec else runningSpec,
-            label = { it.label },
+            label = { ctx.getString(it.labelRes) },
             onSelect = Appearance::setColorSpec,
             onDismiss = { showSpecDialog = false },
         )
@@ -495,14 +495,14 @@ private fun LiveScaleDialog(
         title = title,
         onDismiss = cancel,
         confirmButton = {
-            DialogConfirmButton(if (live) "Save" else "Apply") {
+            DialogConfirmButton(stringResource(if (live) R.string.ui_save else R.string.ui_apply)) {
                 confirmed = true
                 if (!live && selected != original) onApply(selected)
                 onDismiss()
                 if (selected != original) onSaved()
             }
         },
-        dismissButton = { DialogCancelButton(label = "Cancel", onClick = cancel) },
+        dismissButton = { DialogCancelButton(label = stringResource(R.string.ui_cancel), onClick = cancel) },
         text = {
             Column(
                 Modifier.verticalScroll(rememberScrollState()),
@@ -549,6 +549,7 @@ private fun LiveScaleDialog(
 
 @Composable
 internal fun BackgroundGroup() {
+    val ctx = LocalContext.current
     val cs = MaterialTheme.colorScheme
     val settings by Appearance.settings.collectAsStateWithLifecycle()
     val event = remember { SeasonalEvent.on() }
@@ -561,13 +562,13 @@ internal fun BackgroundGroup() {
 
     SettingGroup(
         icon = Icons.Outlined.Animation,
-        title = "Animated background",
+        title = stringResource(R.string.ui_animated_background),
         initiallyExpanded = false,
     ) {
         PrefItem(
             icon = Icons.Outlined.Animation,
-            title = "Choose background",
-            subtitle = "${settings.backgroundType.label}: ${settings.backgroundType.description}",
+            title = stringResource(R.string.ui_choose_background),
+            subtitle = "${stringResource(settings.backgroundType.labelRes)}: ${stringResource(settings.backgroundType.descriptionRes)}",
             shape = itemShape(0, count),
             container = itemContainer(),
             content = cs.onSurface,
@@ -578,8 +579,8 @@ internal fun BackgroundGroup() {
         if (random) {
             PrefItem(
                 icon = Icons.Outlined.Shuffle,
-                title = "Random interval",
-                subtitle = settings.randomInterval.label,
+                title = stringResource(R.string.ui_random_interval),
+                subtitle = stringResource(settings.randomInterval.labelRes),
                 shape = itemShape(1, count),
                 container = itemContainer(),
                 content = cs.onSurface,
@@ -590,12 +591,12 @@ internal fun BackgroundGroup() {
         }
         SwitchItem(
             icon = Icons.Outlined.Layers,
-            title = "Background parallax",
+            title = stringResource(R.string.ui_background_parallax),
             subtitle =
                 if (none) {
-                    "Choose an animated background first"
+                    stringResource(R.string.ui_background_pick_first)
                 } else {
-                    "Gently shifts background as you tilt your phone"
+                    stringResource(R.string.ui_background_parallax_desc)
                 },
             shape = itemShape(count - 2, count),
             checked = settings.backgroundParallax,
@@ -604,12 +605,12 @@ internal fun BackgroundGroup() {
         )
         SwitchItem(
             icon = Icons.Outlined.Celebration,
-            title = "Seasonal themes",
+            title = stringResource(R.string.ui_seasonal_themes),
             subtitle =
                 when {
-                    none -> "Choose an animated background first"
-                    event != null -> "${event.label} active, special background shown until ${event.endLabel}"
-                    else -> "Special backgrounds during Halloween, Winter Holidays, and New Year"
+                    none -> stringResource(R.string.ui_background_pick_first)
+                    event != null -> stringResource(R.string.ui_seasonal_themes_active, stringResource(event.labelRes), event.endLabel)
+                    else -> stringResource(R.string.ui_seasonal_themes_desc)
                 },
             shape = itemShape(count - 1, count),
             checked = settings.seasonalThemes,
@@ -621,10 +622,10 @@ internal fun BackgroundGroup() {
     if (showPicker) {
         OptionDialog(
             icon = Icons.Outlined.Animation,
-            title = "Animated background",
+            title = stringResource(R.string.ui_animated_background),
             options = types,
             selected = settings.backgroundType,
-            label = { it.label },
+            label = { ctx.getString(it.labelRes) },
             onSelect = Appearance::setBackgroundType,
             onDismiss = { showPicker = false },
         )
@@ -632,10 +633,10 @@ internal fun BackgroundGroup() {
     if (showIntervalDialog) {
         OptionDialog(
             icon = Icons.Outlined.Shuffle,
-            title = "Random interval",
+            title = stringResource(R.string.ui_random_interval),
             options = RandomInterval.entries,
             selected = settings.randomInterval,
-            label = { it.label },
+            label = { ctx.getString(it.labelRes) },
             onSelect = Appearance::setRandomInterval,
             onDismiss = { showIntervalDialog = false },
         )
@@ -647,18 +648,18 @@ internal fun NightModeGroup() {
     val settings by Appearance.settings.collectAsStateWithLifecycle()
     SettingGroup(
         icon = Icons.Outlined.BrightnessMedium,
-        title = "Night mode",
+        title = stringResource(R.string.ui_night_mode),
         initiallyExpanded = false,
     ) {
         val options =
             listOf(
-                Triple("Dark", Icons.Outlined.DarkMode, ThemeMode.DARK),
-                Triple("Light", Icons.Outlined.LightMode, ThemeMode.LIGHT),
-                Triple("System", Icons.Outlined.SettingsSuggest, ThemeMode.SYSTEM),
+                Triple(R.string.ui_theme_dark, Icons.Outlined.DarkMode, ThemeMode.DARK),
+                Triple(R.string.ui_theme_light, Icons.Outlined.LightMode, ThemeMode.LIGHT),
+                Triple(R.string.ui_theme_system, Icons.Outlined.SettingsSuggest, ThemeMode.SYSTEM),
             )
-        options.forEachIndexed { index, (label, icon, mode) ->
+        options.forEachIndexed { index, (labelRes, icon, mode) ->
             NightModeItem(
-                title = label,
+                title = stringResource(labelRes),
                 icon = icon,
                 selected = settings.mode == mode,
                 shape = itemShape(index, options.size),

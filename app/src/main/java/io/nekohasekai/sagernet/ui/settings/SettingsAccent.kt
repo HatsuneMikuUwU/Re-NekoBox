@@ -46,7 +46,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.nekohasekai.sagernet.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.nekohasekai.sagernet.ui.components.AppModalBottomSheet
 import io.nekohasekai.sagernet.ui.components.WindowBlurEffect
@@ -93,7 +95,7 @@ fun ColorSchemePreview() {
             ) {
                 Icon(
                     Icons.Outlined.Edit,
-                    contentDescription = "Change",
+                    contentDescription = stringResource(R.string.ui_change),
                     modifier = Modifier.size(16.dp),
                     tint = scheme.inversePrimary,
                 )
@@ -182,7 +184,7 @@ private fun AccentSwatch(
         }
         Spacer(Modifier.height(12.dp))
         Text(
-            accent.label,
+            stringResource(accent.labelRes),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
