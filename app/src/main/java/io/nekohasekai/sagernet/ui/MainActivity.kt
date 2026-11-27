@@ -61,10 +61,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -297,6 +300,8 @@ class MainActivity : ThemedActivity(),
                         .background(fadeBrush),
                 )
 
+                val density = LocalDensity.current
+                var tabBarWidthPx by remember { mutableIntStateOf(0) }
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -318,11 +323,17 @@ class MainActivity : ThemedActivity(),
                             }
                         },
                         onUrlTest = { urlTest() },
+                        modifier = if (tabBarWidthPx > 0) {
+                            Modifier.width(with(density) { tabBarWidthPx.toDp() })
+                        } else {
+                            Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                        },
                     )
                     FloatingTabBar(
                         items = bottomTabs,
                         selectedIndex = { bottomTabs.indexOf(destination).coerceAtLeast(0) },
                         onSelected = { idx -> currentDestination.value = bottomTabs[idx] },
+                        modifier = Modifier.onSizeChanged { tabBarWidthPx = it.width },
                         iconContent = { dest, _ ->
                             Icon(dest.icon, contentDescription = null, modifier = Modifier.size(22.dp))
                         },
@@ -445,6 +456,7 @@ class MainActivity : ThemedActivity(),
         rxRate: Long,
         onToggleConnection: () -> Unit,
         onUrlTest: () -> Int,
+        modifier: Modifier = Modifier,
     ) {
         val isConnected = state == BaseService.State.Connected
         val isTransitioning = state == BaseService.State.Connecting || state == BaseService.State.Stopping
@@ -476,9 +488,7 @@ class MainActivity : ThemedActivity(),
                 }
             },
             enabled = isConnected && !testing,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+            modifier = modifier
                 .barGlass(
                     backdrop = backdrop,
                     shape = CircleShape,

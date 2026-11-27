@@ -3,9 +3,14 @@ package io.nekohasekai.sagernet.ui.screens
 import android.content.Intent
 import android.os.SystemClock
 import android.text.format.Formatter
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.ContentPaste
 import androidx.compose.material.icons.rounded.Delete
@@ -84,6 +90,7 @@ import io.nekohasekai.sagernet.ui.components.ExpressiveEmptyState
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
 import io.nekohasekai.sagernet.ui.components.ExpressivePillBadge
 import io.nekohasekai.sagernet.ui.components.FloatingSearchBar
+import io.nekohasekai.sagernet.ui.components.FloatingTopBar
 import io.nekohasekai.sagernet.ui.components.LocalBottomInset
 import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
@@ -116,6 +123,7 @@ fun ConfigurationScreen(
     var profiles by remember { mutableStateOf<List<ProxyEntity>>(emptyList()) }
     var selectedProxyId by remember { mutableLongStateOf(DataStore.selectedProxy) }
 
+    var searchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showAddSheet by remember { mutableStateOf(false) }
     var showMoreMenu by remember { mutableStateOf(false) }
@@ -366,108 +374,134 @@ fun ConfigurationScreen(
 
         }
 
-        FloatingSearchBar(
-            backdrop = topBackdrop,
-            query = searchQuery,
-            onQueryChange = { searchQuery = it },
-            placeholder = if (selectMode) stringResource(R.string.select_profile) else stringResource(R.string.search),
-            onBack = if (selectMode) onBack else null,
-            actions = if (!selectMode) {
-                {
-                    IconButton(onClick = { showAddSheet = true }) {
-                        Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_profile))
-                    }
-                    Box {
-                        IconButton(onClick = { showSortMenu = true }) {
-                            Icon(Icons.AutoMirrored.Rounded.Sort, contentDescription = stringResource(R.string.group_order))
+        BackHandler(enabled = searchActive) {
+            searchActive = false
+            searchQuery = ""
+        }
+
+        AnimatedContent(
+            targetState = searchActive,
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            label = "configTopBarMode",
+            modifier = Modifier.align(Alignment.TopCenter),
+        ) { searching ->
+            if (searching) {
+                FloatingSearchBar(
+                    backdrop = topBackdrop,
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    placeholder = stringResource(R.string.search),
+                    autoFocus = true,
+                    onBack = {
+                        searchActive = false
+                        searchQuery = ""
+                    },
+                )
+            } else {
+                FloatingTopBar(
+                    backdrop = topBackdrop,
+                    title = if (selectMode) stringResource(R.string.select_profile) else stringResource(R.string.app_name),
+                    onBack = if (selectMode) onBack else null,
+                    actions = {
+                        IconButton(onClick = { searchActive = true }) {
+                            Icon(Icons.Rounded.Search, contentDescription = stringResource(R.string.search))
                         }
-                        DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
-                            val currentGroup = groups.firstOrNull { it.id == selectedGroupId }
-                            listOf(
-                                GroupOrder.ORIGIN to R.string.group_order_origin,
-                                GroupOrder.BY_NAME to R.string.group_order_by_name,
-                                GroupOrder.BY_DELAY to R.string.group_order_by_delay,
-                            ).forEach { (order, labelRes) ->
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(labelRes)) },
-                                    onClick = {
-                                        showSortMenu = false
-                                        if (currentGroup != null) {
+                        if (!selectMode) {
+                            IconButton(onClick = { showAddSheet = true }) {
+                                Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_profile))
+                            }
+                            Box {
+                                IconButton(onClick = { showSortMenu = true }) {
+                                    Icon(Icons.AutoMirrored.Rounded.Sort, contentDescription = stringResource(R.string.group_order))
+                                }
+                                DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
+                                    val currentGroup = groups.firstOrNull { it.id == selectedGroupId }
+                                    listOf(
+                                        GroupOrder.ORIGIN to R.string.group_order_origin,
+                                        GroupOrder.BY_NAME to R.string.group_order_by_name,
+                                        GroupOrder.BY_DELAY to R.string.group_order_by_delay,
+                                    ).forEach { (order, labelRes) ->
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(labelRes)) },
+                                            onClick = {
+                                                showSortMenu = false
+                                                if (currentGroup != null) {
+                                                    runOnDefaultDispatcher {
+                                                        currentGroup.order = order
+                                                        GroupManager.updateGroup(currentGroup)
+                                                        reloadData()
+                                                    }
+                                                }
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                            Box {
+                                IconButton(onClick = { showMoreMenu = true }) {
+                                    Icon(Icons.Rounded.MoreVert, contentDescription = "More")
+                                }
+                                DropdownMenu(expanded = showMoreMenu, onDismissRequest = { showMoreMenu = false }) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                if (isTestingAll) stringResource(R.string.connection_test_testing)
+                                                else stringResource(R.string.connection_test)
+                                            )
+                                        },
+                                        enabled = !isTestingAll && profiles.isNotEmpty(),
+                                        onClick = { showMoreMenu = false; runPingAll() },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.connection_test_icmp_ping)) },
+                                        enabled = !isTestingAll && profiles.isNotEmpty(),
+                                        onClick = { showMoreMenu = false; runPingAll() },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.connection_test_clear_results)) },
+                                        onClick = {
+                                            showMoreMenu = false
                                             runOnDefaultDispatcher {
-                                                currentGroup.order = order
-                                                GroupManager.updateGroup(currentGroup)
+                                                profiles.forEach {
+                                                    it.status = 0
+                                                    it.ping = 0
+                                                    it.error = null
+                                                }
+                                                SagerDatabase.proxyDao.updateProxy(profiles)
                                                 reloadData()
                                             }
-                                        }
-                                    },
-                                )
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.connection_test_delete_unavailable)) },
+                                        onClick = {
+                                            showMoreMenu = false
+                                            runOnDefaultDispatcher {
+                                                val unavailable = profiles.filter { it.status == 2 || it.status == 3 }
+                                                unavailable.forEach { ProfileManager.deleteProfile(it.groupId, it.id) }
+                                                onMainDispatcher {
+                                                    onShowMessage(context.getString(R.string.removed, unavailable.size))
+                                                }
+                                            }
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.clear_traffic_statistics)) },
+                                        onClick = {
+                                            showMoreMenu = false
+                                            runOnDefaultDispatcher {
+                                                ProfileManager.resetTraffic(profiles.map { it.id }.toLongArray())
+                                                reloadData()
+                                            }
+                                        },
+                                    )
+                                }
                             }
                         }
-                    }
-                    Box {
-                        IconButton(onClick = { showMoreMenu = true }) {
-                            Icon(Icons.Rounded.MoreVert, contentDescription = "More")
-                        }
-                        DropdownMenu(expanded = showMoreMenu, onDismissRequest = { showMoreMenu = false }) {
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        if (isTestingAll) stringResource(R.string.connection_test_testing)
-                                        else stringResource(R.string.connection_test)
-                                    )
-                                },
-                                enabled = !isTestingAll && profiles.isNotEmpty(),
-                                onClick = { showMoreMenu = false; runPingAll() },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.connection_test_icmp_ping)) },
-                                enabled = !isTestingAll && profiles.isNotEmpty(),
-                                onClick = { showMoreMenu = false; runPingAll() },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.connection_test_clear_results)) },
-                                onClick = {
-                                    showMoreMenu = false
-                                    runOnDefaultDispatcher {
-                                        profiles.forEach {
-                                            it.status = 0
-                                            it.ping = 0
-                                            it.error = null
-                                        }
-                                        SagerDatabase.proxyDao.updateProxy(profiles)
-                                        reloadData()
-                                    }
-                                },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.connection_test_delete_unavailable)) },
-                                onClick = {
-                                    showMoreMenu = false
-                                    runOnDefaultDispatcher {
-                                        val unavailable = profiles.filter { it.status == 2 || it.status == 3 }
-                                        unavailable.forEach { ProfileManager.deleteProfile(it.groupId, it.id) }
-                                        onMainDispatcher {
-                                            onShowMessage(context.getString(R.string.removed, unavailable.size))
-                                        }
-                                    }
-                                },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.clear_traffic_statistics)) },
-                                onClick = {
-                                    showMoreMenu = false
-                                    runOnDefaultDispatcher {
-                                        ProfileManager.resetTraffic(profiles.map { it.id }.toLongArray())
-                                        reloadData()
-                                    }
-                                },
-                            )
-                        }
-                    }
-                }
-            } else null,
-            modifier = Modifier.align(Alignment.TopCenter),
-        )
+                    },
+                )
+            }
+        }
     }
 
     if (showAddSheet) {

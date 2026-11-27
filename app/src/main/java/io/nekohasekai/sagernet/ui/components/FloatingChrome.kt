@@ -62,6 +62,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
@@ -384,13 +386,19 @@ fun FloatingSearchBar(
     placeholder: String,
     modifier: Modifier = Modifier,
     backdrop: LayerBackdrop? = LocalBlurBackdrop.current,
+    autoFocus: Boolean = false,
     onBack: (() -> Unit)? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val cs = MaterialTheme.colorScheme
     val brush = remember(cs.background) { topScrim(cs.background) }
     val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
     val fadeExtra = 16.dp
+
+    LaunchedEffect(autoFocus) {
+        if (autoFocus) focusRequester.requestFocus()
+    }
 
     Box(
         modifier = modifier
@@ -454,7 +462,9 @@ fun FloatingSearchBar(
                         cursorBrush = SolidColor(cs.primary),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
                     )
                 }
                 if (query.isNotEmpty()) {
