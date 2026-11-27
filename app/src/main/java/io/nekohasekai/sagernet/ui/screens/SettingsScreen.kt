@@ -51,8 +51,6 @@ import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.CleaningServices
-import androidx.compose.material.icons.rounded.Construction
-import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.Language
@@ -119,12 +117,9 @@ import androidx.compose.material.icons.rounded.Straighten
 
 @Composable
 fun SettingsScreen(
-    clashApiEnabled: Boolean,
     onOpenTools: () -> Unit,
     onOpenLogcat: () -> Unit,
-    onOpenDashboard: () -> Unit,
     onOpenAbout: () -> Unit,
-    onClashApiChanged: (Boolean) -> Unit,
     onHideFromRecentAppsChanged: (Boolean) -> Unit,
     onShowMessage: (String, String?, (() -> Unit)?) -> Unit,
 ) {
@@ -548,18 +543,6 @@ fun SettingsScreen(
                         position = ExpressiveGroupPosition.TOP,
                         onClick = { showUrlTestDialog = true },
                     )
-                    StoreSwitchPref(
-                        store = store,
-                        key = Key.ENABLE_CLASH_API,
-                        titleRes = R.string.enable_clash_api,
-                        summaryRes = R.string.enable_clash_api_summary,
-                        icon = Icons.Rounded.Construction,
-                        onChanged = {
-                            onClashApiChanged(it)
-                            notifyNeedReload()
-                            true
-                        },
-                    )
                     StoreSwitchPref(store = store, key = Key.NETWORK_CHANGE_RESET_CONNECTIONS, titleRes = R.string.network_change_reset_connections, defaultValue = true, icon = Icons.Rounded.Sync)
                     StoreSwitchPref(store = store, key = Key.WAKE_RESET_CONNECTIONS, titleRes = R.string.wake_reset_connections, icon = Icons.Rounded.PowerSettingsNew)
                     StoreSwitchPref(store = store, key = Key.GLOBAL_ALLOW_INSECURE, titleRes = R.string.global_allow_insecure, icon = Icons.Rounded.LockOpen)
@@ -589,11 +572,6 @@ fun SettingsScreen(
                 }
                 IconButton(onClick = onOpenLogcat) {
                     Icon(Icons.Rounded.Terminal, contentDescription = stringResource(R.string.menu_log))
-                }
-                if (clashApiEnabled) {
-                    IconButton(onClick = onOpenDashboard) {
-                        Icon(Icons.Rounded.Dashboard, contentDescription = stringResource(R.string.menu_dashboard))
-                    }
                 }
                 IconButton(onClick = onOpenAbout) {
                     Icon(Icons.Rounded.Info, contentDescription = stringResource(R.string.menu_about))

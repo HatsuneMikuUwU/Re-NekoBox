@@ -9,65 +9,48 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.RemoteException
-import android.text.format.Formatter
+import android.os.SystemClock
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountTree
 import androidx.compose.material.icons.rounded.Build
+import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.Dashboard
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.FolderCopy
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Terminal
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -102,48 +85,44 @@ import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.parseProxies
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
-import androidx.compose.ui.graphics.Color
+import io.nekohasekai.sagernet.ui.components.AppDialog
+import io.nekohasekai.sagernet.ui.components.DialogCancelButton
+import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
 import io.nekohasekai.sagernet.ui.components.FloatingTabBar
 import io.nekohasekai.sagernet.ui.components.FloatingTabBarMargin
 import io.nekohasekai.sagernet.ui.components.LocalBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.LocalBottomInset
-import io.nekohasekai.sagernet.ui.components.barGlass
+import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import io.nekohasekai.sagernet.ui.components.bottomScrim
 import io.nekohasekai.sagernet.ui.components.floatingTabBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
-import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import io.nekohasekai.sagernet.ui.screens.AboutScreen
 import io.nekohasekai.sagernet.ui.screens.ConfigurationScreen
+import io.nekohasekai.sagernet.ui.screens.DashboardScreen
 import io.nekohasekai.sagernet.ui.screens.GroupScreen
 import io.nekohasekai.sagernet.ui.screens.LogcatScreen
 import io.nekohasekai.sagernet.ui.screens.RouteScreen
 import io.nekohasekai.sagernet.ui.screens.SettingsScreen
 import io.nekohasekai.sagernet.ui.screens.ToolsScreen
-import io.nekohasekai.sagernet.ui.screens.WebviewScreen
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import moe.matsuri.nb4a.utils.Util
-import androidx.compose.material.icons.rounded.CloudDownload
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.Extension
-import io.nekohasekai.sagernet.ui.components.AppDialog
-import io.nekohasekai.sagernet.ui.components.DialogCancelButton
-import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
 
 enum class MainDestination(
     val titleRes: Int,
     val icon: ImageVector,
     val inBottomBar: Boolean = false,
 ) {
+    DASHBOARD(R.string.dashboard_title, Icons.Rounded.Dashboard, inBottomBar = true),
     CONFIGURATION(R.string.menu_configuration, Icons.Rounded.Router, inBottomBar = true),
     GROUP(R.string.menu_group, Icons.Rounded.FolderCopy, inBottomBar = true),
     ROUTE(R.string.menu_route, Icons.Rounded.AccountTree, inBottomBar = true),
     SETTINGS(R.string.settings, Icons.Rounded.Settings, inBottomBar = true),
-    TRAFFIC(R.string.menu_dashboard, Icons.Rounded.Dashboard),
     TOOLS(R.string.menu_tools, Icons.Rounded.Build),
     LOGCAT(R.string.menu_log, Icons.Rounded.Terminal),
     ABOUT(R.string.menu_about, Icons.Rounded.Info),
 }
+
+private const val SPEED_HISTORY_CAPACITY = 30
 
 class MainActivity : ThemedActivity(),
     SagerConnection.Callback,
@@ -151,11 +130,16 @@ class MainActivity : ThemedActivity(),
 
     val connection = SagerConnection(SagerConnection.CONNECTION_ID_MAIN_ACTIVITY_FOREGROUND, true)
 
-    private val currentDestination = MutableStateFlow(MainDestination.CONFIGURATION)
+    private val currentDestination = MutableStateFlow(MainDestination.DASHBOARD)
+    private val subScreenReturnDestination = MutableStateFlow(MainDestination.SETTINGS)
     private val serviceStateFlow = MutableStateFlow(BaseService.State.Idle)
-    private val txRateFlow = MutableStateFlow(0L)
-    private val rxRateFlow = MutableStateFlow(0L)
-    private val enableClashApiFlow = MutableStateFlow(DataStore.enableClashAPI)
+    private val speedDataFlow = MutableStateFlow(SpeedDisplayData())
+    private val rxHistoryFlow = MutableStateFlow(List(SPEED_HISTORY_CAPACITY) { 0L })
+    private val txHistoryFlow = MutableStateFlow(List(SPEED_HISTORY_CAPACITY) { 0L })
+    private val connectedSinceFlow = MutableStateFlow<Long?>(null)
+    private val urlTestRunningFlow = MutableStateFlow(false)
+    private val urlTestStatusFlow = MutableStateFlow<String?>(null)
+    private val urlTestLatencyMsFlow = MutableStateFlow<Int?>(null)
     private val profileRefreshSignal = MutableStateFlow(0)
 
     private val pendingSubscriptionImport = MutableStateFlow<ProxyGroup?>(null)
@@ -195,13 +179,53 @@ class MainActivity : ThemedActivity(),
         }
     }
 
+    private fun openSubScreen(target: MainDestination, returnTo: MainDestination) {
+        subScreenReturnDestination.value = returnTo
+        currentDestination.value = target
+    }
+
+    private fun toggleConnection() {
+        if (DataStore.serviceState.canStop) {
+            SagerNet.stopService()
+        } else {
+            connect.launch(null)
+        }
+    }
+
+    private fun runConnectionUrlTest() {
+        if (serviceStateFlow.value != BaseService.State.Connected || urlTestRunningFlow.value) return
+        urlTestRunningFlow.value = true
+        urlTestStatusFlow.value = getString(R.string.connection_test_testing)
+        runOnDefaultDispatcher {
+            val result = runCatching { urlTest() }
+            onMainDispatcher {
+                urlTestRunningFlow.value = false
+                result.fold(
+                    onSuccess = { ms ->
+                        urlTestLatencyMsFlow.value = ms
+                        urlTestStatusFlow.value = getString(R.string.connection_test_available, ms)
+                    },
+                    onFailure = { err ->
+                        urlTestLatencyMsFlow.value = null
+                        urlTestStatusFlow.value = getString(R.string.connection_test_error, err.readableMessage)
+                    },
+                )
+            }
+        }
+    }
+
     @Composable
     private fun MainExpressiveShell() {
         val destination by currentDestination.collectAsState()
+        val returnDest by subScreenReturnDestination.collectAsState()
         val serviceState by serviceStateFlow.collectAsState()
-        val txRate by txRateFlow.collectAsState()
-        val rxRate by rxRateFlow.collectAsState()
-        val clashApiEnabled by enableClashApiFlow.collectAsState()
+        val speedData by speedDataFlow.collectAsState()
+        val rxHistory by rxHistoryFlow.collectAsState()
+        val txHistory by txHistoryFlow.collectAsState()
+        val connectedSince by connectedSinceFlow.collectAsState()
+        val urlTestRunning by urlTestRunningFlow.collectAsState()
+        val urlTestStatus by urlTestStatusFlow.collectAsState()
+        val urlTestLatencyMs by urlTestLatencyMsFlow.collectAsState()
         val refreshTick by profileRefreshSignal.collectAsState()
 
         val subImport by pendingSubscriptionImport.collectAsState()
@@ -209,24 +233,23 @@ class MainActivity : ThemedActivity(),
         val pluginMissing by missingPluginDialog.collectAsState()
         val previewHint by showPreviewDialog.collectAsState()
 
-        val isSettingsSubScreen = destination == MainDestination.TOOLS ||
+        val isSubScreen = destination == MainDestination.TOOLS ||
             destination == MainDestination.ABOUT ||
-            destination == MainDestination.LOGCAT ||
-            destination == MainDestination.TRAFFIC
+            destination == MainDestination.LOGCAT
 
-        BackHandler(enabled = destination != MainDestination.CONFIGURATION) {
-            currentDestination.value = if (isSettingsSubScreen) {
-                MainDestination.SETTINGS
+        BackHandler(enabled = destination != MainDestination.DASHBOARD) {
+            currentDestination.value = if (isSubScreen) {
+                returnDest
             } else {
-                MainDestination.CONFIGURATION
+                MainDestination.DASHBOARD
             }
         }
 
         val bottomTabs = remember { MainDestination.entries.filter { it.inBottomBar } }
         val backdrop = rememberBlurBackdrop()
         val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-        val bottomInset = if (!isSettingsSubScreen) {
-            floatingTabBarSpace() + 86.dp
+        val bottomInset = if (!isSubScreen) {
+            floatingTabBarSpace()
         } else {
             navBarInset
         }
@@ -235,108 +258,98 @@ class MainActivity : ThemedActivity(),
             LocalBottomInset provides bottomInset,
             LocalBlurBackdrop provides backdrop,
         ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-        ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .blurBackdropSource(backdrop),
+                    .background(MaterialTheme.colorScheme.background),
             ) {
-                val backToSettings: () -> Unit = { currentDestination.value = MainDestination.SETTINGS }
-                AnimatedContent(
-                    targetState = destination,
-                    transitionSpec = { fadeIn() togetherWith fadeOut() },
-                    label = "mainDestinationTransition",
-                    modifier = Modifier.fillMaxSize(),
-                ) { target ->
-                    when (target) {
-                        MainDestination.CONFIGURATION -> ConfigurationScreen(
-                            refreshSignal = refreshTick,
-                            onShowMessage = { showComposeSnackbar(it) },
-                        )
-                        MainDestination.GROUP -> GroupScreen(
-                            onShowMessage = { showComposeSnackbar(it) },
-                        )
-                        MainDestination.ROUTE -> RouteScreen(
-                            onShowMessage = { showComposeSnackbar(it) },
-                        )
-                        MainDestination.SETTINGS -> SettingsScreen(
-                            clashApiEnabled = clashApiEnabled,
-                            onOpenTools = { currentDestination.value = MainDestination.TOOLS },
-                            onOpenLogcat = { currentDestination.value = MainDestination.LOGCAT },
-                            onOpenDashboard = { currentDestination.value = MainDestination.TRAFFIC },
-                            onOpenAbout = { currentDestination.value = MainDestination.ABOUT },
-                            onClashApiChanged = { enableClashApiFlow.value = it },
-                            onHideFromRecentAppsChanged = { applyHideFromRecentApps(it) },
-                            onShowMessage = { msg, actionLabel, onAction ->
-                                showComposeSnackbar(msg, actionLabel = actionLabel, onAction = onAction)
-                            },
-                        )
-                        MainDestination.TRAFFIC -> WebviewScreen(onBack = backToSettings)
-                        MainDestination.TOOLS -> ToolsScreen(
-                            onBack = backToSettings,
-                            onShowMessage = { showComposeSnackbar(it) },
-                        )
-                        MainDestination.LOGCAT -> LogcatScreen(
-                            onBack = backToSettings,
-                            onShowMessage = { showComposeSnackbar(it) },
-                        )
-                        MainDestination.ABOUT -> AboutScreen(
-                            onBack = backToSettings,
-                            onShowMessage = { showComposeSnackbar(it) },
-                        )
-                    }
-                }
-            }
-
-            if (!isSettingsSubScreen) {
-                val bg = MaterialTheme.colorScheme.background
-                val fadeBrush = remember(bg) { bottomScrim(bg) }
                 Box(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .height(floatingTabBarSpace() + 104.dp)
-                        .background(fadeBrush),
-                )
-
-                val density = LocalDensity.current
-                var tabBarWidthPx by remember { mutableIntStateOf(0) }
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(bottom = FloatingTabBarMargin),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                        .fillMaxSize()
+                        .blurBackdropSource(backdrop),
                 ) {
-                    ExpressiveConnectionDock(
-                        state = serviceState,
-                        txRate = txRate,
-                        rxRate = rxRate,
-                        onToggleConnection = {
-                            if (DataStore.serviceState.canStop) {
-                                SagerNet.stopService()
-                            } else {
-                                connect.launch(null)
-                            }
-                        },
-                        onUrlTest = { urlTest() },
-                        modifier = if (tabBarWidthPx > 0) {
-                            Modifier.width(with(density) { tabBarWidthPx.toDp() })
-                        } else {
-                            Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-                        },
+                    val navigateBack: () -> Unit = { currentDestination.value = returnDest }
+                    AnimatedContent(
+                        targetState = destination,
+                        transitionSpec = { fadeIn() togetherWith fadeOut() },
+                        label = "mainDestinationTransition",
+                        modifier = Modifier.fillMaxSize(),
+                    ) { target ->
+                        when (target) {
+                            MainDestination.DASHBOARD -> DashboardScreen(
+                                serviceState = serviceState,
+                                speedData = speedData,
+                                rxHistory = rxHistory,
+                                txHistory = txHistory,
+                                connectedSinceElapsed = connectedSince,
+                                urlTestRunning = urlTestRunning,
+                                urlTestStatus = urlTestStatus,
+                                urlTestLatencyMs = urlTestLatencyMs,
+                                refreshSignal = refreshTick,
+                                onToggleConnection = { toggleConnection() },
+                                onRunUrlTest = { runConnectionUrlTest() },
+                                onOpenConfiguration = { currentDestination.value = MainDestination.CONFIGURATION },
+                                onOpenGroups = { currentDestination.value = MainDestination.GROUP },
+                                onOpenRoutes = { currentDestination.value = MainDestination.ROUTE },
+                                onOpenLogcat = { openSubScreen(MainDestination.LOGCAT, MainDestination.DASHBOARD) },
+                                onShowMessage = { showComposeSnackbar(it) },
+                            )
+                            MainDestination.CONFIGURATION -> ConfigurationScreen(
+                                refreshSignal = refreshTick,
+                                onShowMessage = { showComposeSnackbar(it) },
+                            )
+                            MainDestination.GROUP -> GroupScreen(
+                                onShowMessage = { showComposeSnackbar(it) },
+                            )
+                            MainDestination.ROUTE -> RouteScreen(
+                                onShowMessage = { showComposeSnackbar(it) },
+                            )
+                            MainDestination.SETTINGS -> SettingsScreen(
+                                onOpenTools = { openSubScreen(MainDestination.TOOLS, MainDestination.SETTINGS) },
+                                onOpenLogcat = { openSubScreen(MainDestination.LOGCAT, MainDestination.SETTINGS) },
+                                onOpenAbout = { openSubScreen(MainDestination.ABOUT, MainDestination.SETTINGS) },
+                                onHideFromRecentAppsChanged = { applyHideFromRecentApps(it) },
+                                onShowMessage = { msg, actionLabel, onAction ->
+                                    showComposeSnackbar(msg, actionLabel = actionLabel, onAction = onAction)
+                                },
+                            )
+                            MainDestination.TOOLS -> ToolsScreen(
+                                onBack = navigateBack,
+                                onShowMessage = { showComposeSnackbar(it) },
+                            )
+                            MainDestination.LOGCAT -> LogcatScreen(
+                                onBack = navigateBack,
+                                onShowMessage = { showComposeSnackbar(it) },
+                            )
+                            MainDestination.ABOUT -> AboutScreen(
+                                onBack = navigateBack,
+                                onShowMessage = { showComposeSnackbar(it) },
+                            )
+                        }
+                    }
+                }
+
+                if (!isSubScreen) {
+                    val bg = MaterialTheme.colorScheme.background
+                    val fadeBrush = remember(bg) { bottomScrim(bg) }
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .height(floatingTabBarSpace() + 24.dp)
+                            .background(fadeBrush),
                     )
+
                     FloatingTabBar(
                         items = bottomTabs,
                         selectedIndex = { bottomTabs.indexOf(destination).coerceAtLeast(0) },
                         onSelected = { idx -> currentDestination.value = bottomTabs[idx] },
-                        modifier = Modifier.onSizeChanged { tabBarWidthPx = it.width },
+                        tabMinWidth = 64.dp,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = FloatingTabBarMargin),
                         iconContent = { dest, _ ->
                             Icon(dest.icon, contentDescription = null, modifier = Modifier.size(22.dp))
                         },
@@ -352,15 +365,14 @@ class MainActivity : ThemedActivity(),
                         },
                     )
                 }
-            }
 
-            SnackbarHost(
-                hostState = composeSnackbarHostState,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = bottomInset + 12.dp),
-            )
-        }
+                SnackbarHost(
+                    hostState = composeSnackbarHostState,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = bottomInset + 12.dp),
+                )
+            }
         }
 
         subImport?.let { group ->
@@ -458,135 +470,6 @@ class MainActivity : ThemedActivity(),
         }
     }
 
-    @Composable
-    private fun ExpressiveConnectionDock(
-        state: BaseService.State,
-        txRate: Long,
-        rxRate: Long,
-        onToggleConnection: () -> Unit,
-        onUrlTest: () -> Int,
-        modifier: Modifier = Modifier,
-    ) {
-        val isConnected = state == BaseService.State.Connected
-        val isTransitioning = state == BaseService.State.Connecting || state == BaseService.State.Stopping
-        var testing by remember { mutableStateOf(false) }
-        var testStatusText by remember { mutableStateOf<String?>(null) }
-
-        val dockContainerColor by animateColorAsState(
-            targetValue = when {
-                isConnected -> MaterialTheme.colorScheme.primaryContainer
-                isTransitioning -> MaterialTheme.colorScheme.secondaryContainer
-                else -> MaterialTheme.colorScheme.surfaceContainer
-            },
-            label = "dockColor",
-        )
-        val backdrop = LocalBlurBackdrop.current
-        Surface(
-            onClick = {
-                testing = true
-                testStatusText = getString(R.string.connection_test_testing)
-                runOnDefaultDispatcher {
-                    val result = runCatching { onUrlTest() }
-                    onMainDispatcher {
-                        testing = false
-                        testStatusText = result.fold(
-                            onSuccess = { getString(R.string.connection_test_available, it) },
-                            onFailure = { getString(R.string.connection_test_error, it.readableMessage) },
-                        )
-                    }
-                }
-            },
-            enabled = isConnected && !testing,
-            modifier = modifier
-                .barGlass(
-                    backdrop = backdrop,
-                    shape = CircleShape,
-                    containerColor = dockContainerColor,
-                    drawFlatBackground = false,
-                ),
-            shape = CircleShape,
-            color = if (backdrop != null) Color.Transparent else dockContainerColor,
-            tonalElevation = 0.dp,
-            shadowElevation = 0.dp,
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 22.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    val statusLabel = when (state) {
-                        BaseService.State.Connected -> testStatusText ?: stringResource(R.string.vpn_connected)
-                        BaseService.State.Connecting -> stringResource(R.string.connecting)
-                        BaseService.State.Stopping -> stringResource(R.string.stopping)
-                        else -> stringResource(R.string.not_connected)
-                    }
-                    Text(
-                        text = statusLabel,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isConnected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    val txStr = Formatter.formatFileSize(this@MainActivity, txRate)
-                    val rxStr = Formatter.formatFileSize(this@MainActivity, rxRate)
-                    Text(
-                        text = "↑ $txStr/s  •  ↓ $rxStr/s",
-                        style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
-                        color = if (isConnected) {
-                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f)
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                FloatingActionButton(
-                    onClick = onToggleConnection,
-                    shape = CircleShape,
-                    elevation = FloatingActionButtonDefaults.elevation(
-                        defaultElevation = 0.dp,
-                        pressedElevation = 0.dp,
-                        focusedElevation = 0.dp,
-                        hoveredElevation = 0.dp,
-                    ),
-                    containerColor = if (isConnected) {
-                        MaterialTheme.colorScheme.errorContainer
-                    } else {
-                        MaterialTheme.colorScheme.primary
-                    },
-                    contentColor = if (isConnected) {
-                        MaterialTheme.colorScheme.onErrorContainer
-                    } else {
-                        MaterialTheme.colorScheme.onPrimary
-                    },
-                    modifier = Modifier.size(56.dp),
-                ) {
-                    if (isTransitioning) {
-                        LoadingIndicator(
-                            modifier = Modifier.size(28.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                        )
-                    } else {
-                        Icon(
-                            imageVector = if (isConnected) Icons.Rounded.Stop else Icons.Rounded.PlayArrow,
-                            contentDescription = if (isConnected) stringResource(R.string.stop) else stringResource(R.string.connect),
-                            modifier = Modifier.size(28.dp),
-                        )
-                    }
-                }
-            }
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         MessageStore.setCurrentActivity(this)
@@ -605,10 +488,6 @@ class MainActivity : ThemedActivity(),
         } catch (e: Exception) {
             Logs.w("Failed to set excludeFromRecents: ${e.message}")
         }
-    }
-
-    fun refreshNavMenu(clashApi: Boolean) {
-        enableClashApiFlow.value = clashApi
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -700,9 +579,18 @@ class MainActivity : ThemedActivity(),
         DataStore.serviceState = state
         serviceStateFlow.value = state
         profileRefreshSignal.value++
-        if (state != BaseService.State.Connected) {
-            txRateFlow.value = 0L
-            rxRateFlow.value = 0L
+        if (state == BaseService.State.Connected) {
+            if (connectedSinceFlow.value == null) {
+                connectedSinceFlow.value = SystemClock.elapsedRealtime()
+            }
+        } else {
+            connectedSinceFlow.value = null
+            speedDataFlow.value = SpeedDisplayData()
+            rxHistoryFlow.value = List(SPEED_HISTORY_CAPACITY) { 0L }
+            txHistoryFlow.value = List(SPEED_HISTORY_CAPACITY) { 0L }
+            urlTestRunningFlow.value = false
+            urlTestStatusFlow.value = null
+            urlTestLatencyMsFlow.value = null
         }
         if (msg != null) {
             showComposeSnackbar(getString(R.string.vpn_error, msg))
@@ -729,12 +617,14 @@ class MainActivity : ThemedActivity(),
     }
 
     override fun cbSpeedUpdate(stats: SpeedDisplayData) {
-        txRateFlow.value = stats.txRateProxy
-        rxRateFlow.value = stats.rxRateProxy
+        speedDataFlow.value = stats
+        rxHistoryFlow.value = (rxHistoryFlow.value.drop(1) + stats.rxRateProxy)
+        txHistoryFlow.value = (txHistoryFlow.value.drop(1) + stats.txRateProxy)
     }
 
     override suspend fun cbTrafficUpdate(data: TrafficDataBatch) {
         ProfileManager.postUpdate(data.items)
+        profileRefreshSignal.value++
     }
 
     override fun cbSelectorUpdate(id: Long) {
@@ -751,7 +641,6 @@ class MainActivity : ThemedActivity(),
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
         when (key) {
             Key.SERVICE_MODE -> onBinderDied()
-            Key.ENABLE_CLASH_API -> enableClashApiFlow.value = DataStore.enableClashAPI
             Key.PROXY_APPS, Key.BYPASS_MODE, Key.INDIVIDUAL -> {
                 if (DataStore.serviceState.canStop) {
                     showComposeSnackbar(
