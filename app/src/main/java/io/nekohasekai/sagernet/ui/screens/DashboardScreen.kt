@@ -767,7 +767,7 @@ private fun DashboardSubTabBar(
                 checked = checked,
                 onCheckedChange = { if (it) onSelectTab(tab) },
                 shapes = shapes,
-                colors = ToggleButtonDefaults.toggleButtonColors(
+                colors = ToggleButtonDefaults.colors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
