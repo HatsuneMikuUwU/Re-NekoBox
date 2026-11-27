@@ -824,4 +824,5 @@
     <string name="about_license_tap_expand">开源软件 · 点击展开完整许可证内容</string>
     <string name="about_license_tap_collapse">开源软件 · 点击收起许可证内容</string>
     <string name="about_footer">为开源代理社区用心打造</string>
+
 </resources>

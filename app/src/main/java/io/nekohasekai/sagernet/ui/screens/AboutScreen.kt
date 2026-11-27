@@ -384,6 +384,7 @@ private fun AboutHero() {
             stringResource(R.string.app_name),
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold,
+            color = cs.onBackground,
         )
         Spacer(Modifier.height(4.dp))
         Text(
@@ -405,12 +406,17 @@ private fun AboutHero() {
                     fontWeight = FontWeight.Bold,
                 )
             }
+            val singBoxVersion = remember {
+                val firstLine = Libcore.versionBox().lineSequence().firstOrNull()?.trim().orEmpty()
+                if (firstLine.startsWith("sing-box", ignoreCase = true)) firstLine else "sing-box: $firstLine"
+            }
             Surface(shape = CircleShape, color = cs.tertiaryContainer, contentColor = cs.onTertiaryContainer) {
                 Text(
-                    "sing-box ${Libcore.versionBox()}",
+                    singBoxVersion,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
                 )
             }
         }
@@ -541,11 +547,21 @@ private fun AboutLinkGroup(links: List<AboutLink>) {
                         )
                     }
                     if (link.showChevron) {
-                        Icon(
-                            Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = cs.onSurfaceVariant,
-                        )
+                        Spacer(Modifier.width(10.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(MaterialShapes.Cookie9Sided.toShape())
+                                .background(cs.surfaceContainerHighest),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = cs.onSurface,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
                     }
                 }
             }
