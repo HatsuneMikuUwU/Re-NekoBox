@@ -28,7 +28,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.toShape
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -160,7 +162,7 @@ fun ExpressiveIconBadge(
     Box(
         modifier = modifier
             .size(40.dp)
-            .clip(RoundedCornerShape(14.dp))
+            .clip(MaterialShapes.Cookie9Sided.toShape())
             .background(containerColor),
         contentAlignment = Alignment.Center,
     ) {
@@ -256,7 +258,7 @@ fun ExpressiveEmptyState(
         Box(
             modifier = Modifier
                 .size(72.dp)
-                .clip(RoundedCornerShape(24.dp))
+                .clip(MaterialShapes.Cookie9Sided.toShape())
                 .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center,
         ) {
