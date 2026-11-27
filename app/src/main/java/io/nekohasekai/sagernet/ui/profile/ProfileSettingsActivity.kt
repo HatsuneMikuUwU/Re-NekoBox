@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui.profile
 
+import io.nekohasekai.sagernet.ui.background.screenContainerColor
+
 import io.nekohasekai.sagernet.ui.components.hapticClick
 
 import android.content.Intent
@@ -190,7 +192,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
+                    .background(screenContainerColor()),
             ) {
                 Box(
                     modifier = Modifier

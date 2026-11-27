@@ -2,6 +2,8 @@
 
 package io.nekohasekai.sagernet.ui.profile
 
+import io.nekohasekai.sagernet.ui.background.screenContainerColor
+
 import io.nekohasekai.sagernet.ui.components.hapticClick
 
 import android.os.Bundle
@@ -61,6 +63,7 @@ class ConfigEditActivity : ThemedActivity() {
             val quickSymbols = remember { listOf("{", "}", "[", "]", "\"", ":", ",", "  ") }
 
             Scaffold(
+                containerColor = screenContainerColor(),
                 snackbarHost = { SnackbarHost(composeSnackbarHostState) },
                 topBar = {
                     TopAppBar(

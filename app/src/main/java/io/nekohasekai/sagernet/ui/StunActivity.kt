@@ -2,6 +2,8 @@
 
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.background.screenContainerColor
+
 import io.nekohasekai.sagernet.ui.components.hapticClick
 
 import android.os.Bundle
@@ -56,6 +58,7 @@ class StunActivity : ThemedActivity() {
             var errorText by remember { mutableStateOf<String?>(null) }
 
             Scaffold(
+                containerColor = screenContainerColor(),
                 topBar = {
                     TopAppBar(
                         title = { Text(stringResource(R.string.stun_test), fontWeight = FontWeight.Bold) },

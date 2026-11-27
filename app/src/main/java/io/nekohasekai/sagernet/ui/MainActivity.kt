@@ -207,7 +207,7 @@ class MainActivity : ThemedActivity(),
             showPreviewDialog.value = true
         }
 
-        setComposeContent {
+        setComposeContent(renderBackground = false) {
             MainExpressiveShell()
         }
     }

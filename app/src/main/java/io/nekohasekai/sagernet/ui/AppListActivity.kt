@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.background.screenContainerColor
+
 import io.nekohasekai.sagernet.ui.components.hapticClick
 
 import android.content.pm.ApplicationInfo
@@ -107,6 +109,7 @@ class AppListActivity : ThemedActivity() {
             }
 
             Scaffold(
+                containerColor = screenContainerColor(),
                 topBar = {
                     TopAppBar(
                         title = { Text(stringResource(R.string.apps), fontWeight = FontWeight.Bold) },

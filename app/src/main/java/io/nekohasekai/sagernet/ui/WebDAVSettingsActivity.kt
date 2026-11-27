@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.background.screenContainerColor
+
 import io.nekohasekai.sagernet.ui.components.hapticClick
 
 import android.os.Bundle
@@ -48,6 +50,7 @@ class WebDAVSettingsActivity : ThemedActivity() {
             val store = rememberComposePreferenceStore(DataStore.configurationStore)
 
             Scaffold(
+                containerColor = screenContainerColor(),
                 snackbarHost = { SnackbarHost(composeSnackbarHostState) },
                 topBar = {
                     TopAppBar(

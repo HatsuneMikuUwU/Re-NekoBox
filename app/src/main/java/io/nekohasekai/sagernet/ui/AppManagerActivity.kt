@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.background.screenContainerColor
+
 import io.nekohasekai.sagernet.ui.components.hapticClick
 import io.nekohasekai.sagernet.ui.components.hapticBooleanChange
 
@@ -145,6 +147,7 @@ class AppManagerActivity : ThemedActivity() {
             }
 
             Scaffold(
+                containerColor = screenContainerColor(),
                 topBar = {
                     TopAppBar(
                         title = { Text(stringResource(R.string.proxied_apps), fontWeight = FontWeight.Bold) },

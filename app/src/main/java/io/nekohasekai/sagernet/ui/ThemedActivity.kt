@@ -6,13 +6,26 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.nekohasekai.sagernet.ui.background.AnimatedBackground
+import io.nekohasekai.sagernet.ui.background.BackgroundType
+import io.nekohasekai.sagernet.ui.background.LocalAnimatedBackgroundActive
+import io.nekohasekai.sagernet.ui.background.rememberActiveBackground
+import io.nekohasekai.sagernet.ui.components.AppMotion
 import io.nekohasekai.sagernet.ui.theme.Appearance
 import io.nekohasekai.sagernet.ui.theme.ReNekoBoxTheme
 import io.nekohasekai.sagernet.ui.theme.UiScaled
@@ -57,12 +70,40 @@ abstract class ThemedActivity : AppCompatActivity() {
         uiMode = resources.configuration.uiMode
     }
 
-    protected fun setComposeContent(content: @Composable () -> Unit) {
+    protected fun setComposeContent(
+        renderBackground: Boolean = !isDialog,
+        content: @Composable () -> Unit,
+    ) {
         setContent {
-            CompositionLocalProvider(LocalSnackbarHostState provides composeSnackbarHostState) {
+            val appearance by Appearance.settings.collectAsStateWithLifecycle()
+            val backgroundActive = renderBackground && appearance.backgroundType != BackgroundType.NONE
+            CompositionLocalProvider(
+                LocalSnackbarHostState provides composeSnackbarHostState,
+                LocalAnimatedBackgroundActive provides backgroundActive,
+            ) {
                 UiScaled {
                     ReNekoBoxTheme {
-                        content()
+                        if (renderBackground) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.background),
+                            ) {
+                                AnimatedVisibility(
+                                    visible = backgroundActive,
+                                    enter = AppMotion.fadeEnter(),
+                                    exit = AppMotion.fadeExit(),
+                                ) {
+                                    AnimatedBackground(
+                                        type = rememberActiveBackground(),
+                                        enableParallax = appearance.backgroundParallax,
+                                    )
+                                }
+                                content()
+                            }
+                        } else {
+                            content()
+                        }
                     }
                 }
             }

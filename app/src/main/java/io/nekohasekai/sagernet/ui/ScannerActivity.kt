@@ -63,7 +63,7 @@ class ScannerActivity : ThemedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setComposeContent {
+        setComposeContent(renderBackground = false) {
             var torchOn by remember { mutableStateOf(false) }
             var cameraRef by remember { mutableStateOf<Camera?>(null) }
             val analysisExecutor = remember { Executors.newSingleThreadExecutor() }
