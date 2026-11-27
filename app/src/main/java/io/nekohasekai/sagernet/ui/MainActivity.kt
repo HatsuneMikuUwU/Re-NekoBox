@@ -26,8 +26,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,7 +36,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountTree
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.FolderCopy
@@ -51,7 +48,6 @@ import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -68,7 +64,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -109,12 +104,12 @@ import io.nekohasekai.sagernet.ktx.parseProxies
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import androidx.compose.ui.graphics.Color
-import io.nekohasekai.sagernet.ui.components.FloatingSideSheet
 import io.nekohasekai.sagernet.ui.components.FloatingTabBar
 import io.nekohasekai.sagernet.ui.components.FloatingTabBarMargin
 import io.nekohasekai.sagernet.ui.components.LocalBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.LocalBottomInset
-import io.nekohasekai.sagernet.ui.components.LocalSideSheetTrigger
+import io.nekohasekai.sagernet.ui.components.LocalNavSheetTrigger
+import io.nekohasekai.sagernet.ui.components.NavigationBottomSheet
 import io.nekohasekai.sagernet.ui.components.barGlass
 import io.nekohasekai.sagernet.ui.components.bottomScrim
 import io.nekohasekai.sagernet.ui.components.floatingTabBarSpace
@@ -164,7 +159,7 @@ class MainActivity : ThemedActivity(),
     private val txRateFlow = MutableStateFlow(0L)
     private val rxRateFlow = MutableStateFlow(0L)
     private val enableClashApiFlow = MutableStateFlow(DataStore.enableClashAPI)
-    private val useSideSheetNavFlow = MutableStateFlow(DataStore.useSideSheetNav)
+    private val useBottomSheetNavFlow = MutableStateFlow(DataStore.useBottomSheetNav)
     private val profileRefreshSignal = MutableStateFlow(0)
 
     private val pendingSubscriptionImport = MutableStateFlow<ProxyGroup?>(null)
@@ -211,8 +206,8 @@ class MainActivity : ThemedActivity(),
         val txRate by txRateFlow.collectAsState()
         val rxRate by rxRateFlow.collectAsState()
         val clashApiEnabled by enableClashApiFlow.collectAsState()
-        val useSideSheetNav by useSideSheetNavFlow.collectAsState()
-        var sideSheetOpen by remember { mutableStateOf(false) }
+        val useBottomSheetNav by useBottomSheetNavFlow.collectAsState()
+        var navSheetOpen by remember { mutableStateOf(false) }
         val refreshTick by profileRefreshSignal.collectAsState()
 
         val subImport by pendingSubscriptionImport.collectAsState()
@@ -225,21 +220,17 @@ class MainActivity : ThemedActivity(),
             destination == MainDestination.LOGCAT ||
             destination == MainDestination.TRAFFIC
 
-        LaunchedEffect(useSideSheetNav, isSettingsSubScreen) {
-            if (!useSideSheetNav || isSettingsSubScreen) {
-                sideSheetOpen = false
+        LaunchedEffect(useBottomSheetNav, isSettingsSubScreen) {
+            if (!useBottomSheetNav || isSettingsSubScreen) {
+                navSheetOpen = false
             }
         }
 
-        BackHandler(enabled = sideSheetOpen || destination != MainDestination.CONFIGURATION) {
-            if (sideSheetOpen) {
-                sideSheetOpen = false
+        BackHandler(enabled = destination != MainDestination.CONFIGURATION) {
+            currentDestination.value = if (isSettingsSubScreen) {
+                MainDestination.SETTINGS
             } else {
-                currentDestination.value = if (isSettingsSubScreen) {
-                    MainDestination.SETTINGS
-                } else {
-                    MainDestination.CONFIGURATION
-                }
+                MainDestination.CONFIGURATION
             }
         }
 
@@ -248,15 +239,15 @@ class MainActivity : ThemedActivity(),
         val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
         val bottomInset = when {
             isSettingsSubScreen -> navBarInset
-            useSideSheetNav -> navBarInset + FloatingTabBarMargin + 82.dp
+            useBottomSheetNav -> navBarInset + FloatingTabBarMargin + 82.dp
             else -> floatingTabBarSpace() + 86.dp
         }
 
         CompositionLocalProvider(
             LocalBottomInset provides bottomInset,
             LocalBlurBackdrop provides backdrop,
-            LocalSideSheetTrigger provides if (useSideSheetNav && !isSettingsSubScreen) {
-                { sideSheetOpen = true }
+            LocalNavSheetTrigger provides if (useBottomSheetNav && !isSettingsSubScreen) {
+                { navSheetOpen = true }
             } else {
                 null
             },
@@ -297,7 +288,7 @@ class MainActivity : ThemedActivity(),
                             onOpenAbout = { currentDestination.value = MainDestination.ABOUT },
                             onClashApiChanged = { enableClashApiFlow.value = it },
                             onHideFromRecentAppsChanged = { applyHideFromRecentApps(it) },
-                            onUseSideSheetNavChanged = { useSideSheetNavFlow.value = it },
+                            onUseBottomSheetNavChanged = { useBottomSheetNavFlow.value = it },
                             onShowMessage = { msg, actionLabel, onAction ->
                                 showComposeSnackbar(msg, actionLabel = actionLabel, onAction = onAction)
                             },
@@ -327,7 +318,7 @@ class MainActivity : ThemedActivity(),
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
                         .height(
-                            if (useSideSheetNav) {
+                            if (useBottomSheetNav) {
                                 navBarInset + FloatingTabBarMargin + 96.dp
                             } else {
                                 floatingTabBarSpace() + 104.dp
@@ -359,13 +350,13 @@ class MainActivity : ThemedActivity(),
                             }
                         },
                         onUrlTest = { urlTest() },
-                        modifier = if (!useSideSheetNav && tabBarWidthPx > 0) {
+                        modifier = if (!useBottomSheetNav && tabBarWidthPx > 0) {
                             Modifier.width(with(density) { tabBarWidthPx.toDp() })
                         } else {
                             Modifier.fillMaxWidth().padding(horizontal = 24.dp)
                         },
                     )
-                    if (!useSideSheetNav) {
+                    if (!useBottomSheetNav) {
                         FloatingTabBar(
                             items = bottomTabs,
                             selectedIndex = { bottomTabs.indexOf(destination).coerceAtLeast(0) },
@@ -388,51 +379,13 @@ class MainActivity : ThemedActivity(),
                     }
                 }
 
-                if (useSideSheetNav) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.CenterStart)
-                            .fillMaxHeight()
-                            .width(20.dp)
-                            .pointerInput(Unit) {
-                                detectHorizontalDragGestures { _, dragAmount ->
-                                    if (dragAmount > 16f) sideSheetOpen = true
-                                }
-                            },
-                    )
-
-                    FloatingSideSheet(
-                        visible = sideSheetOpen,
-                        onDismiss = { sideSheetOpen = false },
+                if (useBottomSheetNav && navSheetOpen) {
+                    NavigationBottomSheet(
+                        onDismiss = { navSheetOpen = false },
                         items = bottomTabs,
                         selectedIndex = bottomTabs.indexOf(destination).coerceAtLeast(0),
                         onSelected = { idx -> currentDestination.value = bottomTabs[idx] },
-                        backdrop = backdrop,
-                        header = {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 20.dp, end = 8.dp, top = 14.dp, bottom = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.app_name),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                                IconButton(onClick = { sideSheetOpen = false }) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Close,
-                                        contentDescription = stringResource(R.string.close_navigation),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        },
+                        title = stringResource(R.string.app_name),
                         iconContent = { dest, _ ->
                             Icon(dest.icon, contentDescription = null, modifier = Modifier.size(22.dp))
                         },
@@ -845,7 +798,7 @@ class MainActivity : ThemedActivity(),
         when (key) {
             Key.SERVICE_MODE -> onBinderDied()
             Key.ENABLE_CLASH_API -> enableClashApiFlow.value = DataStore.enableClashAPI
-            Key.USE_SIDE_SHEET_NAV -> useSideSheetNavFlow.value = DataStore.useSideSheetNav
+            Key.USE_BOTTOM_SHEET_NAV -> useBottomSheetNavFlow.value = DataStore.useBottomSheetNav
             Key.PROXY_APPS, Key.BYPASS_MODE, Key.INDIVIDUAL -> {
                 if (DataStore.serviceState.canStop) {
                     showComposeSnackbar(
