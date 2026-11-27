@@ -83,6 +83,12 @@ import io.nekohasekai.sagernet.ui.components.DialogCancelButton
 import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
 import io.nekohasekai.sagernet.ui.components.DialogDestructiveButton
 import io.nekohasekai.sagernet.ui.components.DialogOptionRow
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.FileDownload
+import androidx.compose.material.icons.rounded.QrCode2
+import io.nekohasekai.sagernet.fmt.buildConfig
+import io.nekohasekai.sagernet.ktx.readableMessage
+import io.nekohasekai.sagernet.ui.components.QrCodeDialog
 
 @Suppress("UNCHECKED_CAST")
 abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
@@ -137,6 +143,24 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
             var showMoveDialog by remember { mutableStateOf(false) }
             val moveCandidateGroups = remember { initialMoveGroups }
             var moreMenuOpen by remember { mutableStateOf(false) }
+            var qrDialogData by remember { mutableStateOf<Pair<String, String>?>(null) }
+            var pendingExportConfig by remember { mutableStateOf<String?>(null) }
+            val exportConfigLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.CreateDocument("application/json")
+            ) { uri ->
+                val cfg = pendingExportConfig
+                pendingExportConfig = null
+                if (uri != null && !cfg.isNullOrBlank()) {
+                    runOnDefaultDispatcher {
+                        try {
+                            contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { it.write(cfg) }
+                            onMainDispatcher { showComposeSnackbar(getString(R.string.action_export_msg)) }
+                        } catch (e: Exception) {
+                            onMainDispatcher { showComposeSnackbar(e.readableMessage) }
+                        }
+                    }
+                }
+            }
 
             val store = rememberComposePreferenceStore(DataStore.profileCacheStore, markProfileDirty = true)
 
@@ -206,6 +230,69 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                         onClick = {
                                             moreMenuOpen = false
                                             showMoveDialog = true
+                                        },
+                                    )
+                                }
+                                if (editingId != 0L) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.share_qr_nfc)) },
+                                        leadingIcon = { Icon(Icons.Rounded.QrCode2, null) },
+                                        onClick = {
+                                            moreMenuOpen = false
+                                            proxyEntity?.let { ent ->
+                                                qrDialogData = ent.displayName() to ent.toStdLink()
+                                            }
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.action_export_clipboard)) },
+                                        leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
+                                        onClick = {
+                                            moreMenuOpen = false
+                                            proxyEntity?.let { ent ->
+                                                SagerNet.trySetPrimaryClip(ent.toStdLink())
+                                                showComposeSnackbar(getString(R.string.copy_success))
+                                            }
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.menu_configuration)) },
+                                        leadingIcon = { Icon(Icons.Rounded.DataObject, null) },
+                                        onClick = {
+                                            moreMenuOpen = false
+                                            proxyEntity?.let { ent ->
+                                                runOnDefaultDispatcher {
+                                                    try {
+                                                        val json = buildConfig(ent).config
+                                                        onMainDispatcher {
+                                                            SagerNet.trySetPrimaryClip(json)
+                                                            showComposeSnackbar(getString(R.string.copy_success))
+                                                        }
+                                                    } catch (e: Exception) {
+                                                        onMainDispatcher { showComposeSnackbar(e.readableMessage) }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.action_export_file)) },
+                                        leadingIcon = { Icon(Icons.Rounded.FileDownload, null) },
+                                        onClick = {
+                                            moreMenuOpen = false
+                                            proxyEntity?.let { ent ->
+                                                runOnDefaultDispatcher {
+                                                    try {
+                                                        val json = buildConfig(ent).config
+                                                        onMainDispatcher {
+                                                            pendingExportConfig = json
+                                                            exportConfigLauncher.launch("${ent.displayName()}.json")
+                                                        }
+                                                    } catch (e: Exception) {
+                                                        onMainDispatcher { showComposeSnackbar(e.readableMessage) }
+                                                    }
+                                                }
+                                            }
                                         },
                                     )
                                 }
@@ -289,6 +376,19 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                         .align(Alignment.BottomCenter)
                         .navigationBarsPadding()
                         .padding(bottom = 84.dp),
+                )
+            }
+
+            qrDialogData?.let { (title, link) ->
+                QrCodeDialog(
+                    title = title,
+                    content = link,
+                    onCopy = {
+                        SagerNet.trySetPrimaryClip(link)
+                        showComposeSnackbar(getString(R.string.copy_success))
+                        qrDialogData = null
+                    },
+                    onDismiss = { qrDialogData = null },
                 )
             }
 

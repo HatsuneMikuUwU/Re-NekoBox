@@ -76,6 +76,7 @@ import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.rememberComposePreferenceStore
 import io.nekohasekai.sagernet.ui.components.rememberFabExpanded
 import io.nekohasekai.sagernet.ui.profile.ConfigEditActivity
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 class RouteSettingsActivity : ThemedActivity() {
 
@@ -341,14 +342,13 @@ class RouteSettingsActivity : ThemedActivity() {
                 ExtendedFloatingActionButton(
                     onClick = { saveRoute() },
                     expanded = fabExpanded,
+                    shape = RoundedCornerShape(16.dp),
                     icon = { Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply)) },
                     text = { Text(stringResource(R.string.apply)) },
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .navigationBarsPadding()
-                        .padding(end = 16.dp, bottom = 16.dp),
+                        .padding(16.dp),
                 )
             }
 

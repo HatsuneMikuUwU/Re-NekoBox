@@ -83,6 +83,7 @@ import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.rememberComposePreferenceStore
 import io.nekohasekai.sagernet.ui.components.rememberFabExpanded
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 class GroupSettingsActivity : ThemedActivity() {
 
@@ -400,14 +401,13 @@ class GroupSettingsActivity : ThemedActivity() {
                 ExtendedFloatingActionButton(
                     onClick = { saveGroup() },
                     expanded = fabExpanded,
+                    shape = RoundedCornerShape(16.dp),
                     icon = { Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply)) },
                     text = { Text(stringResource(R.string.apply)) },
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .navigationBarsPadding()
-                        .padding(end = 16.dp, bottom = 16.dp),
+                        .padding(16.dp),
                 )
             }
 
