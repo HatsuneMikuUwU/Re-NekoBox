@@ -45,7 +45,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,6 +77,7 @@ import io.nekohasekai.sagernet.ui.components.LocalEditorListState
 import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
+import io.nekohasekai.sagernet.ui.components.rememberFabExpanded
 import io.nekohasekai.sagernet.ui.components.ComposePreferenceStore
 import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
 import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceComposeScreen
@@ -169,11 +169,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
             val topInset = floatingTopBarSpace()
             val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             val listState = rememberLazyListState()
-            val fabExpanded by remember {
-                derivedStateOf {
-                    listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 24
-                }
-            }
+            val fabExpanded = rememberFabExpanded(listState)
 
             Box(
                 modifier = Modifier

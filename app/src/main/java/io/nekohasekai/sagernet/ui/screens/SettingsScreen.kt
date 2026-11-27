@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountTree
 import androidx.compose.material.icons.rounded.AltRoute
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.BatteryChargingFull
@@ -455,6 +456,7 @@ fun SettingsScreen(
                     StoreSwitchPref(
                         store = store,
                         key = Key.ENABLE_DNS_ROUTING,
+                        icon = Icons.Rounded.AccountTree,
                         titleRes = R.string.enable_dns_routing,
                         summaryRes = R.string.dns_routing_message,
                         defaultValue = true,

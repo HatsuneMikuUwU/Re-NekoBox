@@ -34,7 +34,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +58,7 @@ import io.nekohasekai.sagernet.ui.components.FloatingTopBar
 import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
+import io.nekohasekai.sagernet.ui.components.rememberFabExpanded
 import io.nekohasekai.sagernet.ui.components.PrefCategory
 import io.nekohasekai.sagernet.ui.components.StoreEditTextPref
 import io.nekohasekai.sagernet.ui.components.StoreListPref
@@ -113,11 +113,7 @@ class GroupSettingsActivity : ThemedActivity() {
             val topInset = floatingTopBarSpace()
             val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             val listState = rememberLazyListState()
-            val fabExpanded by remember {
-                derivedStateOf {
-                    listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 24
-                }
-            }
+            val fabExpanded = rememberFabExpanded(listState)
 
             fun saveGroup() {
                 runOnDefaultDispatcher {

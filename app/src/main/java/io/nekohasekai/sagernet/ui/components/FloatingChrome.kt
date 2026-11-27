@@ -54,6 +54,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -135,6 +136,29 @@ val LocalBottomInset = compositionLocalOf { 0.dp }
 val LocalBlurBackdrop = compositionLocalOf<LayerBackdrop?> { null }
 val LocalEditorListState = compositionLocalOf<LazyListState?> { null }
 val LocalEditorContentPadding = compositionLocalOf<PaddingValues?> { null }
+
+@Composable
+fun rememberFabExpanded(listState: LazyListState): Boolean {
+    var expanded by remember { mutableStateOf(true) }
+    var previousIndex by remember(listState) { mutableIntStateOf(listState.firstVisibleItemIndex) }
+    var previousOffset by remember(listState) { mutableIntStateOf(listState.firstVisibleItemScrollOffset) }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+            .collect { (index, offset) ->
+                if (index == 0 && offset == 0) {
+                    expanded = true
+                } else if (index != previousIndex) {
+                    expanded = index < previousIndex
+                } else if (abs(offset - previousOffset) > 12) {
+                    expanded = offset < previousOffset
+                }
+                previousIndex = index
+                previousOffset = offset
+            }
+    }
+    return expanded
+}
 
 @Composable
 fun floatingTopBarSpace(): Dp =
