@@ -55,13 +55,15 @@ class ShadowsocksSettingsActivity : ProfileSettingsActivity<ShadowsocksBean>() {
     }
 
     override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.Shadowsocks
-    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD)
+    override val passwordKeys: Set<String> = setOf("password")
 
     override fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean {
-        val mux = store.getBoolean("enableMux", false)
-        val brutal = store.getBoolean("enableBrutal", false)
+        val muxMode = store.getString("muxMode", "0").toIntOrNull() ?: 0
+        val muxBrutal = store.getBoolean("muxBrutal", false)
         return when (key) {
-            "brutalUpMbps", "brutalDownMbps" -> mux && brutal
+            "muxConcurrency" -> muxMode == 0
+            "muxMaxConnections", "muxMinStreams" -> muxMode != 0
+            "muxBrutalUpMbps", "muxBrutalDownMbps" -> muxBrutal
             else -> true
         }
     }

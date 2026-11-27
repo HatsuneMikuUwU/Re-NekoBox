@@ -1,6 +1,7 @@
 package io.nekohasekai.sagernet.ui.profile
 import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
 import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceSchemas
+import io.nekohasekai.sagernet.ui.components.ComposePreferenceStore
 
 import android.os.Bundle
 import io.nekohasekai.sagernet.Key
@@ -47,5 +48,12 @@ class TuicSettingsActivity : ProfileSettingsActivity<TuicBean>() {
 
     override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.Tuic
     override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD)
+
+    override fun isPreferenceEnabled(key: String, store: ComposePreferenceStore): Boolean {
+        if (key == Key.SERVER_SNI) {
+            return !store.getBoolean(Key.SERVER_DISABLE_SNI, false)
+        }
+        return true
+    }
 
 }

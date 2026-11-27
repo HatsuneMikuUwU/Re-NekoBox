@@ -87,18 +87,66 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
 
 
     override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.StandardV2Ray
-    override val passwordKeys: Set<String> = setOf(Key.SERVER_USER_ID, Key.SERVER_PASSWORD)
+    override val passwordKeys: Set<String> = setOf("uuid", "password")
 
     override fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean {
         val isHttp = tmpBean is HttpBean
         val isVmess = tmpBean is VMessBean && !(tmpBean as VMessBean).isVLESS
         val isVless = tmpBean is VMessBean && (tmpBean as VMessBean).isVLESS
+        val network = store.getString("type", "tcp")
+        val security = store.getString("security", "")
+        val isTls = "tls" in security
+        val muxMode = store.getString("muxMode", "0").toIntOrNull() ?: 0
+        val muxBrutal = store.getBoolean("muxBrutal", false)
         return when (key) {
-            Key.SERVER_USER_ID -> !isHttp
+            "type", "uuid" -> !isHttp
+            "packetEncoding" -> isVmess || isVless
             "alterId" -> isVmess
-            Key.SERVER_ENCRYPTION -> isVmess || isVless
-            Key.SERVER_USERNAME, Key.SERVER_PASSWORD -> isHttp
+            "encryption" -> isVmess || isVless
+            "vlessEncryption" -> isVless
+            "username", "password" -> isHttp
+            "host" -> !isHttp && network in setOf("http", "ws", "httpupgrade", "xhttp")
+            "path" -> !isHttp && network in setOf("http", "ws", "grpc", "httpupgrade", "xhttp")
+            "mKcpSeed", "headerType", "kcpMtu", "kcpTti", "kcpCwndMultiplier" -> !isHttp && network == "kcp"
+            "serverWsCategory" -> !isHttp && network == "ws"
+            "serverXhttpCategory" -> !isHttp && network == "xhttp"
+            "serverSecurityCategory", "serverTlsCamouflageCategory", "serverECHCategory" -> isTls
+            "muxConcurrency" -> muxMode == 0
+            "muxMaxConnections", "muxMinStreams" -> muxMode != 0
+            "muxBrutalUpMbps", "muxBrutalDownMbps" -> muxBrutal
             else -> true
         }
+    }
+
+    override fun resolvePreferenceTitleRes(key: String, store: ComposePreferenceStore): Int? {
+        val isVless = tmpBean is VMessBean && (tmpBean as VMessBean).isVLESS
+        val network = store.getString("type", "tcp")
+        return when (key) {
+            "uuid" -> if (tmpBean is TrojanBean) R.string.password else null
+            "encryption" -> if (isVless) R.string.xtls_flow else null
+            "host" -> when (network) {
+                "ws" -> R.string.ws_host
+                "httpupgrade" -> R.string.http_upgrade_host
+                "xhttp" -> R.string.xhttp_host
+                else -> R.string.http_host
+            }
+            "path" -> when (network) {
+                "ws" -> R.string.ws_path
+                "grpc" -> R.string.grpc_service_name
+                "httpupgrade" -> R.string.http_upgrade_path
+                "xhttp" -> R.string.xhttp_path
+                else -> R.string.http_path
+            }
+            else -> null
+        }
+    }
+
+    override fun resolvePreferenceListOptions(key: String, store: ComposePreferenceStore): Pair<List<String>, List<String>>? {
+        val isVless = tmpBean is VMessBean && (tmpBean as VMessBean).isVLESS
+        if (key == "encryption" && isVless) {
+            val arr = resources.getStringArray(R.array.xtls_flow_value).toList()
+            return arr to arr
+        }
+        return null
     }
 }

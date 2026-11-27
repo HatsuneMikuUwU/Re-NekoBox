@@ -85,9 +85,14 @@ fun ProtocolPreferenceComposeScreen(
     store: ComposePreferenceStore,
     passwordKeys: Set<String> = emptySet(),
     isKeyVisible: (String, ComposePreferenceStore) -> Boolean = { _, _ -> true },
+    isKeyEnabled: (String, ComposePreferenceStore) -> Boolean = { _, _ -> true },
+    resolveTitleRes: (String, ComposePreferenceStore) -> Int? = { _, _ -> null },
+    resolveListOptions: (String, ComposePreferenceStore) -> Pair<List<String>, List<String>>? = { _, _ -> null },
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    @Suppress("UNUSED_VARIABLE")
+    val revision = store.revision
 
     val listState = LocalEditorListState.current ?: rememberLazyListState()
     val contentPadding = LocalEditorContentPadding.current ?: PaddingValues(vertical = 8.dp)
@@ -116,8 +121,10 @@ fun ProtocolPreferenceComposeScreen(
                                 idx == visibleItems.lastIndex -> ExpressiveGroupPosition.BOTTOM
                                 else -> ExpressiveGroupPosition.MIDDLE
                             }
-                            val enabled = item.dependency.isNullOrBlank() || store.getBoolean(item.dependency, false)
-                            val titleStr = item.title.resolve()
+                            val enabled = (item.dependency.isNullOrBlank() || store.getBoolean(item.dependency, false)) &&
+                                (item.key.isBlank() || isKeyEnabled(item.key, store))
+                            val overrideTitleRes = if (item.key.isBlank()) null else resolveTitleRes(item.key, store)
+                            val titleStr = overrideTitleRes?.let { stringResource(it) } ?: item.title.resolve()
                             val summaryStr = item.summary?.resolve()
 
                             when (item.type) {
@@ -151,8 +158,9 @@ fun ProtocolPreferenceComposeScreen(
                                     )
                                 }
                                 PrefFieldType.LIST -> {
-                                    val entries = item.entriesRes?.let { stringArrayResource(it).toList() } ?: emptyList()
-                                    val values = item.entryValuesRes?.let { stringArrayResource(it).toList() } ?: entries
+                                    val dynamicOptions = if (item.key.isBlank()) null else resolveListOptions(item.key, store)
+                                    val entries = dynamicOptions?.first ?: item.entriesRes?.let { stringArrayResource(it).toList() } ?: emptyList()
+                                    val values = dynamicOptions?.second ?: item.entryValuesRes?.let { stringArrayResource(it).toList() } ?: entries
                                     StoreListPrefRaw(
                                         store = store,
                                         key = item.key,

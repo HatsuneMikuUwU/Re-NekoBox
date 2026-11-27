@@ -234,6 +234,8 @@ class GroupSettingsActivity : ThemedActivity() {
                                         titleRes = R.string.deduplication,
                                         summaryRes = R.string.deduplication_sum,
                                     )
+                                    val filterMode = store.getString("subscriptionFilterMode", "0").toIntOrNull() ?: 0
+                                    val showFilterRegex = filterMode != 0
                                     StoreListPref(
                                         store = store,
                                         key = "subscriptionFilterMode",
@@ -242,14 +244,17 @@ class GroupSettingsActivity : ThemedActivity() {
                                         entryValuesRes = R.array.int_array_3,
                                         defaultValue = "0",
                                         icon = Icons.Rounded.FilterList,
+                                        position = if (showFilterRegex) ExpressiveGroupPosition.MIDDLE else ExpressiveGroupPosition.BOTTOM,
                                     )
-                                    StoreEditTextPref(
-                                        store = store,
-                                        key = "subscriptionFilterRegex",
-                                        icon = Icons.Rounded.FilterAlt,
-                                        titleRes = R.string.filter_regex,
-                                        position = ExpressiveGroupPosition.BOTTOM,
-                                    )
+                                    if (showFilterRegex) {
+                                        StoreEditTextPref(
+                                            store = store,
+                                            key = "subscriptionFilterRegex",
+                                            icon = Icons.Rounded.FilterAlt,
+                                            titleRes = R.string.filter_regex,
+                                            position = ExpressiveGroupPosition.BOTTOM,
+                                        )
+                                    }
                                 }
                             }
 

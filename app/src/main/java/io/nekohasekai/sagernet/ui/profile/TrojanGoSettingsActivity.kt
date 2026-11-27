@@ -59,14 +59,14 @@ class TrojanGoSettingsActivity : ProfileSettingsActivity<TrojanGoBean>() {
     val trojanGoNetworks = app.resources.getStringArray(R.array.trojan_go_networks_value)
 
     override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.TrojanGo
-    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD, Key.SERVER_ENCRYPTION)
+    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD, Key.SERVER_PASSWORD1)
 
     override fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean {
         val network = store.getString(Key.SERVER_NETWORK, "original")
         val encryption = store.getString(Key.SERVER_ENCRYPTION, "none")
         return when (key) {
             Key.SERVER_WS_CATEGORY, Key.SERVER_HOST, Key.SERVER_PATH -> network == "ws"
-            Key.SERVER_SS_CATEGORY, Key.SERVER_METHOD -> encryption == "ss"
+            Key.SERVER_SS_CATEGORY, Key.SERVER_METHOD, Key.SERVER_PASSWORD1 -> encryption == "ss"
             else -> true
         }
     }

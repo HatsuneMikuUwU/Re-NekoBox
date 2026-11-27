@@ -60,15 +60,19 @@ class HysteriaSettingsActivity : ProfileSettingsActivity<HysteriaBean>() {
     override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD)
 
     override fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean {
-        val version = store.getString(Key.SERVER_PROTOCOL, "2").toIntOrNull() ?: 2
+        val version = store.getString(Key.PROTOCOL_VERSION, "2").toIntOrNull() ?: 2
+        val authType = store.getString(Key.SERVER_AUTH_TYPE, "0")
         return if (version == 2) {
             key !in setOf(
                 Key.SERVER_AUTH_TYPE,
+                Key.SERVER_PROTOCOL,
                 Key.SERVER_ALPN,
                 Key.SERVER_STREAM_RECEIVE_WINDOW,
                 Key.SERVER_CONNECTION_RECEIVE_WINDOW,
                 Key.SERVER_DISABLE_MTU_DISCOVERY,
             )
-        } else true
+        } else {
+            if (key == Key.SERVER_PASSWORD) authType != "${HysteriaBean.TYPE_NONE}" else true
+        }
     }
 }

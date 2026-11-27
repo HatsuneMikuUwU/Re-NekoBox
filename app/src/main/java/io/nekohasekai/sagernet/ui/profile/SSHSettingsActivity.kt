@@ -46,13 +46,13 @@ class SSHSettingsActivity : ProfileSettingsActivity<SSHBean>() {
     }
 
     override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.SSH
-    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD, Key.SERVER_PRIVATE_KEY, "serverPrivateKeyPassword")
+    override val passwordKeys: Set<String> = setOf(Key.SERVER_PASSWORD, Key.SERVER_PRIVATE_KEY, Key.SERVER_PASSWORD1)
 
     override fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean {
         val authType = store.getString(Key.SERVER_AUTH_TYPE, "0").toIntOrNull() ?: 0
         return when (key) {
             Key.SERVER_PASSWORD -> authType == SSHBean.AUTH_TYPE_PASSWORD
-            Key.SERVER_PRIVATE_KEY, "serverPrivateKeyPassword" -> authType == SSHBean.AUTH_TYPE_PRIVATE_KEY
+            Key.SERVER_PRIVATE_KEY, Key.SERVER_PASSWORD1 -> authType == SSHBean.AUTH_TYPE_PRIVATE_KEY
             else -> true
         }
     }

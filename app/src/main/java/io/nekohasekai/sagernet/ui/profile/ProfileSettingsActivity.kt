@@ -104,6 +104,9 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
     open val passwordKeys: Set<String> = emptySet()
 
     open fun isPreferenceVisible(key: String, store: ComposePreferenceStore): Boolean = true
+    open fun isPreferenceEnabled(key: String, store: ComposePreferenceStore): Boolean = true
+    open fun resolvePreferenceTitleRes(key: String, store: ComposePreferenceStore): Int? = null
+    open fun resolvePreferenceListOptions(key: String, store: ComposePreferenceStore): Pair<List<String>, List<String>>? = null
 
     val proxyEntity by lazy { SagerDatabase.proxyDao.getById(DataStore.editingId) }
     protected var isSubscription by Delegates.notNull<Boolean>()
@@ -411,6 +414,9 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
             store = store,
             passwordKeys = passwordKeys,
             isKeyVisible = ::isPreferenceVisible,
+            isKeyEnabled = ::isPreferenceEnabled,
+            resolveTitleRes = ::resolvePreferenceTitleRes,
+            resolveListOptions = ::resolvePreferenceListOptions,
         )
     }
 
