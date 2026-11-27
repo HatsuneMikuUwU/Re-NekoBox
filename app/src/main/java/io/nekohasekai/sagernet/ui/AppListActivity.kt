@@ -49,6 +49,14 @@ import io.nekohasekai.sagernet.ui.components.ExpressiveSearchField
 import io.nekohasekai.sagernet.ui.components.ExpressiveSurfaceItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.material.icons.rounded.ClearAll
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.ContentPaste
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.SwapHoriz
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import io.nekohasekai.sagernet.SagerNet
 
 class AppListActivity : ThemedActivity() {
 
@@ -106,12 +114,61 @@ class AppListActivity : ThemedActivity() {
                             }
                         },
                         actions = {
+                            var moreOpen by remember { mutableStateOf(false) }
                             IconButton(onClick = {
                                 DataStore.routePackages = selectedPackages.joinToString("\n")
                                 setResult(RESULT_OK)
                                 finish()
                             }) {
                                 Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply))
+                            }
+                            Box {
+                                IconButton(onClick = { moreOpen = true }) {
+                                    Icon(Icons.Rounded.MoreVert, contentDescription = "More")
+                                }
+                                DropdownMenu(expanded = moreOpen, onDismissRequest = { moreOpen = false }) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.action_invert_selections)) },
+                                        leadingIcon = { Icon(Icons.Rounded.SwapHoriz, null) },
+                                        onClick = {
+                                            moreOpen = false
+                                            val allVisible = filtered.map { it.packageName }.toSet()
+                                            selectedPackages = (selectedPackages - allVisible) + (allVisible - selectedPackages)
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.clear_selections)) },
+                                        leadingIcon = { Icon(Icons.Rounded.ClearAll, null) },
+                                        onClick = {
+                                            moreOpen = false
+                                            selectedPackages = emptySet()
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.action_export_clipboard)) },
+                                        leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
+                                        onClick = {
+                                            moreOpen = false
+                                            SagerNet.trySetPrimaryClip(selectedPackages.joinToString("\n"))
+                                            showComposeSnackbar(getString(R.string.copy_success))
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.action_import)) },
+                                        leadingIcon = { Icon(Icons.Rounded.ContentPaste, null) },
+                                        onClick = {
+                                            moreOpen = false
+                                            val clip = SagerNet.getClipboardText()
+                                            if (clip.isNotBlank()) {
+                                                val imported = clip.lineSequence()
+                                                    .map { it.trim() }
+                                                    .filter { it.isNotEmpty() }
+                                                    .toSet()
+                                                selectedPackages = selectedPackages + imported
+                                            }
+                                        },
+                                    )
+                                }
                             }
                         },
                     )

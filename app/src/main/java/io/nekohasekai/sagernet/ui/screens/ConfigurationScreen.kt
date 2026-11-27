@@ -137,6 +137,11 @@ import androidx.compose.material.icons.rounded.VpnKey
 import androidx.compose.material.icons.rounded.VpnLock
 import androidx.compose.material.icons.rounded.WifiTethering
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.CloudSync
+import androidx.compose.material.icons.rounded.LayersClear
+import io.nekohasekai.sagernet.GroupType
+import io.nekohasekai.sagernet.group.GroupUpdater
 
 @Composable
 fun ConfigurationScreen(
@@ -185,6 +190,7 @@ fun ConfigurationScreen(
     var showMoreMenu by remember { mutableStateOf(false) }
     var showSortMenu by remember { mutableStateOf(false) }
     var isTestingAll by remember { mutableStateOf(false) }
+    var globalMode by remember { mutableStateOf(DataStore.globalMode) }
 
     var qrDialogData by remember { mutableStateOf<Pair<String, String>?>(null) }
     var deleteConfirmEntity by remember { mutableStateOf<ProxyEntity?>(null) }
@@ -721,6 +727,54 @@ fun ConfigurationScreen(
                                             profiles = profiles.map { it.copy(tx = 0L, rx = 0L) }
                                             runOnDefaultDispatcher {
                                                 ProfileManager.resetTraffic(ids)
+                                            }
+                                        },
+                                    )
+                                    val activeGroup = groups.firstOrNull { it.id == selectedGroupId }
+                                    if (activeGroup?.type == GroupType.SUBSCRIPTION) {
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(R.string.update_current_subscription)) },
+                                            leadingIcon = { Icon(Icons.Rounded.CloudSync, null) },
+                                            onClick = {
+                                                showMoreMenu = false
+                                                GroupUpdater.startUpdate(activeGroup, true)
+                                            },
+                                        )
+                                    }
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.remove_duplicate)) },
+                                        leadingIcon = { Icon(Icons.Rounded.LayersClear, null) },
+                                        enabled = profiles.size > 1,
+                                        onClick = {
+                                            showMoreMenu = false
+                                            val snapshot = profiles.toList()
+                                            runOnDefaultDispatcher {
+                                                val seen = HashSet<String>()
+                                                val duplicates = snapshot.filter { entity ->
+                                                    val key = "${entity.type}:${entity.requireBean().displayAddress()}:${entity.requireBean().name}:${entity.toStdLink()}"
+                                                    !seen.add(key)
+                                                }
+                                                duplicates.forEach { ProfileManager.deleteProfile(it.groupId, it.id) }
+                                                onMainDispatcher {
+                                                    onShowMessage(context.getString(R.string.removed, duplicates.size))
+                                                }
+                                            }
+                                        },
+                                    )
+                                    HorizontalDivider()
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.global_mode)) },
+                                        leadingIcon = { Icon(Icons.Rounded.Public, null) },
+                                        trailingIcon = if (globalMode) {
+                                            { Icon(Icons.Rounded.Check, null) }
+                                        } else null,
+                                        onClick = {
+                                            showMoreMenu = false
+                                            val next = !globalMode
+                                            globalMode = next
+                                            DataStore.globalMode = next
+                                            if (DataStore.serviceState.started) {
+                                                SagerNet.reloadService()
                                             }
                                         },
                                     )

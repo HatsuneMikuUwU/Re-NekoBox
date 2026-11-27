@@ -79,6 +79,11 @@ import io.nekohasekai.sagernet.ui.components.QrCodeDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.rounded.FileDownload
+import io.nekohasekai.sagernet.ktx.onMainDispatcher
+import io.nekohasekai.sagernet.ktx.readableMessage
 
 @Composable
 fun GroupScreen(
@@ -97,6 +102,25 @@ fun GroupScreen(
     var showUpdateAllDialog by remember { mutableStateOf(false) }
     var deleteConfirmGroup by remember { mutableStateOf<ProxyGroup?>(null) }
     var qrData by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var pendingExportText by remember { mutableStateOf<String?>(null) }
+    val exportFileLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/plain")
+    ) { uri ->
+        val content = pendingExportText
+        pendingExportText = null
+        if (uri != null && !content.isNullOrBlank()) {
+            runOnDefaultDispatcher {
+                try {
+                    context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use {
+                        it.write(content)
+                    }
+                    onMainDispatcher { onShowMessage(context.getString(R.string.action_export_msg)) }
+                } catch (e: Exception) {
+                    onMainDispatcher { onShowMessage(e.readableMessage) }
+                }
+            }
+        }
+    }
 
     fun reload() {
         scope.launch {
@@ -181,6 +205,34 @@ fun GroupScreen(
                         },
                         onShowQr = {
                             qrData = group.displayName() to group.toUniversalLink()
+                        },
+                        onExportProfilesClipboard = {
+                            runOnDefaultDispatcher {
+                                val links = SagerDatabase.proxyDao.getByGroup(group.id)
+                                    .joinToString("\n") { it.toStdLink() }
+                                onMainDispatcher {
+                                    if (links.isBlank()) {
+                                        onShowMessage(context.getString(R.string.no_proxies_found))
+                                    } else {
+                                        SagerNet.trySetPrimaryClip(links)
+                                        onShowMessage(context.getString(R.string.copy_success))
+                                    }
+                                }
+                            }
+                        },
+                        onExportProfilesFile = {
+                            runOnDefaultDispatcher {
+                                val links = SagerDatabase.proxyDao.getByGroup(group.id)
+                                    .joinToString("\n") { it.toStdLink() }
+                                onMainDispatcher {
+                                    if (links.isBlank()) {
+                                        onShowMessage(context.getString(R.string.no_proxies_found))
+                                    } else {
+                                        pendingExportText = links
+                                        exportFileLauncher.launch("${group.displayName()}.txt")
+                                    }
+                                }
+                            }
                         },
                         onClearProfiles = {
                             runOnDefaultDispatcher {
@@ -280,6 +332,8 @@ private fun GroupExpressiveCard(
     onUpdateSubscription: () -> Unit,
     onCopySubscriptionLink: () -> Unit,
     onShowQr: () -> Unit,
+    onExportProfilesClipboard: () -> Unit,
+    onExportProfilesFile: () -> Unit,
     onClearProfiles: () -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -358,6 +412,18 @@ private fun GroupExpressiveCard(
                                 text = { Text(stringResource(R.string.action_export_clipboard)) },
                                 leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
                                 onClick = { menuExpanded = false; onCopySubscriptionLink() },
+                            )
+                        }
+                        if (profileCount > 0) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.action_export_clipboard)) },
+                                leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
+                                onClick = { menuOpen = false; onExportProfilesClipboard() },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.action_export_file)) },
+                                leadingIcon = { Icon(Icons.Rounded.FileDownload, null) },
+                                onClick = { menuOpen = false; onExportProfilesFile() },
                             )
                         }
                         DropdownMenuItem(
