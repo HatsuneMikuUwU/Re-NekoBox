@@ -1,16 +1,9 @@
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package io.nekohasekai.sagernet.ui.screens
 
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import io.nekohasekai.sagernet.ui.components.AppDialog
 import io.nekohasekai.sagernet.ui.components.DialogCancelButton
 import io.nekohasekai.sagernet.ui.components.DialogDestructiveButton
-import io.nekohasekai.sagernet.ui.components.SheetItemSurface
-import io.nekohasekai.sagernet.ui.components.WindowBlurEffect
-import io.nekohasekai.sagernet.ui.components.groupedSheetItemShape
 import android.content.Intent
 import android.os.SystemClock
 import android.text.format.Formatter
@@ -69,7 +62,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -123,6 +115,28 @@ import moe.matsuri.nb4a.proxy.config.ConfigSettingActivity
 import moe.matsuri.nb4a.proxy.shadowtls.ShadowTLSSettingsActivity
 import java.net.InetSocketAddress
 import java.net.Socket
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.Code
+import androidx.compose.material.icons.rounded.EnhancedEncryption
+import androidx.compose.material.icons.rounded.Hub
+import androidx.compose.material.icons.rounded.Https
+import androidx.compose.material.icons.rounded.Lan
+import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.RocketLaunch
+import androidx.compose.material.icons.rounded.Security
+import androidx.compose.material.icons.rounded.Shield
+import androidx.compose.material.icons.rounded.Stream
+import androidx.compose.material.icons.rounded.Terminal
+import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.VerifiedUser
+import androidx.compose.material.icons.rounded.VpnKey
+import androidx.compose.material.icons.rounded.VpnLock
+import androidx.compose.material.icons.rounded.WifiTethering
+import androidx.compose.material3.HorizontalDivider
 
 @Composable
 fun ConfigurationScreen(
@@ -142,7 +156,8 @@ fun ConfigurationScreen(
 
     var searchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
-    var showAddSheet by remember { mutableStateOf(false) }
+    var showAddMenu by remember { mutableStateOf(false) }
+    var showManualMenu by remember { mutableStateOf(false) }
     var showMoreMenu by remember { mutableStateOf(false) }
     var showSortMenu by remember { mutableStateOf(false) }
     var isTestingAll by remember { mutableStateOf(false) }
@@ -438,8 +453,164 @@ fun ConfigurationScreen(
                             Icon(Icons.Rounded.Search, contentDescription = stringResource(R.string.search))
                         }
                         if (!selectMode) {
-                            IconButton(onClick = { showAddSheet = true }) {
-                                Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_profile))
+                            Box {
+                                IconButton(onClick = { showAddMenu = true }) {
+                                    Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_profile))
+                                }
+                                DropdownMenu(
+                                    expanded = showAddMenu,
+                                    onDismissRequest = { showAddMenu = false },
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.add_profile_methods_scan_qr_code)) },
+                                        leadingIcon = { Icon(Icons.Rounded.QrCodeScanner, null) },
+                                        onClick = {
+                                            showAddMenu = false
+                                            context.startActivity(Intent(context, ScannerActivity::class.java))
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.action_import)) },
+                                        leadingIcon = { Icon(Icons.Rounded.ContentPaste, null) },
+                                        onClick = {
+                                            showAddMenu = false
+                                            val text = SagerNet.getClipboardText()
+                                            if (text.isBlank()) {
+                                                onShowMessage(context.getString(R.string.action_import_err))
+                                            } else {
+                                                runOnDefaultDispatcher {
+                                                    try {
+                                                        val parsed = parseProxies(text)
+                                                        if (parsed.isEmpty()) {
+                                                            onMainDispatcher { onShowMessage(context.getString(R.string.no_proxies_found)) }
+                                                        } else {
+                                                            val target = DataStore.selectedGroupForImport()
+                                                            parsed.forEach { ProfileManager.createProfile(target, it) }
+                                                            onMainDispatcher {
+                                                                onShowMessage(context.resources.getQuantityString(R.plurals.added, parsed.size, parsed.size))
+                                                            }
+                                                        }
+                                                    } catch (e: Exception) {
+                                                        onMainDispatcher { onShowMessage(e.readableMessage) }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.action_import_file)) },
+                                        leadingIcon = { Icon(Icons.Rounded.FileOpen, null) },
+                                        onClick = {
+                                            showAddMenu = false
+                                            importFileLauncher.launch("*/*")
+                                        },
+                                    )
+                                    HorizontalDivider()
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.add_profile_methods_manual_settings)) },
+                                        leadingIcon = { Icon(Icons.Rounded.Tune, null) },
+                                        trailingIcon = { Icon(Icons.Rounded.ChevronRight, null) },
+                                        onClick = {
+                                            showAddMenu = false
+                                            showManualMenu = true
+                                        },
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = showManualMenu,
+                                    onDismissRequest = { showManualMenu = false },
+                                ) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = stringResource(R.string.add_profile_methods_manual_settings),
+                                                fontWeight = FontWeight.SemiBold,
+                                            )
+                                        },
+                                        leadingIcon = { Icon(Icons.AutoMirrored.Rounded.ArrowBack, null) },
+                                        onClick = {
+                                            showManualMenu = false
+                                            showAddMenu = true
+                                        },
+                                    )
+                                    HorizontalDivider()
+                                    val manualProtocols: List<Triple<String, androidx.compose.ui.graphics.vector.ImageVector, () -> Unit>> = listOf(
+                                        Triple(stringResource(R.string.action_socks), Icons.Rounded.Router) {
+                                            context.startActivity(Intent(context, SocksSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_http), Icons.Rounded.Public) {
+                                            context.startActivity(Intent(context, HttpSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_shadowsocks), Icons.Rounded.Shield) {
+                                            context.startActivity(Intent(context, ShadowsocksSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_shadowsocksr), Icons.Rounded.Security) {
+                                            context.startActivity(Intent(context, ShadowsocksRSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_vmess), Icons.Rounded.Hub) {
+                                            context.startActivity(Intent(context, VMessSettingsActivity::class.java))
+                                        },
+                                        Triple("VLESS", Icons.Rounded.Bolt) {
+                                            context.startActivity(
+                                                Intent(context, VMessSettingsActivity::class.java).apply {
+                                                    putExtra("vless", true)
+                                                }
+                                            )
+                                        },
+                                        Triple(stringResource(R.string.action_trojan), Icons.Rounded.VpnKey) {
+                                            context.startActivity(Intent(context, TrojanSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_trojan_go), Icons.Rounded.EnhancedEncryption) {
+                                            context.startActivity(Intent(context, TrojanGoSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_mieru), Icons.Rounded.Lan) {
+                                            context.startActivity(Intent(context, MieruSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_naive), Icons.Rounded.VerifiedUser) {
+                                            context.startActivity(Intent(context, NaiveSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_hysteria), Icons.Rounded.Speed) {
+                                            context.startActivity(Intent(context, HysteriaSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_tuic), Icons.Rounded.RocketLaunch) {
+                                            context.startActivity(Intent(context, TuicSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_juicity), Icons.Rounded.Stream) {
+                                            context.startActivity(Intent(context, JuicitySettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_shadowtls), Icons.Rounded.Lock) {
+                                            context.startActivity(Intent(context, ShadowTLSSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_anytls), Icons.Rounded.Https) {
+                                            context.startActivity(Intent(context, AnyTLSSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_snell), Icons.Rounded.WifiTethering) {
+                                            context.startActivity(Intent(context, SnellSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_ssh), Icons.Rounded.Terminal) {
+                                            context.startActivity(Intent(context, SSHSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_wireguard), Icons.Rounded.VpnLock) {
+                                            context.startActivity(Intent(context, WireGuardSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.custom_config), Icons.Rounded.Code) {
+                                            context.startActivity(Intent(context, ConfigSettingActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.proxy_chain), Icons.Rounded.Link) {
+                                            context.startActivity(Intent(context, ChainSettingsActivity::class.java))
+                                        },
+                                    )
+                                    manualProtocols.forEach { (label, icon, action) ->
+                                        DropdownMenuItem(
+                                            text = { Text(label) },
+                                            leadingIcon = { Icon(icon, null) },
+                                            onClick = {
+                                                showManualMenu = false
+                                                action()
+                                            },
+                                        )
+                                    }
+                                }
                             }
                             Box {
                                 IconButton(onClick = { showSortMenu = true }) {
@@ -534,143 +705,6 @@ fun ConfigurationScreen(
                         }
                     },
                 )
-            }
-        }
-    }
-
-    if (showAddSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showAddSheet = false },
-            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-        ) {
-            WindowBlurEffect()
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .padding(bottom = 28.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.add_profile),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp),
-                )
-
-                val quickActions = listOf(
-                    Triple(Icons.Rounded.QrCodeScanner, R.string.add_profile_methods_scan_qr_code) {
-                        context.startActivity(Intent(context, ScannerActivity::class.java))
-                    },
-                    Triple(Icons.Rounded.ContentPaste, R.string.action_import) {
-                        val text = SagerNet.getClipboardText()
-                        if (text.isBlank()) {
-                            onShowMessage(context.getString(R.string.action_import_err))
-                        } else {
-                            runOnDefaultDispatcher {
-                                try {
-                                    val parsed = parseProxies(text)
-                                    if (parsed.isEmpty()) {
-                                        onMainDispatcher { onShowMessage(context.getString(R.string.no_proxies_found)) }
-                                    } else {
-                                        val target = DataStore.selectedGroupForImport()
-                                        parsed.forEach { ProfileManager.createProfile(target, it) }
-                                        onMainDispatcher {
-                                            onShowMessage(context.resources.getQuantityString(R.plurals.added, parsed.size, parsed.size))
-                                        }
-                                    }
-                                } catch (e: Exception) {
-                                    onMainDispatcher { onShowMessage(e.readableMessage) }
-                                }
-                            }
-                        }
-                    },
-                    Triple(Icons.Rounded.FileOpen, R.string.action_import_file) {
-                        importFileLauncher.launch("*/*")
-                    },
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    quickActions.forEach { (icon, labelRes, action) ->
-                        FilledTonalButton(
-                            onClick = {
-                                showAddSheet = false
-                                action()
-                            },
-                            modifier = Modifier.weight(1f),
-                            shapes = ButtonDefaults.shapes(),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 14.dp),
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(icon, contentDescription = null, modifier = Modifier.size(22.dp))
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    text = stringResource(labelRes),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = stringResource(R.string.add_profile_methods_manual_settings),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-
-                val protocols = listOf(
-                    "SOCKS" to SocksSettingsActivity::class.java,
-                    "HTTP" to HttpSettingsActivity::class.java,
-                    "Shadowsocks" to ShadowsocksSettingsActivity::class.java,
-                    "ShadowsocksR" to ShadowsocksRSettingsActivity::class.java,
-                    "VMess / VLESS" to VMessSettingsActivity::class.java,
-                    "Trojan" to TrojanSettingsActivity::class.java,
-                    "Trojan-Go" to TrojanGoSettingsActivity::class.java,
-                    "Hysteria" to HysteriaSettingsActivity::class.java,
-                    "TUIC" to TuicSettingsActivity::class.java,
-                    "WireGuard" to WireGuardSettingsActivity::class.java,
-                    "SSH" to SSHSettingsActivity::class.java,
-                    "Naive" to NaiveSettingsActivity::class.java,
-                    "Mieru" to MieruSettingsActivity::class.java,
-                    "Juicity" to JuicitySettingsActivity::class.java,
-                    "Snell" to SnellSettingsActivity::class.java,
-                    "ShadowTLS" to ShadowTLSSettingsActivity::class.java,
-                    "AnyTLS" to AnyTLSSettingsActivity::class.java,
-                    "Chain" to ChainSettingsActivity::class.java,
-                    "Custom Config" to ConfigSettingActivity::class.java,
-                )
-
-                LazyColumn(
-                    modifier = Modifier.height(260.dp),
-                ) {
-                    itemsIndexed(protocols) { idx, (name, clazz) ->
-                        SheetItemSurface(
-                            shape = groupedSheetItemShape(idx, protocols.size),
-                            onClick = {
-                                showAddSheet = false
-                                context.startActivity(Intent(context, clazz))
-                            },
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                            ) {
-                                Text(name, style = MaterialTheme.typography.titleSmall)
-                                Icon(Icons.Rounded.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                            }
-                        }
-                    }
-                }
             }
         }
     }
