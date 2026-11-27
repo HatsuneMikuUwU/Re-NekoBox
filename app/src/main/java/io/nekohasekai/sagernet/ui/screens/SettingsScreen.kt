@@ -43,6 +43,8 @@ import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -525,39 +527,6 @@ fun SettingsScreen(
                 }
             }
 
-            // Tools, Log, Dashboard & About
-            item {
-                PrefCategory(titleRes = R.string.menu_tools) {
-                    PrefActionRow(
-                        title = stringResource(R.string.menu_tools),
-                        summary = "${stringResource(R.string.tools_network)} • ${stringResource(R.string.backup)}",
-                        icon = Icons.Rounded.Build,
-                        position = ExpressiveGroupPosition.TOP,
-                        onClick = onOpenTools,
-                    )
-                    PrefActionRow(
-                        title = stringResource(R.string.menu_log),
-                        icon = Icons.Rounded.Terminal,
-                        position = ExpressiveGroupPosition.MIDDLE,
-                        onClick = onOpenLogcat,
-                    )
-                    if (clashApiEnabled) {
-                        PrefActionRow(
-                            title = stringResource(R.string.menu_dashboard),
-                            icon = Icons.Rounded.Dashboard,
-                            position = ExpressiveGroupPosition.MIDDLE,
-                            onClick = onOpenDashboard,
-                        )
-                    }
-                    PrefActionRow(
-                        title = stringResource(R.string.menu_about),
-                        summary = SagerNet.appVersionNameForDisplay,
-                        icon = Icons.Rounded.Info,
-                        position = ExpressiveGroupPosition.BOTTOM,
-                        onClick = onOpenAbout,
-                    )
-                }
-            }
         }
 
         }
@@ -565,6 +534,22 @@ fun SettingsScreen(
         FloatingTopBar(
             backdrop = topBackdrop,
             title = stringResource(R.string.settings),
+            actions = {
+                IconButton(onClick = onOpenTools) {
+                    Icon(Icons.Rounded.Build, contentDescription = stringResource(R.string.menu_tools))
+                }
+                IconButton(onClick = onOpenLogcat) {
+                    Icon(Icons.Rounded.Terminal, contentDescription = stringResource(R.string.menu_log))
+                }
+                if (clashApiEnabled) {
+                    IconButton(onClick = onOpenDashboard) {
+                        Icon(Icons.Rounded.Dashboard, contentDescription = stringResource(R.string.menu_dashboard))
+                    }
+                }
+                IconButton(onClick = onOpenAbout) {
+                    Icon(Icons.Rounded.Info, contentDescription = stringResource(R.string.menu_about))
+                }
+            },
             modifier = Modifier.align(Alignment.TopCenter),
         )
     }
