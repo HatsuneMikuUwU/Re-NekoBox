@@ -55,7 +55,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
@@ -108,8 +107,6 @@ import io.nekohasekai.sagernet.ui.components.FloatingTabBar
 import io.nekohasekai.sagernet.ui.components.FloatingTabBarMargin
 import io.nekohasekai.sagernet.ui.components.LocalBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.LocalBottomInset
-import io.nekohasekai.sagernet.ui.components.LocalNavSheetTrigger
-import io.nekohasekai.sagernet.ui.components.NavigationBottomSheet
 import io.nekohasekai.sagernet.ui.components.barGlass
 import io.nekohasekai.sagernet.ui.components.bottomScrim
 import io.nekohasekai.sagernet.ui.components.floatingTabBarSpace
@@ -159,7 +156,6 @@ class MainActivity : ThemedActivity(),
     private val txRateFlow = MutableStateFlow(0L)
     private val rxRateFlow = MutableStateFlow(0L)
     private val enableClashApiFlow = MutableStateFlow(DataStore.enableClashAPI)
-    private val useBottomSheetNavFlow = MutableStateFlow(DataStore.useBottomSheetNav)
     private val profileRefreshSignal = MutableStateFlow(0)
 
     private val pendingSubscriptionImport = MutableStateFlow<ProxyGroup?>(null)
@@ -206,8 +202,6 @@ class MainActivity : ThemedActivity(),
         val txRate by txRateFlow.collectAsState()
         val rxRate by rxRateFlow.collectAsState()
         val clashApiEnabled by enableClashApiFlow.collectAsState()
-        val useBottomSheetNav by useBottomSheetNavFlow.collectAsState()
-        var navSheetOpen by remember { mutableStateOf(false) }
         val refreshTick by profileRefreshSignal.collectAsState()
 
         val subImport by pendingSubscriptionImport.collectAsState()
@@ -220,12 +214,6 @@ class MainActivity : ThemedActivity(),
             destination == MainDestination.LOGCAT ||
             destination == MainDestination.TRAFFIC
 
-        LaunchedEffect(useBottomSheetNav, isSettingsSubScreen) {
-            if (!useBottomSheetNav || isSettingsSubScreen) {
-                navSheetOpen = false
-            }
-        }
-
         BackHandler(enabled = destination != MainDestination.CONFIGURATION) {
             currentDestination.value = if (isSettingsSubScreen) {
                 MainDestination.SETTINGS
@@ -237,20 +225,15 @@ class MainActivity : ThemedActivity(),
         val bottomTabs = remember { MainDestination.entries.filter { it.inBottomBar } }
         val backdrop = rememberBlurBackdrop()
         val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-        val bottomInset = when {
-            isSettingsSubScreen -> navBarInset
-            useBottomSheetNav -> navBarInset + FloatingTabBarMargin + 82.dp
-            else -> floatingTabBarSpace() + 86.dp
+        val bottomInset = if (!isSettingsSubScreen) {
+            floatingTabBarSpace() + 86.dp
+        } else {
+            navBarInset
         }
 
         CompositionLocalProvider(
             LocalBottomInset provides bottomInset,
             LocalBlurBackdrop provides backdrop,
-            LocalNavSheetTrigger provides if (useBottomSheetNav && !isSettingsSubScreen) {
-                { navSheetOpen = true }
-            } else {
-                null
-            },
         ) {
         Box(
             modifier = Modifier
@@ -288,7 +271,6 @@ class MainActivity : ThemedActivity(),
                             onOpenAbout = { currentDestination.value = MainDestination.ABOUT },
                             onClashApiChanged = { enableClashApiFlow.value = it },
                             onHideFromRecentAppsChanged = { applyHideFromRecentApps(it) },
-                            onUseBottomSheetNavChanged = { useBottomSheetNavFlow.value = it },
                             onShowMessage = { msg, actionLabel, onAction ->
                                 showComposeSnackbar(msg, actionLabel = actionLabel, onAction = onAction)
                             },
@@ -317,13 +299,7 @@ class MainActivity : ThemedActivity(),
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .height(
-                            if (useBottomSheetNav) {
-                                navBarInset + FloatingTabBarMargin + 96.dp
-                            } else {
-                                floatingTabBarSpace() + 104.dp
-                            }
-                        )
+                        .height(floatingTabBarSpace() + 104.dp)
                         .background(fadeBrush),
                 )
 
@@ -350,49 +326,27 @@ class MainActivity : ThemedActivity(),
                             }
                         },
                         onUrlTest = { urlTest() },
-                        modifier = if (!useBottomSheetNav && tabBarWidthPx > 0) {
+                        modifier = if (tabBarWidthPx > 0) {
                             Modifier.width(with(density) { tabBarWidthPx.toDp() })
                         } else {
                             Modifier.fillMaxWidth().padding(horizontal = 24.dp)
                         },
                     )
-                    if (!useBottomSheetNav) {
-                        FloatingTabBar(
-                            items = bottomTabs,
-                            selectedIndex = { bottomTabs.indexOf(destination).coerceAtLeast(0) },
-                            onSelected = { idx -> currentDestination.value = bottomTabs[idx] },
-                            modifier = Modifier.onSizeChanged { tabBarWidthPx = it.width },
-                            iconContent = { dest, _ ->
-                                Icon(dest.icon, contentDescription = null, modifier = Modifier.size(22.dp))
-                            },
-                            labelContent = { dest, _ ->
-                                Text(
-                                    text = stringResource(dest.titleRes),
-                                    fontSize = 11.sp,
-                                    lineHeight = 14.sp,
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            },
-                        )
-                    }
-                }
-
-                if (useBottomSheetNav && navSheetOpen) {
-                    NavigationBottomSheet(
-                        onDismiss = { navSheetOpen = false },
+                    FloatingTabBar(
                         items = bottomTabs,
-                        selectedIndex = bottomTabs.indexOf(destination).coerceAtLeast(0),
+                        selectedIndex = { bottomTabs.indexOf(destination).coerceAtLeast(0) },
                         onSelected = { idx -> currentDestination.value = bottomTabs[idx] },
-                        title = stringResource(R.string.app_name),
+                        modifier = Modifier.onSizeChanged { tabBarWidthPx = it.width },
                         iconContent = { dest, _ ->
                             Icon(dest.icon, contentDescription = null, modifier = Modifier.size(22.dp))
                         },
                         labelContent = { dest, _ ->
                             Text(
                                 text = stringResource(dest.titleRes),
+                                fontSize = 11.sp,
+                                lineHeight = 14.sp,
                                 maxLines = 1,
+                                softWrap = false,
                                 overflow = TextOverflow.Ellipsis,
                             )
                         },
@@ -798,7 +752,6 @@ class MainActivity : ThemedActivity(),
         when (key) {
             Key.SERVICE_MODE -> onBinderDied()
             Key.ENABLE_CLASH_API -> enableClashApiFlow.value = DataStore.enableClashAPI
-            Key.USE_BOTTOM_SHEET_NAV -> useBottomSheetNavFlow.value = DataStore.useBottomSheetNav
             Key.PROXY_APPS, Key.BYPASS_MODE, Key.INDIVIDUAL -> {
                 if (DataStore.serviceState.canStop) {
                     showComposeSnackbar(

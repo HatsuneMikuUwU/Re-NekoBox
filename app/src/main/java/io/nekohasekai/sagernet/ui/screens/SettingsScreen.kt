@@ -116,7 +116,6 @@ import androidx.compose.material.icons.rounded.Policy
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.LinearScale
 import androidx.compose.material.icons.rounded.Straighten
-import androidx.compose.material.icons.rounded.ViewAgenda
 
 @Composable
 fun SettingsScreen(
@@ -127,7 +126,6 @@ fun SettingsScreen(
     onOpenAbout: () -> Unit,
     onClashApiChanged: (Boolean) -> Unit,
     onHideFromRecentAppsChanged: (Boolean) -> Unit,
-    onUseBottomSheetNavChanged: (Boolean) -> Unit = {},
     onShowMessage: (String, String?, (() -> Unit)?) -> Unit,
 ) {
     val context = LocalContext.current
@@ -318,24 +316,6 @@ fun SettingsScreen(
                                     putExtra("useConfigStore", true)
                                 }
                             )
-                        },
-                    )
-                }
-            }
-
-            // UI Customisation
-            item {
-                PrefCategory(titleRes = R.string.ui_customisation) {
-                    StoreSwitchPref(
-                        store = store,
-                        key = Key.USE_BOTTOM_SHEET_NAV,
-                        titleRes = R.string.use_bottom_sheet_nav,
-                        summaryRes = R.string.use_bottom_sheet_nav_summary,
-                        icon = Icons.Rounded.ViewAgenda,
-                        position = ExpressiveGroupPosition.SINGLE,
-                        onChanged = {
-                            onUseBottomSheetNavChanged(it)
-                            true
                         },
                     )
                 }

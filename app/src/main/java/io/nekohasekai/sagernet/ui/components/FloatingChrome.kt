@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
@@ -38,16 +37,12 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -141,7 +136,6 @@ val FloatingTabBarMargin = 12.dp
 
 val LocalBottomInset = compositionLocalOf { 0.dp }
 val LocalBlurBackdrop = compositionLocalOf<LayerBackdrop?> { null }
-val LocalNavSheetTrigger = compositionLocalOf<(() -> Unit)?> { null }
 val LocalEditorListState = compositionLocalOf<LazyListState?> { null }
 val LocalEditorContentPadding = compositionLocalOf<PaddingValues?> { null }
 
@@ -370,7 +364,6 @@ fun FloatingTopBar(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val navSheetTrigger = LocalNavSheetTrigger.current
             if (onBack != null) {
                 FloatingGlassButton(
                     contentDescription = "Back",
@@ -379,15 +372,6 @@ fun FloatingTopBar(
                     size = FloatingBarHeight,
                 ) {
                     Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, tint = cs.onSurface)
-                }
-            } else if (navSheetTrigger != null) {
-                FloatingGlassButton(
-                    contentDescription = "Open navigation",
-                    onClick = navSheetTrigger,
-                    backdrop = backdrop,
-                    size = FloatingBarHeight,
-                ) {
-                    Icon(Icons.Rounded.Menu, contentDescription = null, tint = cs.onSurface)
                 }
             }
             if (!title.isNullOrBlank()) {
@@ -796,102 +780,6 @@ private suspend inline fun AwaitPointerEventScope.awaitDragOrUp(pointerId: Point
         } else {
             val hasDragged = dragEvent.previousPosition != dragEvent.position
             if (hasDragged) return dragEvent
-        }
-    }
-}
-
-@Composable
-fun <T> NavigationBottomSheet(
-    onDismiss: () -> Unit,
-    items: List<T>,
-    selectedIndex: Int,
-    onSelected: (index: Int) -> Unit,
-    title: String? = null,
-    iconContent: @Composable (item: T, index: Int) -> Unit,
-    labelContent: @Composable (item: T, index: Int) -> Unit,
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val cs = MaterialTheme.colorScheme
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp),
-        ) {
-            if (!title.isNullOrBlank()) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = cs.onSurface,
-                    modifier = Modifier.padding(start = 6.dp, end = 6.dp, bottom = 12.dp),
-                )
-            }
-
-            items.forEachIndexed { index, item ->
-                val isSelected = index == selectedIndex
-                val shape = groupedSheetItemShape(index = index, count = items.size)
-                val containerColor = if (isSelected) {
-                    cs.secondaryContainer
-                } else {
-                    cs.surfaceContainerHigh
-                }
-                val itemContentColor = if (isSelected) {
-                    cs.onSecondaryContainer
-                } else {
-                    cs.onSurface
-                }
-
-                SheetItemSurface(
-                    shape = shape,
-                    container = containerColor,
-                    onClick = {
-                        if (!isSelected) {
-                            onSelected(index)
-                        }
-                        onDismiss()
-                    },
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .semantics(mergeDescendants = true) {
-                                selected = isSelected
-                                role = Role.Tab
-                            }
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    ) {
-                        CompositionLocalProvider(LocalContentColor provides itemContentColor) {
-                            iconContent(item, index)
-                            Box(modifier = Modifier.weight(1f)) {
-                                ProvideTextStyle(
-                                    MaterialTheme.typography.titleSmall.copy(
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    ),
-                                ) {
-                                    labelContent(item, index)
-                                }
-                            }
-                            if (isSelected) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Check,
-                                    contentDescription = null,
-                                    tint = itemContentColor,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 }

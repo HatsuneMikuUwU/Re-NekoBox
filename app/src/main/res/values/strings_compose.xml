@@ -18,8 +18,4 @@
     <string name="route_protocol">Protocol</string>
     <string name="route_outbound">Outbound</string>
     <string name="service_mode_transproxy">Transparent Proxy</string>
-    <string name="ui_customisation">UI Customisation</string>
-    <string name="use_bottom_sheet_nav">Bottom sheet navigation</string>
-    <string name="use_bottom_sheet_nav_summary">Replace the bottom floating tab bar with a navigation bottom sheet</string>
-    <string name="open_navigation">Open navigation</string>
 </resources>
