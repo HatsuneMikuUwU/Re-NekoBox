@@ -2,10 +2,13 @@
 
 package io.nekohasekai.sagernet.ui.components
 
+import androidx.compose.material.icons.rounded.Checklist
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.Tune
 import androidx.annotation.ArrayRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,9 +30,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,11 +37,8 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Stable
@@ -54,7 +51,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -371,10 +367,10 @@ fun StoreEditTextPref(
         var draft by remember(currentValue) { mutableStateOf(currentValue) }
         var passwordVisible by remember { mutableStateOf(false) }
 
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+        AppDialog(
+            icon = icon ?: Icons.Rounded.Edit,
+            title = title,
+            onDismiss = { showDialog = false },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (!dialogMessage.isNullOrBlank()) {
@@ -418,20 +414,15 @@ fun StoreEditTextPref(
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        store.putString(key, draft)
-                        onChanged?.invoke(draft)
-                        showDialog = false
-                    },
-                    shape = CircleShape,
-                ) {
-                    Text(stringResource(android.R.string.ok))
+                DialogConfirmButton(label = stringResource(android.R.string.ok)) {
+                    store.putString(key, draft)
+                    onChanged?.invoke(draft)
+                    showDialog = false
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(android.R.string.cancel))
+                DialogCancelButton(label = stringResource(android.R.string.cancel)) {
+                    showDialog = false
                 }
             },
         )
@@ -499,54 +490,29 @@ fun StoreListPrefRaw(
     )
 
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+        AppDialog(
+            icon = icon ?: Icons.Rounded.Tune,
+            title = title,
+            onDismiss = { showDialog = false },
             text = {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     itemsIndexed(entries) { idx, label ->
                         val value = entryValues.getOrElse(idx) { label }
-                        val isSelected = value == currentValue
-                        Surface(
-                            shape = RoundedCornerShape(16.dp),
-                            color = if (isSelected) {
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
-                            } else {
-                                Color.Transparent
+                        DialogOptionRow(
+                            label = label,
+                            selected = value == currentValue,
+                            onClick = {
+                                store.putString(key, value)
+                                onChanged?.invoke(value)
+                                showDialog = false
                             },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .clickable {
-                                    store.putString(key, value)
-                                    onChanged?.invoke(value)
-                                    showDialog = false
-                                },
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = isSelected, onClick = null)
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Text(
-                                    text = label,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
-                        }
+                        )
                     }
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(android.R.string.cancel))
+                DialogCancelButton(label = stringResource(android.R.string.cancel)) {
+                    showDialog = false
                 }
             },
         )
@@ -591,47 +557,33 @@ fun StoreMultiSelectPref(
 
     if (showDialog) {
         var draft by remember(selected) { mutableStateOf(selected) }
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+        AppDialog(
+            icon = icon ?: Icons.Rounded.Checklist,
+            title = title,
+            onDismiss = { showDialog = false },
             text = {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     itemsIndexed(entries.toList()) { idx, label ->
                         val v = values.getOrElse(idx) { label }
                         val checked = v in draft
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .clickable {
-                                    draft = if (checked) draft - v else draft + v
-                                }
-                                .padding(horizontal = 8.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Checkbox(checked = checked, onCheckedChange = null)
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(label, style = MaterialTheme.typography.bodyLarge)
-                        }
+                        DialogCheckRow(
+                            label = label,
+                            checked = checked,
+                            onClick = { draft = if (checked) draft - v else draft + v },
+                        )
                     }
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        store.putStringSet(key, draft)
-                        onChanged?.invoke(draft)
-                        showDialog = false
-                    },
-                    shape = CircleShape,
-                ) {
-                    Text(stringResource(android.R.string.ok))
+                DialogConfirmButton(label = stringResource(android.R.string.ok)) {
+                    store.putStringSet(key, draft)
+                    onChanged?.invoke(draft)
+                    showDialog = false
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(android.R.string.cancel))
+                DialogCancelButton(label = stringResource(android.R.string.cancel)) {
+                    showDialog = false
                 }
             },
         )
@@ -648,10 +600,10 @@ fun MtuPickerDialog(
     onDismiss: () -> Unit,
 ) {
     var draft by remember(currentMtu) { mutableStateOf(currentMtu) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(28.dp),
-        title = { Text(stringResource(R.string.mtu), style = MaterialTheme.typography.titleLarge) },
+    AppDialog(
+        icon = Icons.Rounded.Public,
+        title = stringResource(R.string.mtu),
+        onDismiss = onDismiss,
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 FlowRow(
@@ -679,20 +631,13 @@ fun MtuPickerDialog(
             }
         },
         confirmButton = {
-            Button(
-                onClick = {
-                    if (draft.isNotBlank()) onConfirm(draft)
-                    onDismiss()
-                },
-                shape = CircleShape,
-            ) {
-                Text(stringResource(android.R.string.ok))
+            DialogConfirmButton(label = stringResource(android.R.string.ok)) {
+                if (draft.isNotBlank()) onConfirm(draft)
+                onDismiss()
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(android.R.string.cancel))
-            }
+            DialogCancelButton(label = stringResource(android.R.string.cancel), onClick = onDismiss)
         },
     )
 }

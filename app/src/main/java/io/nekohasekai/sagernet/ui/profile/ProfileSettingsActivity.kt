@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddToHomeScreen
@@ -30,8 +29,6 @@ import androidx.compose.material.icons.rounded.DriveFileMove
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.DropdownMenuItem
@@ -41,7 +38,6 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -85,6 +81,12 @@ import io.nekohasekai.sagernet.ui.components.rememberComposePreferenceStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
+import androidx.compose.material.icons.rounded.WarningAmber
+import io.nekohasekai.sagernet.ui.components.AppDialog
+import io.nekohasekai.sagernet.ui.components.DialogCancelButton
+import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
+import io.nekohasekai.sagernet.ui.components.DialogDestructiveButton
+import io.nekohasekai.sagernet.ui.components.DialogOptionRow
 
 @Suppress("UNCHECKED_CAST")
 abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
@@ -312,35 +314,39 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
             }
 
             if (showUnsavedDialog) {
-                AlertDialog(
-                    onDismissRequest = { showUnsavedDialog = false },
-                    shape = RoundedCornerShape(28.dp),
-                    title = { Text(stringResource(R.string.unsaved_changes_prompt)) },
+                AppDialog(
+                    icon = Icons.Rounded.WarningAmber,
+                    title = stringResource(R.string.unsaved_changes_prompt),
+                    onDismiss = { showUnsavedDialog = false },
                     confirmButton = {
-                        Button(
+                        DialogConfirmButton(
+                            label = stringResource(R.string.yes),
                             onClick = {
                                 showUnsavedDialog = false
                                 runOnDefaultDispatcher { saveAndExit() }
                             },
-                            shape = CircleShape,
-                        ) { Text(stringResource(R.string.yes)) }
+                        )
                     },
                     dismissButton = {
-                        TextButton(onClick = {
-                            showUnsavedDialog = false
-                            finish()
-                        }) { Text(stringResource(R.string.no)) }
+                        DialogCancelButton(
+                            label = stringResource(R.string.no),
+                            onClick = {
+                                showUnsavedDialog = false
+                                finish()
+                            },
+                        )
                     },
                 )
             }
 
             if (showDeleteDialog) {
-                AlertDialog(
-                    onDismissRequest = { showDeleteDialog = false },
-                    shape = RoundedCornerShape(28.dp),
-                    title = { Text(stringResource(R.string.delete_confirm_prompt)) },
+                AppDialog(
+                    icon = Icons.Rounded.Delete,
+                    title = stringResource(R.string.delete_confirm_prompt),
+                    onDismiss = { showDeleteDialog = false },
                     confirmButton = {
-                        Button(
+                        DialogDestructiveButton(
+                            label = stringResource(R.string.yes),
                             onClick = {
                                 showDeleteDialog = false
                                 runOnDefaultDispatcher {
@@ -348,29 +354,31 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                     onMainDispatcher { finish() }
                                 }
                             },
-                            shape = CircleShape,
-                        ) { Text(stringResource(R.string.yes)) }
+                        )
                     },
                     dismissButton = {
-                        TextButton(onClick = { showDeleteDialog = false }) {
-                            Text(stringResource(R.string.no))
-                        }
+                        DialogCancelButton(
+                            label = stringResource(R.string.no),
+                            onClick = { showDeleteDialog = false },
+                        )
                     },
                 )
             }
 
             if (showMoveDialog) {
-                AlertDialog(
-                    onDismissRequest = { showMoveDialog = false },
-                    shape = RoundedCornerShape(28.dp),
-                    title = { Text(stringResource(R.string.move)) },
+                AppDialog(
+                    icon = Icons.Rounded.DriveFileMove,
+                    title = stringResource(R.string.move),
+                    onDismiss = { showMoveDialog = false },
                     text = {
-                        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             items(moveCandidateGroups, key = { it.id }) { grp ->
-                                Button(
+                                DialogOptionRow(
+                                    label = grp.displayName(),
+                                    selected = false,
                                     onClick = {
                                         showMoveDialog = false
-                                        val ent = proxyEntity ?: return@Button
+                                        val ent = proxyEntity ?: return@DialogOptionRow
                                         runOnDefaultDispatcher {
                                             val oldGroup = ent.groupId
                                             ent.groupId = grp.id
@@ -381,18 +389,15 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                             onMainDispatcher { finish() }
                                         }
                                     },
-                                    shape = CircleShape,
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) {
-                                    Text(grp.displayName())
-                                }
+                                )
                             }
                         }
                     },
                     confirmButton = {
-                        TextButton(onClick = { showMoveDialog = false }) {
-                            Text(stringResource(android.R.string.cancel))
-                        }
+                        DialogCancelButton(
+                            label = stringResource(android.R.string.cancel),
+                            onClick = { showMoveDialog = false },
+                        )
                     },
                 )
             }

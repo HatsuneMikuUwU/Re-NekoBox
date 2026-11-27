@@ -2,6 +2,9 @@
 
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.AppDialog
+import io.nekohasekai.sagernet.ui.components.DialogCancelButton
+import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
 import android.annotation.SuppressLint
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -11,18 +14,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -111,10 +109,10 @@ fun WebviewScreen(
 
     if (showUrlDialog) {
         var draft by remember(currentUrl) { mutableStateOf(currentUrl) }
-        AlertDialog(
-            onDismissRequest = { showUrlDialog = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(stringResource(R.string.set_panel_url)) },
+        AppDialog(
+            icon = Icons.Rounded.Link,
+            title = stringResource(R.string.set_panel_url),
+            onDismiss = { showUrlDialog = false },
             text = {
                 OutlinedTextField(
                     value = draft,
@@ -125,19 +123,20 @@ fun WebviewScreen(
                 )
             },
             confirmButton = {
-                Button(
+                DialogConfirmButton(
+                    label = stringResource(android.R.string.ok),
                     onClick = {
                         DataStore.yacdURL = draft.trim()
                         currentUrl = DataStore.yacdURL
                         showUrlDialog = false
                     },
-                    shape = CircleShape,
-                ) { Text(stringResource(android.R.string.ok)) }
+                )
             },
             dismissButton = {
-                TextButton(onClick = { showUrlDialog = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
+                DialogCancelButton(
+                    label = stringResource(android.R.string.cancel),
+                    onClick = { showUrlDialog = false },
+                )
             },
         )
     }

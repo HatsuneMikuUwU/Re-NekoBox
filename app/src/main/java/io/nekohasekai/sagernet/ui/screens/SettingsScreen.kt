@@ -2,6 +2,10 @@
 
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.AppDialog
+import io.nekohasekai.sagernet.ui.components.DialogCancelButton
+import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
+import io.nekohasekai.sagernet.ui.components.DialogDestructiveButton
 import android.content.Intent
 import android.os.Build
 import android.widget.Toast
@@ -14,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -67,15 +70,12 @@ import androidx.compose.material.icons.rounded.SettingsEthernet
 import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -616,10 +616,10 @@ fun SettingsScreen(
         var username by remember { mutableStateOf(DataStore.mixedUsername) }
         var password by remember { mutableStateOf(DataStore.mixedSecret) }
 
-        AlertDialog(
-            onDismissRequest = { showLocalProxyDialog = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(stringResource(R.string.local_proxy_settings)) },
+        AppDialog(
+            icon = Icons.Rounded.Router,
+            title = stringResource(R.string.local_proxy_settings),
+            onDismiss = { showLocalProxyDialog = false },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
@@ -658,26 +658,23 @@ fun SettingsScreen(
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        val p = portText.toIntOrNull()
-                        if (p == null || p !in 1..65535) {
-                            Toast.makeText(context, R.string.port_out_of_range, Toast.LENGTH_SHORT).show()
-                        } else {
-                            DataStore.mixedPort = p
-                            DataStore.allowAccess = allowLan
-                            DataStore.mixedUsername = username.trim()
-                            DataStore.configurationStore.putString(Key.MIXED_SECRET, password)
-                            showLocalProxyDialog = false
-                            notifyNeedReload()
-                        }
-                    },
-                    shape = CircleShape,
-                ) { Text(stringResource(android.R.string.ok)) }
+                DialogConfirmButton(label = stringResource(android.R.string.ok)) {
+                    val p = portText.toIntOrNull()
+                    if (p == null || p !in 1..65535) {
+                        Toast.makeText(context, R.string.port_out_of_range, Toast.LENGTH_SHORT).show()
+                    } else {
+                        DataStore.mixedPort = p
+                        DataStore.allowAccess = allowLan
+                        DataStore.mixedUsername = username.trim()
+                        DataStore.configurationStore.putString(Key.MIXED_SECRET, password)
+                        showLocalProxyDialog = false
+                        notifyNeedReload()
+                    }
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showLocalProxyDialog = false }) {
-                    Text(stringResource(android.R.string.cancel))
+                DialogCancelButton(label = stringResource(android.R.string.cancel)) {
+                    showLocalProxyDialog = false
                 }
             },
         )
@@ -688,10 +685,10 @@ fun SettingsScreen(
         var concurrent by remember { mutableStateOf(DataStore.connectionTestConcurrent.toString()) }
         var timeout by remember { mutableStateOf(DataStore.connectionTestTimeout.toString()) }
 
-        AlertDialog(
-            onDismissRequest = { showUrlTestDialog = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(stringResource(R.string.connection_test_url)) },
+        AppDialog(
+            icon = Icons.Rounded.NetworkCheck,
+            title = stringResource(R.string.connection_test_url),
+            onDismiss = { showUrlTestDialog = false },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(value = url, onValueChange = { url = it }, label = { Text("URL") }, singleLine = true, shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth())
@@ -700,116 +697,111 @@ fun SettingsScreen(
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        DataStore.connectionTestURL = url.trim()
-                        DataStore.connectionTestConcurrent = (concurrent.toIntOrNull() ?: 5).coerceIn(1, 64)
-                        DataStore.connectionTestTimeout = (timeout.toIntOrNull() ?: 3000).coerceIn(500, 30000)
-                        showUrlTestDialog = false
-                    },
-                    shape = CircleShape,
-                ) { Text(stringResource(android.R.string.ok)) }
+                DialogConfirmButton(label = stringResource(android.R.string.ok)) {
+                    DataStore.connectionTestURL = url.trim()
+                    DataStore.connectionTestConcurrent = (concurrent.toIntOrNull() ?: 5).coerceIn(1, 64)
+                    DataStore.connectionTestTimeout = (timeout.toIntOrNull() ?: 3000).coerceIn(500, 30000)
+                    showUrlTestDialog = false
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showUrlTestDialog = false }) { Text(stringResource(android.R.string.cancel)) }
+                DialogCancelButton(label = stringResource(android.R.string.cancel)) {
+                    showUrlTestDialog = false
+                }
             },
         )
     }
 
     if (showLogBufDialog) {
         var buf by remember { mutableStateOf((DataStore.logBufSize.takeIf { it > 0 } ?: 50).toString()) }
-        AlertDialog(
-            onDismissRequest = { showLogBufDialog = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text("Log buffer size (KB)") },
+        AppDialog(
+            icon = Icons.Rounded.BugReport,
+            title = "Log buffer size (KB)",
+            onDismiss = { showLogBufDialog = false },
             text = {
                 OutlinedTextField(value = buf, onValueChange = { buf = it.filter(Char::isDigit) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth())
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        DataStore.logBufSize = (buf.toIntOrNull() ?: 50).coerceAtLeast(1)
-                        showLogBufDialog = false
-                        notifyNeedRestart()
-                    },
-                    shape = CircleShape,
-                ) { Text(stringResource(android.R.string.ok)) }
+                DialogConfirmButton(label = stringResource(android.R.string.ok)) {
+                    DataStore.logBufSize = (buf.toIntOrNull() ?: 50).coerceAtLeast(1)
+                    showLogBufDialog = false
+                    notifyNeedRestart()
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showLogBufDialog = false }) { Text(stringResource(android.R.string.cancel)) }
+                DialogCancelButton(label = stringResource(android.R.string.cancel)) {
+                    showLogBufDialog = false
+                }
             },
         )
     }
 
     if (showAppendHttpConfirm) {
-        AlertDialog(
-            onDismissRequest = { showAppendHttpConfirm = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(stringResource(R.string.append_http_proxy_security_title)) },
+        AppDialog(
+            icon = Icons.Rounded.Warning,
+            title = stringResource(R.string.append_http_proxy_security_title),
+            onDismiss = { showAppendHttpConfirm = false },
             text = { Text(stringResource(R.string.append_http_proxy_security_message)) },
             confirmButton = {
-                Button(
-                    onClick = {
-                        store.putBoolean(Key.APPEND_HTTP_PROXY, true)
-                        showAppendHttpConfirm = false
-                        notifyNeedReload()
-                    },
-                    shape = CircleShape,
-                ) { Text(stringResource(R.string.enable_anyway)) }
+                DialogDestructiveButton(label = stringResource(R.string.enable_anyway)) {
+                    store.putBoolean(Key.APPEND_HTTP_PROXY, true)
+                    showAppendHttpConfirm = false
+                    notifyNeedReload()
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showAppendHttpConfirm = false }) { Text(stringResource(android.R.string.cancel)) }
+                DialogCancelButton(label = stringResource(android.R.string.cancel)) {
+                    showAppendHttpConfirm = false
+                }
             },
         )
     }
 
     if (showResetConfirm) {
-        AlertDialog(
-            onDismissRequest = { showResetConfirm = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(stringResource(R.string.confirm)) },
+        AppDialog(
+            icon = Icons.Rounded.RestartAlt,
+            title = stringResource(R.string.confirm),
+            onDismiss = { showResetConfirm = false },
             text = { Text(stringResource(R.string.reset_settings_message)) },
             confirmButton = {
-                Button(
-                    onClick = {
-                        showResetConfirm = false
-                        DataStore.configurationStore.reset()
-                        triggerFullRestart(context)
-                    },
-                    shape = CircleShape,
-                ) { Text(stringResource(R.string.yes)) }
+                DialogDestructiveButton(label = stringResource(R.string.yes)) {
+                    showResetConfirm = false
+                    DataStore.configurationStore.reset()
+                    triggerFullRestart(context)
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showResetConfirm = false }) { Text(stringResource(R.string.no)) }
+                DialogCancelButton(label = stringResource(R.string.no)) {
+                    showResetConfirm = false
+                }
             },
         )
     }
 
     if (showClearCacheConfirm) {
-        AlertDialog(
-            onDismissRequest = { showClearCacheConfirm = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(stringResource(R.string.clear_cache)) },
+        AppDialog(
+            icon = Icons.Rounded.CleaningServices,
+            title = stringResource(R.string.clear_cache),
+            onDismiss = { showClearCacheConfirm = false },
             text = { Text(stringResource(R.string.clear_cache_confirm)) },
             confirmButton = {
-                Button(
-                    onClick = {
-                        showClearCacheConfirm = false
-                        try {
-                            clearDirFiles(SagerNet.application.cacheDir, setOf("neko.log"))
-                            val rel = File(SagerNet.application.cacheDir.parentFile, "cache")
-                            if (rel.exists() && rel.isDirectory) clearDirFiles(rel)
-                            Toast.makeText(context, R.string.clear_cache_success, Toast.LENGTH_SHORT).show()
-                            notifyNeedReload()
-                        } catch (e: Exception) {
-                            Toast.makeText(context, context.getString(R.string.clear_cache_failed, e.message), Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    shape = CircleShape,
-                ) { Text(stringResource(android.R.string.ok)) }
+                DialogDestructiveButton(label = stringResource(android.R.string.ok)) {
+                    showClearCacheConfirm = false
+                    try {
+                        clearDirFiles(SagerNet.application.cacheDir, setOf("neko.log"))
+                        val rel = File(SagerNet.application.cacheDir.parentFile, "cache")
+                        if (rel.exists() && rel.isDirectory) clearDirFiles(rel)
+                        Toast.makeText(context, R.string.clear_cache_success, Toast.LENGTH_SHORT).show()
+                        notifyNeedReload()
+                    } catch (e: Exception) {
+                        Toast.makeText(context, context.getString(R.string.clear_cache_failed, e.message), Toast.LENGTH_SHORT).show()
+                    }
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showClearCacheConfirm = false }) { Text(stringResource(android.R.string.cancel)) }
+                DialogCancelButton(label = stringResource(android.R.string.cancel)) {
+                    showClearCacheConfirm = false
+                }
             },
         )
     }

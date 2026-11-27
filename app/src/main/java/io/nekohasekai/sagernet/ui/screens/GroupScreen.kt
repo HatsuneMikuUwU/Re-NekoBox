@@ -1,5 +1,9 @@
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.AppDialog
+import io.nekohasekai.sagernet.ui.components.DialogCancelButton
+import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
+import io.nekohasekai.sagernet.ui.components.DialogDestructiveButton
 import android.content.Intent
 import android.text.format.Formatter
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Add
@@ -29,8 +32,6 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Sync
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
@@ -40,7 +41,6 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -208,50 +208,44 @@ fun GroupScreen(
     }
 
     if (showUpdateAllDialog) {
-        AlertDialog(
-            onDismissRequest = { showUpdateAllDialog = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(stringResource(R.string.confirm)) },
+        AppDialog(
+            icon = Icons.Rounded.Sync,
+            title = stringResource(R.string.confirm),
+            onDismiss = { showUpdateAllDialog = false },
             text = { Text(stringResource(R.string.update_all_subscription)) },
             confirmButton = {
-                Button(
-                    onClick = {
-                        showUpdateAllDialog = false
-                        runOnDefaultDispatcher {
-                            SagerDatabase.groupDao.allGroups()
-                                .filter { it.type == GroupType.SUBSCRIPTION }
-                                .forEach { GroupUpdater.startUpdate(it, true) }
-                        }
-                    },
-                    shape = CircleShape,
-                ) { Text(stringResource(R.string.yes)) }
+                DialogConfirmButton(label = stringResource(R.string.yes)) {
+                    showUpdateAllDialog = false
+                    runOnDefaultDispatcher {
+                        SagerDatabase.groupDao.allGroups()
+                            .filter { it.type == GroupType.SUBSCRIPTION }
+                            .forEach { GroupUpdater.startUpdate(it, true) }
+                    }
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showUpdateAllDialog = false }) {
-                    Text(stringResource(R.string.no))
+                DialogCancelButton(label = stringResource(R.string.no)) {
+                    showUpdateAllDialog = false
                 }
             },
         )
     }
 
     deleteConfirmGroup?.let { group ->
-        AlertDialog(
-            onDismissRequest = { deleteConfirmGroup = null },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(stringResource(R.string.delete_group_prompt)) },
+        AppDialog(
+            icon = Icons.Rounded.Delete,
+            title = stringResource(R.string.delete_group_prompt),
+            onDismiss = { deleteConfirmGroup = null },
             text = { Text(group.displayName()) },
             confirmButton = {
-                Button(
-                    onClick = {
-                        deleteConfirmGroup = null
-                        runOnDefaultDispatcher { GroupManager.deleteGroup(group.id) }
-                    },
-                    shape = CircleShape,
-                ) { Text(stringResource(R.string.yes)) }
+                DialogDestructiveButton(label = stringResource(R.string.yes)) {
+                    deleteConfirmGroup = null
+                    runOnDefaultDispatcher { GroupManager.deleteGroup(group.id) }
+                }
             },
             dismissButton = {
-                TextButton(onClick = { deleteConfirmGroup = null }) {
-                    Text(stringResource(R.string.no))
+                DialogCancelButton(label = stringResource(R.string.no)) {
+                    deleteConfirmGroup = null
                 }
             },
         )

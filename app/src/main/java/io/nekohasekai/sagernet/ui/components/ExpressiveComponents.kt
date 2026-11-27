@@ -2,6 +2,7 @@
 
 package io.nekohasekai.sagernet.ui.components
 
+import androidx.compose.material.icons.rounded.QrCode2
 import android.graphics.Bitmap
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
@@ -17,14 +18,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,7 +33,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -306,17 +303,10 @@ fun QrCodeDialog(
         generateQrBitmap(content, 640)
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(28.dp),
-        title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-        },
+    AppDialog(
+        icon = Icons.Rounded.QrCode2,
+        title = title,
+        onDismiss = onDismiss,
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -346,16 +336,10 @@ fun QrCodeDialog(
             }
         },
         confirmButton = {
-            Button(onClick = onCopy, shape = CircleShape) {
-                Icon(Icons.Rounded.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(6.dp))
-                Text("Copy")
-            }
+            DialogConfirmButton(label = "Copy", onClick = onCopy)
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close")
-            }
+            DialogCancelButton(label = "Close", onClick = onDismiss)
         },
     )
 }

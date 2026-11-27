@@ -1,5 +1,16 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package io.nekohasekai.sagernet.ui.screens
 
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
+import io.nekohasekai.sagernet.ui.components.AppDialog
+import io.nekohasekai.sagernet.ui.components.DialogCancelButton
+import io.nekohasekai.sagernet.ui.components.DialogDestructiveButton
+import io.nekohasekai.sagernet.ui.components.SheetItemSurface
+import io.nekohasekai.sagernet.ui.components.WindowBlurEffect
+import io.nekohasekai.sagernet.ui.components.groupedSheetItemShape
 import android.content.Intent
 import android.os.SystemClock
 import android.text.format.Formatter
@@ -51,8 +62,6 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material.icons.rounded.Router
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
@@ -62,7 +71,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -533,8 +541,9 @@ fun ConfigurationScreen(
     if (showAddSheet) {
         ModalBottomSheet(
             onDismissRequest = { showAddSheet = false },
-            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         ) {
+            WindowBlurEffect()
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -586,13 +595,13 @@ fun ConfigurationScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     quickActions.forEach { (icon, labelRes, action) ->
-                        Button(
+                        FilledTonalButton(
                             onClick = {
                                 showAddSheet = false
                                 action()
                             },
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(20.dp),
+                            shapes = ButtonDefaults.shapes(),
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 14.dp),
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -640,16 +649,10 @@ fun ConfigurationScreen(
 
                 LazyColumn(
                     modifier = Modifier.height(260.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     itemsIndexed(protocols) { idx, (name, clazz) ->
-                        val pos = when (idx) {
-                            0 -> ExpressiveGroupPosition.TOP
-                            protocols.lastIndex -> ExpressiveGroupPosition.BOTTOM
-                            else -> ExpressiveGroupPosition.MIDDLE
-                        }
-                        ExpressiveSurfaceItem(
-                            position = pos,
+                        SheetItemSurface(
+                            shape = groupedSheetItemShape(idx, protocols.size),
                             onClick = {
                                 showAddSheet = false
                                 context.startActivity(Intent(context, clazz))
@@ -686,25 +689,22 @@ fun ConfigurationScreen(
     }
 
     deleteConfirmEntity?.let { entity ->
-        AlertDialog(
-            onDismissRequest = { deleteConfirmEntity = null },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(stringResource(R.string.delete_confirm_prompt)) },
+        AppDialog(
+            icon = Icons.Rounded.Delete,
+            title = stringResource(R.string.delete_confirm_prompt),
+            onDismiss = { deleteConfirmEntity = null },
             text = { Text(entity.displayName()) },
             confirmButton = {
-                Button(
-                    onClick = {
-                        deleteConfirmEntity = null
-                        runOnDefaultDispatcher {
-                            ProfileManager.deleteProfile(entity.groupId, entity.id)
-                        }
-                    },
-                    shape = CircleShape,
-                ) { Text(stringResource(R.string.yes)) }
+                DialogDestructiveButton(label = stringResource(R.string.yes)) {
+                    deleteConfirmEntity = null
+                    runOnDefaultDispatcher {
+                        ProfileManager.deleteProfile(entity.groupId, entity.id)
+                    }
+                }
             },
             dismissButton = {
-                TextButton(onClick = { deleteConfirmEntity = null }) {
-                    Text(stringResource(R.string.no))
+                DialogCancelButton(label = stringResource(R.string.no)) {
+                    deleteConfirmEntity = null
                 }
             },
         )

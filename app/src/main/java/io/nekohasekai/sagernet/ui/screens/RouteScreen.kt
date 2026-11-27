@@ -1,5 +1,8 @@
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.AppDialog
+import io.nekohasekai.sagernet.ui.components.DialogCancelButton
+import io.nekohasekai.sagernet.ui.components.DialogDestructiveButton
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,22 +17,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountTree
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.FolderZip
 import androidx.compose.material.icons.rounded.RestartAlt
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -236,27 +234,24 @@ fun RouteScreen(
     }
 
     if (showResetDialog) {
-        AlertDialog(
-            onDismissRequest = { showResetDialog = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(stringResource(R.string.confirm)) },
+        AppDialog(
+            icon = Icons.Rounded.RestartAlt,
+            title = stringResource(R.string.confirm),
+            onDismiss = { showResetDialog = false },
             text = { Text(stringResource(R.string.clear_profiles_message)) },
             confirmButton = {
-                Button(
-                    onClick = {
+                DialogDestructiveButton(label = stringResource(R.string.yes)) {
                         showResetDialog = false
                         runOnDefaultDispatcher {
                             SagerDatabase.rulesDao.reset()
                             DataStore.rulesFirstCreate = false
                             reload()
                         }
-                    },
-                    shape = CircleShape,
-                ) { Text(stringResource(R.string.yes)) }
+                    }
             },
             dismissButton = {
-                TextButton(onClick = { showResetDialog = false }) {
-                    Text(stringResource(R.string.no))
+                DialogCancelButton(label = stringResource(R.string.no)) {
+                    showResetDialog = false
                 }
             },
         )

@@ -45,8 +45,6 @@ import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Terminal
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -55,7 +53,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -126,6 +123,12 @@ import io.nekohasekai.sagernet.ui.screens.WebviewScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import moe.matsuri.nb4a.utils.Util
+import androidx.compose.material.icons.rounded.CloudDownload
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Extension
+import io.nekohasekai.sagernet.ui.components.AppDialog
+import io.nekohasekai.sagernet.ui.components.DialogCancelButton
+import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
 
 enum class MainDestination(
     val titleRes: Int,
@@ -362,88 +365,94 @@ class MainActivity : ThemedActivity(),
 
         subImport?.let { group ->
             val displayName = group.name.takeIf { !it.isNullOrBlank() } ?: "Subscription"
-            AlertDialog(
-                onDismissRequest = { pendingSubscriptionImport.value = null },
-                shape = RoundedCornerShape(28.dp),
-                title = { Text(stringResource(R.string.subscription_import)) },
+            AppDialog(
+                icon = Icons.Rounded.CloudDownload,
+                title = stringResource(R.string.subscription_import),
+                onDismiss = { pendingSubscriptionImport.value = null },
                 text = { Text(stringResource(R.string.subscription_import_message, displayName)) },
                 confirmButton = {
-                    Button(
+                    DialogConfirmButton(
+                        label = stringResource(R.string.yes),
                         onClick = {
                             pendingSubscriptionImport.value = null
                             currentDestination.value = MainDestination.GROUP
                             runOnDefaultDispatcher { finishImportSubscription(group) }
                         },
-                        shape = CircleShape,
-                    ) { Text(stringResource(R.string.yes)) }
+                    )
                 },
                 dismissButton = {
-                    TextButton(onClick = { pendingSubscriptionImport.value = null }) {
-                        Text(stringResource(android.R.string.cancel))
-                    }
+                    DialogCancelButton(
+                        label = stringResource(android.R.string.cancel),
+                        onClick = { pendingSubscriptionImport.value = null },
+                    )
                 },
             )
         }
 
         profImport?.let { profile ->
-            AlertDialog(
-                onDismissRequest = { pendingProfileImport.value = null },
-                shape = RoundedCornerShape(28.dp),
-                title = { Text(stringResource(R.string.profile_import)) },
+            AppDialog(
+                icon = Icons.Rounded.Download,
+                title = stringResource(R.string.profile_import),
+                onDismiss = { pendingProfileImport.value = null },
                 text = { Text(stringResource(R.string.profile_import_message, profile.displayName())) },
                 confirmButton = {
-                    Button(
+                    DialogConfirmButton(
+                        label = stringResource(R.string.yes),
                         onClick = {
                             pendingProfileImport.value = null
                             runOnDefaultDispatcher { finishImportProfile(profile) }
                         },
-                        shape = CircleShape,
-                    ) { Text(stringResource(R.string.yes)) }
+                    )
                 },
                 dismissButton = {
-                    TextButton(onClick = { pendingProfileImport.value = null }) {
-                        Text(stringResource(android.R.string.cancel))
-                    }
+                    DialogCancelButton(
+                        label = stringResource(android.R.string.cancel),
+                        onClick = { pendingProfileImport.value = null },
+                    )
                 },
             )
         }
 
         pluginMissing?.let { (profileName, pluginEntity) ->
-            AlertDialog(
-                onDismissRequest = { missingPluginDialog.value = null },
-                shape = RoundedCornerShape(28.dp),
-                title = { Text(stringResource(R.string.missing_plugin)) },
+            AppDialog(
+                icon = Icons.Rounded.Extension,
+                title = stringResource(R.string.missing_plugin),
+                onDismiss = { missingPluginDialog.value = null },
                 text = {
                     Text(stringResource(R.string.profile_requiring_plugin, profileName, pluginEntity.displayName))
                 },
                 confirmButton = {
-                    Button(
+                    DialogConfirmButton(
+                        label = stringResource(R.string.action_download),
                         onClick = {
                             missingPluginDialog.value = null
                             launchCustomTab(pluginEntity.downloadSource.downloadLink)
                         },
-                        shape = CircleShape,
-                    ) { Text(stringResource(R.string.action_download)) }
+                    )
                 },
                 dismissButton = {
-                    TextButton(onClick = {
-                        missingPluginDialog.value = null
-                        launchCustomTab("https://matsuridayo.github.io/nb4a-plugin/")
-                    }) { Text(stringResource(R.string.action_learn_more)) }
+                    DialogCancelButton(
+                        label = stringResource(R.string.action_learn_more),
+                        onClick = {
+                            missingPluginDialog.value = null
+                            launchCustomTab("https://matsuridayo.github.io/nb4a-plugin/")
+                        },
+                    )
                 },
             )
         }
 
         if (previewHint) {
-            AlertDialog(
-                onDismissRequest = { showPreviewDialog.value = false },
-                shape = RoundedCornerShape(28.dp),
-                title = { Text(BuildConfig.PRE_VERSION_NAME) },
+            AppDialog(
+                icon = Icons.Rounded.Info,
+                title = BuildConfig.PRE_VERSION_NAME,
+                onDismiss = { showPreviewDialog.value = false },
                 text = { Text(stringResource(R.string.preview_version_hint)) },
                 confirmButton = {
-                    Button(onClick = { showPreviewDialog.value = false }, shape = CircleShape) {
-                        Text(stringResource(android.R.string.ok))
-                    }
+                    DialogConfirmButton(
+                        label = stringResource(android.R.string.ok),
+                        onClick = { showPreviewDialog.value = false },
+                    )
                 },
             )
         }

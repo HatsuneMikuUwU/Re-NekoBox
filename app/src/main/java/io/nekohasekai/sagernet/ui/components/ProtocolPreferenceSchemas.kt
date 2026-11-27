@@ -2,6 +2,7 @@
 
 package io.nekohasekai.sagernet.ui.components
 
+import androidx.compose.material.icons.rounded.Edit
 import android.content.Intent
 import androidx.annotation.ArrayRes
 import androidx.annotation.StringRes
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -30,11 +30,8 @@ import androidx.compose.material.icons.rounded.Title
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.VerifiedUser
 import androidx.compose.material.icons.rounded.Code
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -258,10 +255,10 @@ private fun PureComposeEditTextRow(
 
     if (showDialog) {
         var draft by remember(currentValue) { mutableStateOf(currentValue) }
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text(title) },
+        AppDialog(
+            icon = icon ?: Icons.Rounded.Edit,
+            title = title,
+            onDismiss = { showDialog = false },
             text = {
                 OutlinedTextField(
                     value = draft,
@@ -280,17 +277,14 @@ private fun PureComposeEditTextRow(
                 )
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        store.putString(key, draft)
-                        showDialog = false
-                    },
-                    shape = CircleShape,
-                ) { Text(stringResource(android.R.string.ok)) }
+                DialogConfirmButton(label = stringResource(android.R.string.ok)) {
+                    store.putString(key, draft)
+                    showDialog = false
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(android.R.string.cancel))
+                DialogCancelButton(label = stringResource(android.R.string.cancel)) {
+                    showDialog = false
                 }
             },
         )
