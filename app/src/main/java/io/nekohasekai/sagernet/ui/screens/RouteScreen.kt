@@ -114,7 +114,7 @@ fun RouteScreen(
         if (rules.isEmpty()) {
             ExpressiveEmptyState(
                 icon = Icons.Rounded.AccountTree,
-                title = stringResource(R.string.menu_route),
+                title = null,
                 actionLabel = stringResource(R.string.route_add),
                 onAction = { context.startActivity(Intent(context, RouteSettingsActivity::class.java)) },
                 modifier = Modifier

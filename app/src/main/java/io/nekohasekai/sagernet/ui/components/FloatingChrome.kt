@@ -309,7 +309,7 @@ fun FloatingGlassButton(
 
 @Composable
 fun FloatingTopBar(
-    title: String,
+    title: String? = null,
     modifier: Modifier = Modifier,
     backdrop: LayerBackdrop? = LocalBlurBackdrop.current,
     onBack: (() -> Unit)? = null,
@@ -344,23 +344,27 @@ fun FloatingTopBar(
                     Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, tint = cs.onSurface)
                 }
             }
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(FloatingBarHeight)
-                    .barGlass(backdrop = backdrop, shape = CircleShape, containerColor = cs.surfaceContainer)
-                    .padding(horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                CompositionLocalProvider(LocalContentColor provides cs.onSurface) {
-                    ProvideTextStyle(MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) {
-                        Text(
-                            text = title,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+            if (!title.isNullOrBlank()) {
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(FloatingBarHeight)
+                        .barGlass(backdrop = backdrop, shape = CircleShape, containerColor = cs.surfaceContainer)
+                        .padding(horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    CompositionLocalProvider(LocalContentColor provides cs.onSurface) {
+                        ProvideTextStyle(MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) {
+                            Text(
+                                text = title,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 }
+            } else {
+                Spacer(modifier = Modifier.weight(1f))
             }
             if (actions != null) {
                 Row(

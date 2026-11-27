@@ -533,7 +533,7 @@ fun SettingsScreen(
 
         FloatingTopBar(
             backdrop = topBackdrop,
-            title = stringResource(R.string.settings),
+            title = null,
             actions = {
                 IconButton(onClick = onOpenTools) {
                     Icon(Icons.Rounded.Build, contentDescription = stringResource(R.string.menu_tools))

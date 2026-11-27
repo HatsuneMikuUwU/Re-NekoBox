@@ -127,7 +127,7 @@ fun GroupScreen(
         if (groups.isEmpty()) {
             ExpressiveEmptyState(
                 icon = Icons.Rounded.FolderCopy,
-                title = stringResource(R.string.menu_group),
+                title = null,
                 actionLabel = stringResource(R.string.group_create),
                 onAction = { context.startActivity(Intent(context, GroupSettingsActivity::class.java)) },
                 modifier = Modifier

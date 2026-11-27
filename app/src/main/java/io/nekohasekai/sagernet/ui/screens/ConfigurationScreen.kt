@@ -400,7 +400,7 @@ fun ConfigurationScreen(
             } else {
                 FloatingTopBar(
                     backdrop = topBackdrop,
-                    title = if (selectMode) stringResource(R.string.select_profile) else stringResource(R.string.app_name),
+                    title = if (selectMode) stringResource(R.string.select_profile) else null,
                     onBack = if (selectMode) onBack else null,
                     actions = {
                         IconButton(onClick = { searchActive = true }) {
