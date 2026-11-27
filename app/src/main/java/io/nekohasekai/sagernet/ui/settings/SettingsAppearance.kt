@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.Animation
 import androidx.compose.material.icons.outlined.AspectRatio
 import androidx.compose.material.icons.outlined.BlurOn
 import androidx.compose.material.icons.outlined.BrightnessMedium
+import androidx.compose.material.icons.outlined.CallToAction
 import androidx.compose.material.icons.outlined.Celebration
 import androidx.compose.material.icons.outlined.Colorize
 import androidx.compose.material.icons.outlined.Contrast
@@ -74,6 +75,7 @@ import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
 import io.nekohasekai.sagernet.ui.components.rememberStableHapticAction
 import io.nekohasekai.sagernet.ui.theme.Appearance
 import io.nekohasekai.sagernet.ui.theme.BarEffect
+import io.nekohasekai.sagernet.ui.theme.NavigationBarStyle
 import io.nekohasekai.sagernet.ui.theme.DynamicColorSupported
 import io.nekohasekai.sagernet.ui.theme.FONT_SCALE_MAX
 import io.nekohasekai.sagernet.ui.theme.FONT_SCALE_MIN
@@ -195,12 +197,13 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
     var showStyleDialog by rememberSaveable { mutableStateOf(false) }
     var showSpecDialog by rememberSaveable { mutableStateOf(false) }
     var showBarEffectDialog by rememberSaveable { mutableStateOf(false) }
+    var showNavBarStyleDialog by rememberSaveable { mutableStateOf(false) }
     var showCustomColorSheet by rememberSaveable { mutableStateOf(false) }
     var showContrastDialog by rememberSaveable { mutableStateOf(false) }
     var showRoleSheet by rememberSaveable { mutableStateOf(false) }
     var showColorAnimDialog by rememberSaveable { mutableStateOf(false) }
     val animExtra = if (settings.animateColorChange) 1 else 0
-    val itemCount = 12 + animExtra
+    val itemCount = 13 + animExtra
     val barEffectEnabled = settings.blur && BlurSupported
 
     SettingGroup(
@@ -364,6 +367,17 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
             onChange = Appearance::setBlur,
         )
         PrefItem(
+            icon = Icons.Outlined.CallToAction,
+            title = stringResource(R.string.ui_nav_bar_style),
+            subtitle = stringResource(settings.navigationBarStyle.labelRes),
+            shape = itemShape(10 + animExtra, itemCount),
+            container = itemContainer(),
+            content = cs.onSurface,
+            onClick = { showNavBarStyleDialog = true },
+            badge = cs.primary,
+            badgeTint = cs.onPrimary,
+        )
+        PrefItem(
             icon = Icons.Outlined.Tab,
             title = stringResource(R.string.ui_bar_effect),
             subtitle =
@@ -372,7 +386,7 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
                 } else {
                     stringResource(R.string.ui_bar_effect_enable_blur)
                 },
-            shape = itemShape(10 + animExtra, itemCount),
+            shape = itemShape(11 + animExtra, itemCount),
             container = itemContainer(),
             content = cs.onSurface,
             enabled = barEffectEnabled,
@@ -387,7 +401,7 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
             icon = Icons.Outlined.TouchApp,
             title = stringResource(R.string.ui_haptics),
             subtitle = stringResource(R.string.ui_haptics_desc),
-            shape = itemShape(11 + animExtra, itemCount),
+            shape = itemShape(12 + animExtra, itemCount),
             checked = settings.hapticsEnabled,
             enabled = true,
             onChange = Appearance::setHapticsEnabled,
@@ -442,6 +456,18 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
             label = { ctx.getString(it.labelRes) },
             onSelect = Appearance::setBarEffect,
             onDismiss = { showBarEffectDialog = false },
+        )
+    }
+
+    if (showNavBarStyleDialog) {
+        OptionDialog(
+            icon = Icons.Outlined.CallToAction,
+            title = stringResource(R.string.ui_nav_bar_style),
+            options = NavigationBarStyle.entries,
+            selected = settings.navigationBarStyle,
+            label = { ctx.getString(it.labelRes) },
+            onSelect = Appearance::setNavigationBarStyle,
+            onDismiss = { showNavBarStyleDialog = false },
         )
     }
 

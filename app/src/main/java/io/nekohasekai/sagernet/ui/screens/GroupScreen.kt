@@ -28,7 +28,6 @@ import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.FolderCopy
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.QrCode2
@@ -399,11 +398,6 @@ private fun GroupExpressiveCard(
                         Icon(Icons.Rounded.MoreVert, contentDescription = "Options")
                     }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.edit)) },
-                            leadingIcon = { Icon(Icons.Rounded.Edit, null) },
-                            onClick = hapticClick { menuExpanded = false; onEdit() },
-                        )
                         if (isSubscription) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.share_qr_nfc)) },

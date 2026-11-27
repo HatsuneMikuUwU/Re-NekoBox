@@ -53,6 +53,8 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -121,6 +123,7 @@ import io.nekohasekai.sagernet.ui.components.bottomScrim
 import io.nekohasekai.sagernet.ui.components.floatingTabBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.blurBackdropSource
+import io.nekohasekai.sagernet.ui.components.blurEffect
 import io.nekohasekai.sagernet.ui.screens.AboutScreen
 import io.nekohasekai.sagernet.ui.screens.ConfigurationScreen
 import io.nekohasekai.sagernet.ui.screens.GroupScreen
@@ -147,6 +150,7 @@ import io.nekohasekai.sagernet.ui.onboarding.Onboarding
 import io.nekohasekai.sagernet.ui.onboarding.OnboardingScreen
 import io.nekohasekai.sagernet.ui.settings.AppearanceSettingsSheet
 import io.nekohasekai.sagernet.ui.theme.Appearance
+import io.nekohasekai.sagernet.ui.theme.NavigationBarStyle
 import io.nekohasekai.sagernet.ui.components.DialogCancelButton
 import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
 
@@ -261,9 +265,10 @@ class MainActivity : ThemedActivity(),
         var configSearchActive by remember { mutableStateOf(false) }
         val bottomTabs = remember { MainDestination.entries.filter { it.inBottomBar } }
         val backdrop = rememberBlurBackdrop()
+        val isMaterialNav = appearance.navigationBarStyle == NavigationBarStyle.MATERIAL
         val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
         val bottomInset = if (!isSettingsSubScreen) {
-            floatingTabBarSpace() + 86.dp
+            if (isMaterialNav) navBarInset + 80.dp + 90.dp else floatingTabBarSpace() + 86.dp
         } else {
             navBarInset
         }
@@ -344,11 +349,16 @@ class MainActivity : ThemedActivity(),
             if (!isSettingsSubScreen) {
                 val bg = MaterialTheme.colorScheme.background
                 val fadeBrush = remember(bg) { bottomScrim(bg) }
+                val scrimHeight = if (isMaterialNav) {
+                    navBarInset + 80.dp + 104.dp
+                } else {
+                    floatingTabBarSpace() + 104.dp
+                }
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .height(floatingTabBarSpace() + 104.dp)
+                        .height(scrimHeight)
                         .background(fadeBrush),
                 )
 
@@ -356,8 +366,15 @@ class MainActivity : ThemedActivity(),
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(bottom = FloatingTabBarMargin),
+                        .then(
+                            if (isMaterialNav) {
+                                Modifier
+                            } else {
+                                Modifier
+                                    .navigationBarsPadding()
+                                    .padding(bottom = FloatingTabBarMargin)
+                            },
+                        ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
@@ -377,24 +394,59 @@ class MainActivity : ThemedActivity(),
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
                     )
-                    FloatingTabBar(
-                        items = bottomTabs,
-                        selectedIndex = { bottomTabs.indexOf(destination).coerceAtLeast(0) },
-                        onSelected = { idx -> currentDestination.value = bottomTabs[idx] },
-                        iconContent = { dest, _ ->
-                            Icon(dest.icon, contentDescription = null, modifier = Modifier.size(22.dp))
-                        },
-                        labelContent = { dest, _ ->
-                            Text(
-                                text = stringResource(dest.titleRes),
-                                fontSize = 11.sp,
-                                lineHeight = 14.sp,
-                                maxLines = 1,
-                                softWrap = false,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                    )
+                    if (isMaterialNav) {
+                        NavigationBar(
+                            modifier = Modifier.blurEffect(
+                                backdrop = backdrop,
+                                blendColor = MaterialTheme.colorScheme.surfaceContainer,
+                            ),
+                            containerColor = if (backdrop != null) {
+                                Color.Transparent
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainer
+                            },
+                        ) {
+                            bottomTabs.forEach { dest ->
+                                NavigationBarItem(
+                                    selected = destination == dest,
+                                    onClick = hapticClick { currentDestination.value = dest },
+                                    icon = {
+                                        Icon(
+                                            imageVector = dest.icon,
+                                            contentDescription = stringResource(dest.titleRes),
+                                        )
+                                    },
+                                    label = {
+                                        Text(
+                                            text = stringResource(dest.titleRes),
+                                            maxLines = 1,
+                                            softWrap = false,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                    } else {
+                        FloatingTabBar(
+                            items = bottomTabs,
+                            selectedIndex = { bottomTabs.indexOf(destination).coerceAtLeast(0) },
+                            onSelected = { idx -> currentDestination.value = bottomTabs[idx] },
+                            iconContent = { dest, _ ->
+                                Icon(dest.icon, contentDescription = null, modifier = Modifier.size(22.dp))
+                            },
+                            labelContent = { dest, _ ->
+                                Text(
+                                    text = stringResource(dest.titleRes),
+                                    fontSize = 11.sp,
+                                    lineHeight = 14.sp,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
+                        )
+                    }
                 }
             }
 

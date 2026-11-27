@@ -82,6 +82,13 @@ enum class BarEffect(
     LIQUID_GLASS(R.string.ui_bar_effect_liquid_glass),
 }
 
+enum class NavigationBarStyle(
+    @StringRes val labelRes: Int,
+) {
+    FLOATING(R.string.ui_nav_bar_floating),
+    MATERIAL(R.string.ui_nav_bar_material),
+}
+
 enum class ColorSpec(
     @StringRes val labelRes: Int,
 ) {
@@ -170,6 +177,7 @@ data class AppearanceSettings(
     val amoled: Boolean = false,
     val blur: Boolean = true,
     val barEffect: BarEffect = BarEffect.BLUR,
+    val navigationBarStyle: NavigationBarStyle = NavigationBarStyle.FLOATING,
     val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     val colorSpec: ColorSpec = ColorSpec.SPEC_2025,
     val contrast: Float = 0f,
@@ -199,6 +207,7 @@ private object AppearancePrefKeys {
     const val AMOLED = "amoled"
     const val BLUR = "blur"
     const val BAR_EFFECT = "bar_effect"
+    const val NAV_BAR_STYLE = "navigation_bar_style"
     const val PALETTE_STYLE = "palette_style"
     const val COLOR_SPEC = "color_spec"
     const val CONTRAST = "contrast"
@@ -248,6 +257,10 @@ object Appearance {
                 barEffect =
                     runCatching { BarEffect.valueOf(p.getString(AppearancePrefKeys.BAR_EFFECT, null).orEmpty()) }
                         .getOrDefault(d.barEffect),
+                navigationBarStyle =
+                    runCatching {
+                        NavigationBarStyle.valueOf(p.getString(AppearancePrefKeys.NAV_BAR_STYLE, null).orEmpty())
+                    }.getOrDefault(d.navigationBarStyle),
                 paletteStyle =
                     runCatching { PaletteStyle.valueOf(p.getString(AppearancePrefKeys.PALETTE_STYLE, null).orEmpty()) }
                         .getOrDefault(d.paletteStyle),
@@ -297,6 +310,8 @@ object Appearance {
     fun setBlur(enabled: Boolean) = update { it.copy(blur = enabled) }
 
     fun setBarEffect(effect: BarEffect) = update { it.copy(barEffect = effect) }
+
+    fun setNavigationBarStyle(style: NavigationBarStyle) = update { it.copy(navigationBarStyle = style) }
 
     fun setPaletteStyle(style: PaletteStyle) = update { it.copy(paletteStyle = style) }
 
@@ -366,6 +381,7 @@ object Appearance {
             .putBoolean(AppearancePrefKeys.AMOLED, next.amoled)
             .putBoolean(AppearancePrefKeys.BLUR, next.blur)
             .putString(AppearancePrefKeys.BAR_EFFECT, next.barEffect.name)
+            .putString(AppearancePrefKeys.NAV_BAR_STYLE, next.navigationBarStyle.name)
             .putString(AppearancePrefKeys.PALETTE_STYLE, next.paletteStyle.name)
             .putString(AppearancePrefKeys.COLOR_SPEC, next.colorSpec.name)
             .putFloat(AppearancePrefKeys.CONTRAST, next.contrast)

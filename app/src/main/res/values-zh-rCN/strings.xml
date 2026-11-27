@@ -648,6 +648,9 @@
     <string name="ui_palette_cmf">CMF</string>
     <string name="ui_bar_effect_blur">模糊</string>
     <string name="ui_bar_effect_liquid_glass">液态玻璃</string>
+    <string name="ui_nav_bar_style">底部导航栏样式</string>
+    <string name="ui_nav_bar_floating">悬浮标签栏</string>
+    <string name="ui_nav_bar_material">Material 默认</string>
     <string name="ui_color_spec_2021">Material 3 (2021)</string>
     <string name="ui_color_spec_2025">Expressive (2025)</string>
     <string name="ui_color_spec_2026">Expressive (2026)</string>
