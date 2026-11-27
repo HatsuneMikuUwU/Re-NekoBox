@@ -171,7 +171,7 @@ data class AppearanceSettings(
     val blur: Boolean = true,
     val barEffect: BarEffect = BarEffect.BLUR,
     val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
-    val colorSpec: ColorSpec = ColorSpec.SPEC_2021,
+    val colorSpec: ColorSpec = ColorSpec.SPEC_2025,
     val contrast: Float = 0f,
     val customSeed: Int = 0,
     val cmfTertiarySeed: Int = 0,
