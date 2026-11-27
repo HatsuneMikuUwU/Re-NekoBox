@@ -79,7 +79,7 @@ fun ColorSchemePreview() {
         Modifier
             .padding(end = 4.dp)
             .size(72.dp)
-            .clip(MaterialShapes.Clover4Leaf.toShape())
+            .clip(MaterialShapes.Cookie9Sided.toShape())
             .background(backdrop),
         contentAlignment = Alignment.Center,
     ) {
@@ -203,7 +203,7 @@ internal fun SwatchContent(
     val tertiaryArc = remember(scheme) { scheme.tertiaryContainer.copy(alpha = 0.9f) }
     val backdrop = remember(scheme) { scheme.primary.copy(alpha = 0.3f) }
     Box(
-        Modifier.size(64.dp).clip(MaterialShapes.Clover4Leaf.toShape()).background(backdrop),
+        Modifier.size(64.dp).clip(MaterialShapes.Cookie9Sided.toShape()).background(backdrop),
         contentAlignment = Alignment.Center,
     ) {
         Box(Modifier.size(48.dp).clip(CircleShape), contentAlignment = Alignment.Center) {
@@ -235,7 +235,7 @@ internal fun FallbackSwatchContent(
     selected: Boolean,
 ) {
     Box(
-        Modifier.size(64.dp).clip(MaterialShapes.Clover4Leaf.toShape()).background(base.copy(alpha = 0.1f)),
+        Modifier.size(64.dp).clip(MaterialShapes.Cookie9Sided.toShape()).background(base.copy(alpha = 0.1f)),
         contentAlignment = Alignment.Center,
     ) {
         Box(
