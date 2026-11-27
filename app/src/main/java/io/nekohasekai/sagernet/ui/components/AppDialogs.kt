@@ -2,6 +2,9 @@
 
 package io.nekohasekai.sagernet.ui.components
 
+import androidx.compose.runtime.collectAsState
+import io.nekohasekai.sagernet.ui.theme.AppearanceStore
+
 import android.os.Build
 import android.view.View
 import android.view.Window
@@ -55,8 +58,9 @@ fun WindowBlurEffect(
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
 
     val view = LocalView.current
+    val userBlur by AppearanceStore.settings.collectAsState()
     val systemAllows = rememberCrossWindowBlurEnabled()
-    val radius = if (enabled && systemAllows) blurRadius else 0
+    val radius = if (enabled && userBlur.blurEnabled && systemAllows) blurRadius else 0
 
     DisposableEffect(view, radius) {
         val apply = Runnable { view.setWindowBlur(radius) }

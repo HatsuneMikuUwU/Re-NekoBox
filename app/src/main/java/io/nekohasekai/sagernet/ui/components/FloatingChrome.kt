@@ -1,5 +1,8 @@
 package io.nekohasekai.sagernet.ui.components
 
+import androidx.compose.runtime.collectAsState
+import io.nekohasekai.sagernet.ui.theme.AppearanceStore
+
 import android.os.Build
 
 import androidx.compose.animation.core.Animatable
@@ -173,8 +176,10 @@ fun rememberBlurBackdrop(
     enabled: Boolean = true,
     background: Color = MaterialTheme.colorScheme.background,
 ): LayerBackdrop? {
+    val userBlur by AppearanceStore.settings.collectAsState()
     if (
         !enabled ||
+        !userBlur.blurEnabled ||
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
         !isRenderEffectSupported()
     ) {
