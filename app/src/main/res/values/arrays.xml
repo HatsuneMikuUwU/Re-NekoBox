@@ -706,4 +706,10 @@
         <item>unsafe-raw</item>
     </string-array>
 
+    <string-array name="spoof_app_modes">
+        <item>@string/spoof_app_none</item>
+        <item>Happ</item>
+        <item>v2RayTun</item>
+        <item>Incy</item>
+    </string-array>
 </resources>

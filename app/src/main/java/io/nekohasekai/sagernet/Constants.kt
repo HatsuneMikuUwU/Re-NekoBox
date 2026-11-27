@@ -171,6 +171,12 @@ object Key {
     const val SUBSCRIPTION_FILTER_MODE = "subscriptionFilterMode"
     const val SUBSCRIPTION_FILTER_REGEX = "subscriptionFilterRegex"
     const val SUBSCRIPTION_SERVER_DNS = "subscriptionServerDns"
+    const val SUBSCRIPTION_HWID_ENABLED = "subscriptionHwidEnabled"
+    const val SUBSCRIPTION_SPOOF_APP = "subscriptionSpoofApp"
+    const val SUBSCRIPTION_HWID = "subscriptionHwid"
+    const val SUBSCRIPTION_SPOOF_DEVICE = "subscriptionSpoofDevice"
+    const val SUBSCRIPTION_DEVICE_PRESET = "subscriptionDevicePreset"
+    const val SUBSCRIPTION_DEVICE_HEADERS = "subscriptionDeviceHeaders"
 
     //
 
@@ -206,6 +212,13 @@ object IPv6Mode {
 object GroupType {
     const val BASIC = 0
     const val SUBSCRIPTION = 1
+}
+
+object SpoofApp {
+    const val NONE = 0
+    const val HAPP = 1
+    const val V2RAY_TUN = 2
+    const val INCY = 3
 }
 
 object GroupOrder {

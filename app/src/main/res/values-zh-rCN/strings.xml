@@ -828,4 +828,27 @@
     <string name="about_license_tap_collapse">开源软件 · 点击收起许可证内容</string>
     <string name="about_footer">为开源代理社区用心打造</string>
 
+    <string name="hwid_support">硬件标识符支持</string>
+    <string name="spoof_app">伪装应用</string>
+    <string name="spoof_app_none">无</string>
+    <string name="spoof_app_without_hwid_title">未启用 HWID 的应用伪装</string>
+    <string name="spoof_app_without_hwid_message">这些应用通常会在更新订阅时发送设备标识符。未启用 HWID 时进行伪装可能会被订阅提供商拒绝。</string>
+    <string name="hwid_not_supported">此订阅需要 HWID 支持</string>
+    <string name="hwid_max_devices_reached">您已达到此订阅中的设备数量上限</string>
+    <string name="subscription_device_id">设备 ID</string>
+    <string name="subscription_hwid_value">自定义 HWID</string>
+    <string name="subscription_hwid_empty">启用硬件标识符支持时，HWID 不能为空。</string>
+    <string name="subscription_hwid_send_summary">更新此订阅时发送已保存的设备 ID。</string>
+    <string name="subscription_spoof_device">伪装设备</string>
+    <string name="subscription_spoof_device_summary">使用已保存的设备配置文件代替当前设备。</string>
+    <string name="subscription_device_profile">设备配置文件</string>
+    <string name="subscription_device_random">随机</string>
+    <string name="subscription_header_model">设备型号 (X-Device-Model)</string>
+    <string name="subscription_header_os">设备系统 (X-Device-Os)</string>
+    <string name="subscription_header_os_version">系统版本 (X-Ver-Os)</string>
+    <string name="subscription_header_locale">设备区域 (X-Device-Locale)</string>
+    <string name="subscription_header_app_version">应用版本 (X-App-Version)</string>
+    <string name="subscription_header_client">客户端 (X-Client)</string>
+    <string name="subscription_header_accept">接受内容 (Accept)</string>
+    <string name="subscription_header_accept_language">接受语言 (Accept-Language)</string>
 </resources>

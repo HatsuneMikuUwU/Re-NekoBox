@@ -906,4 +906,27 @@
     <string name="about_license_tap_collapse">Open source software · Tap to collapse</string>
     <string name="about_footer">Made for the Open Proxy Community</string>
 
+    <string name="hwid_support">HWID Support</string>
+    <string name="spoof_app">Spoof App</string>
+    <string name="spoof_app_none">None</string>
+    <string name="spoof_app_without_hwid_title">Spoof App without HWID</string>
+    <string name="spoof_app_without_hwid_message">These apps usually send a device identifier with subscription update requests. Spoofing without HWID may be rejected by the subscription provider.</string>
+    <string name="hwid_not_supported">This subscription requires HWID support</string>
+    <string name="hwid_max_devices_reached">You\'ve reached maximum number of devices in this subscription</string>
+    <string name="subscription_device_id">Device ID</string>
+    <string name="subscription_hwid_value">HWID override</string>
+    <string name="subscription_hwid_empty">HWID cannot be empty while HWID support is enabled.</string>
+    <string name="subscription_hwid_send_summary">Send the saved device ID when updating this subscription.</string>
+    <string name="subscription_spoof_device">Spoof Device</string>
+    <string name="subscription_spoof_device_summary">Use a saved device profile instead of this device.</string>
+    <string name="subscription_device_profile">Device profile</string>
+    <string name="subscription_device_random">Random</string>
+    <string name="subscription_header_model">Device model (X-Device-Model)</string>
+    <string name="subscription_header_os">Device OS (X-Device-Os)</string>
+    <string name="subscription_header_os_version">OS version (X-Ver-Os)</string>
+    <string name="subscription_header_locale">Device locale (X-Device-Locale)</string>
+    <string name="subscription_header_app_version">App version (X-App-Version)</string>
+    <string name="subscription_header_client">Client (X-Client)</string>
+    <string name="subscription_header_accept">Accepted content (Accept)</string>
+    <string name="subscription_header_accept_language">Accepted languages (Accept-Language)</string>
 </resources>

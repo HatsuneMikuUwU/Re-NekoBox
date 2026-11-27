@@ -75,8 +75,20 @@ object RawUpdater : GroupUpdater() {
                     allowInsecure()
                 }
                 setURL(subscription.link)
-                setUserAgent(subscription.customUserAgent.takeIf { it.isNotBlank() } ?: USER_AGENT)
+                val fingerprint = buildSubscriptionRequestFingerprint(subscription, USER_AGENT)
+                setUserAgent(fingerprint.userAgent)
+                for ((name, value) in fingerprint.headers) {
+                    setHeader(name, value)
+                }
             }.execute()
+            if (Util.getStringBox(response.getHeader("x-hwid-not-supported")).equals("true", ignoreCase = true)) {
+                error(app.getString(R.string.hwid_not_supported))
+            }
+            if (Util.getStringBox(response.getHeader("x-hwid-max-devices-reached")).equals("true", ignoreCase = true) ||
+                Util.getStringBox(response.getHeader("x-hwid-limit")).equals("true", ignoreCase = true)
+            ) {
+                error(app.getString(R.string.hwid_max_devices_reached))
+            }
             val content = Util.getStringBox(response.contentString)
             proxies = parseRaw(content)
                 ?: error(app.getString(R.string.no_proxies_found))

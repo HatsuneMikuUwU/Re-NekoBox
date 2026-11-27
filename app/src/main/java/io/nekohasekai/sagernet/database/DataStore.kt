@@ -299,6 +299,12 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var subscriptionFilterMode by profileCacheStore.stringToInt(Key.SUBSCRIPTION_FILTER_MODE) { 0 }
     var subscriptionFilterRegex by profileCacheStore.string(Key.SUBSCRIPTION_FILTER_REGEX)
     var subscriptionServerDns by profileCacheStore.string(Key.SUBSCRIPTION_SERVER_DNS)
+    var subscriptionHwidEnabled by profileCacheStore.boolean(Key.SUBSCRIPTION_HWID_ENABLED)
+    var subscriptionSpoofApp by profileCacheStore.stringToInt(Key.SUBSCRIPTION_SPOOF_APP) { 0 }
+    var subscriptionHwid by profileCacheStore.string(Key.SUBSCRIPTION_HWID)
+    var subscriptionSpoofDevice by profileCacheStore.boolean(Key.SUBSCRIPTION_SPOOF_DEVICE)
+    var subscriptionDevicePreset by profileCacheStore.string(Key.SUBSCRIPTION_DEVICE_PRESET)
+    var subscriptionDeviceHeaders by profileCacheStore.string(Key.SUBSCRIPTION_DEVICE_HEADERS)
 
     var rulesFirstCreate by profileCacheStore.boolean("rulesFirstCreate")
 

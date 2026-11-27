@@ -25,6 +25,12 @@ public class SubscriptionBean extends Serializable {
     public Integer filterMode;
     public String filterRegex;
     public String serverDnsResolver;
+    public Boolean hwidEnabled;
+    public Integer spoofApp;
+    public String hwid;
+    public Boolean spoofDevice;
+    public String devicePresetId;
+    public String deviceHeaders;
 
     // SIP008
 
@@ -47,7 +53,7 @@ public class SubscriptionBean extends Serializable {
 
     @Override
     public void serializeToBuffer(ByteBufferOutput output) {
-        output.writeInt(3);
+        output.writeInt(4);
 
         output.writeInt(type);
 
@@ -69,6 +75,14 @@ public class SubscriptionBean extends Serializable {
 
         // v3
         output.writeString(serverDnsResolver);
+
+        // v4
+        output.writeBoolean(Boolean.TRUE.equals(hwidEnabled));
+        output.writeInt(spoofApp != null ? spoofApp : 0);
+        output.writeString(hwid);
+        output.writeBoolean(Boolean.TRUE.equals(spoofDevice));
+        output.writeString(devicePresetId);
+        output.writeString(deviceHeaders);
     }
 
     public void serializeForShare(ByteBufferOutput output) {
@@ -108,6 +122,15 @@ public class SubscriptionBean extends Serializable {
         if (version >= 3) {
             serverDnsResolver = input.readString();
         }
+
+        if (version >= 4) {
+            hwidEnabled = input.readBoolean();
+            spoofApp = input.readInt();
+            hwid = input.readString();
+            spoofDevice = input.readBoolean();
+            devicePresetId = input.readString();
+            deviceHeaders = input.readString();
+        }
     }
 
     public void deserializeFromShare(ByteBufferInput input) {
@@ -136,6 +159,10 @@ public class SubscriptionBean extends Serializable {
         if (filterMode == null) filterMode = 0;
         if (filterRegex == null) filterRegex = "";
         if (serverDnsResolver == null) serverDnsResolver = "";
+        if (hwidEnabled == null) hwidEnabled = false;
+        if (spoofApp == null) spoofApp = 0;
+        if (spoofDevice == null) spoofDevice = false;
+        if (devicePresetId == null) devicePresetId = "";
 
         if (bytesUsed == null) bytesUsed = 0L;
         if (bytesRemaining == null) bytesRemaining = 0L;
