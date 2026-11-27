@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.ExpressiveSwitch
+
 import io.nekohasekai.sagernet.ui.components.hapticClick
 import io.nekohasekai.sagernet.ui.components.hapticBooleanChange
 
@@ -185,7 +187,7 @@ fun RouteScreen(
                                 )
                             }
                             Spacer(modifier = Modifier.width(8.dp))
-                            Switch(
+                            ExpressiveSwitch(
                                 checked = rule.enabled,
                                 onCheckedChange = hapticBooleanChange { checked ->
                                     val updated = rule.copy(enabled = checked)

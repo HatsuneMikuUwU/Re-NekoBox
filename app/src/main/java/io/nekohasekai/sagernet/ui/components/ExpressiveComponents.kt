@@ -2,6 +2,14 @@
 
 package io.nekohasekai.sagernet.ui.components
 
+import androidx.compose.material3.SwitchDefaults
+
+import androidx.compose.material3.Switch
+
+import androidx.compose.material.icons.outlined.Close
+
+import androidx.compose.material.icons.outlined.Check
+
 import androidx.compose.material.icons.rounded.QrCode2
 import android.graphics.Bitmap
 import androidx.compose.animation.animateColorAsState
@@ -462,4 +470,27 @@ private fun generateQrBitmap(content: String, sizePx: Int): Bitmap? {
     } catch (_: Exception) {
         null
     }
+}
+
+
+@Composable
+fun ExpressiveSwitch(
+    checked: Boolean,
+    onCheckedChange: ((Boolean) -> Unit)?,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    Switch(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        modifier = modifier,
+        enabled = enabled,
+        thumbContent = {
+            Icon(
+                imageVector = if (checked) Icons.Outlined.Check else Icons.Outlined.Close,
+                contentDescription = null,
+                modifier = Modifier.size(SwitchDefaults.IconSize),
+            )
+        },
+    )
 }

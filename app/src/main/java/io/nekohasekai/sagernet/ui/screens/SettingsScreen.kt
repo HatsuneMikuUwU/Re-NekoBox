@@ -2,6 +2,8 @@
 
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.ExpressiveSwitch
+
 import io.nekohasekai.sagernet.ui.components.hapticClick
 import io.nekohasekai.sagernet.ui.components.hapticBooleanChange
 
@@ -645,7 +647,7 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text(stringResource(R.string.allow_access), style = MaterialTheme.typography.bodyLarge)
-                        Switch(checked = allowLan, onCheckedChange = hapticBooleanChange { allowLan = it })
+                        ExpressiveSwitch(checked = allowLan, onCheckedChange = hapticBooleanChange { allowLan = it })
                     }
                     OutlinedTextField(
                         value = username,

@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.components.ExpressiveSwitch
+
 import io.nekohasekai.sagernet.ui.components.ExpressiveEmptyState
 
 import androidx.compose.material.icons.rounded.SearchOff
@@ -161,7 +163,7 @@ class AppManagerActivity : ThemedActivity() {
                             }
                         },
                         actions = {
-                            Switch(
+                            ExpressiveSwitch(
                                 checked = proxyAppsEnabled,
                                 onCheckedChange = hapticBooleanChange {
                                     proxyAppsEnabled = it

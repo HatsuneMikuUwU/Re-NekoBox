@@ -221,9 +221,10 @@ fun PrefSwitchRow(
                 }
             }
             Spacer(modifier = Modifier.width(12.dp))
-            Switch(
+            val switchChange = hapticBooleanChange(onCheckedChange)
+            ExpressiveSwitch(
                 checked = checked,
-                onCheckedChange = if (enabled) onCheckedChange else null,
+                onCheckedChange = if (enabled) switchChange else null,
                 enabled = enabled,
             )
         }
