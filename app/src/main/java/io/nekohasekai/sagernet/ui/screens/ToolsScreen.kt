@@ -135,7 +135,7 @@ fun ToolsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = topInset, bottom = bottomInset),
+                .padding(top = topInset + 8.dp, bottom = bottomInset),
         ) {
             val tabs = listOf(
                 stringResource(R.string.tools_network),

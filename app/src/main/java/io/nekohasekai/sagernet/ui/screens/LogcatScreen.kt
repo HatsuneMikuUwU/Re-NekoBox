@@ -96,7 +96,7 @@ fun LogcatScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = topInset, bottom = bottomInset),
+                .padding(top = topInset + 10.dp, bottom = bottomInset + 8.dp),
         ) {
             ExpressiveSearchField(
                 query = filterQuery,

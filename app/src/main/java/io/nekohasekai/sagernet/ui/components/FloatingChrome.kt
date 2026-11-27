@@ -134,7 +134,7 @@ val LocalBlurBackdrop = compositionLocalOf<LayerBackdrop?> { null }
 
 @Composable
 fun floatingTopBarSpace(): Dp =
-    WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + FloatingBarTopPadding + FloatingBarHeight + 8.dp
+    WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + FloatingBarTopPadding + FloatingBarHeight
 
 @Composable
 fun floatingTabBarSpace(): Dp =

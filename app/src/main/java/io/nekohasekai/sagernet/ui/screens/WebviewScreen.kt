@@ -65,7 +65,7 @@ fun WebviewScreen(
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = topInset, bottom = bottomInset),
+                .padding(top = topInset + 16.dp, bottom = bottomInset + 16.dp),
             factory = { ctx ->
                 WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
                 WebView(ctx).apply {

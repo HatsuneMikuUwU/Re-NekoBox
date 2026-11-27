@@ -279,7 +279,7 @@ fun ConfigurationScreen(
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
-                    top = topInset + 4.dp,
+                    top = topInset + 16.dp,
                     bottom = bottomInset + 16.dp,
                 ),
                 verticalArrangement = Arrangement.spacedBy(4.dp),

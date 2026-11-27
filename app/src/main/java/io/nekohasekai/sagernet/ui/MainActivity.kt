@@ -12,6 +12,7 @@ import android.os.RemoteException
 import android.text.format.Formatter
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -222,9 +223,9 @@ class MainActivity : ThemedActivity(),
         val backdrop = rememberBlurBackdrop()
         val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
         val bottomInset = if (!isSettingsSubScreen) {
-            floatingTabBarSpace() + 92.dp
+            floatingTabBarSpace() + 86.dp
         } else {
-            navBarInset + 16.dp
+            navBarInset
         }
 
         CompositionLocalProvider(
@@ -354,7 +355,7 @@ class MainActivity : ThemedActivity(),
                 hostState = composeSnackbarHostState,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = bottomInset + 4.dp),
+                    .padding(bottom = bottomInset + 12.dp),
             )
         }
         }
@@ -462,7 +463,14 @@ class MainActivity : ThemedActivity(),
         var testing by remember { mutableStateOf(false) }
         var testStatusText by remember { mutableStateOf<String?>(null) }
 
-        val dockContainerColor = MaterialTheme.colorScheme.surfaceContainer
+        val dockContainerColor by animateColorAsState(
+            targetValue = when {
+                isConnected -> MaterialTheme.colorScheme.primaryContainer
+                isTransitioning -> MaterialTheme.colorScheme.secondaryContainer
+                else -> MaterialTheme.colorScheme.surfaceContainer
+            },
+            label = "dockColor",
+        )
         val backdrop = LocalBlurBackdrop.current
         Surface(
             onClick = {
@@ -510,7 +518,7 @@ class MainActivity : ThemedActivity(),
                         text = statusLabel,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = if (isConnected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -520,7 +528,11 @@ class MainActivity : ThemedActivity(),
                     Text(
                         text = if (isConnected) "↑ $txStr/s  •  ↓ $rxStr/s" else stringResource(R.string.connection_test_pending),
                         style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (isConnected) {
+                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f)
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )

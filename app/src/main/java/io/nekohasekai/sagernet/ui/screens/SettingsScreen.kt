@@ -145,7 +145,7 @@ fun SettingsScreen(
         ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(top = topInset, bottom = bottomInset + 16.dp),
+            contentPadding = PaddingValues(top = topInset, bottom = bottomInset + 8.dp),
         ) {
             // General Settings
             item {
