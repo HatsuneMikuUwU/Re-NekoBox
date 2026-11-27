@@ -2,6 +2,8 @@
 
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+
 import android.os.Bundle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -58,7 +60,7 @@ class StunActivity : ThemedActivity() {
                     TopAppBar(
                         title = { Text(stringResource(R.string.stun_test), fontWeight = FontWeight.Bold) },
                         navigationIcon = {
-                            IconButton(onClick = { finish() }) {
+                            IconButton(onClick = hapticClick { finish() }) {
                                 Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
                             }
                         },
@@ -82,7 +84,7 @@ class StunActivity : ThemedActivity() {
                     )
 
                     Button(
-                        onClick = {
+                        onClick = hapticClick {
                             testing = true
                             errorText = null
                             runOnDefaultDispatcher {

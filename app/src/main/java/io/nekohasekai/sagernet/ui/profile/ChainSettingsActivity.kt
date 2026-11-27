@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui.profile
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -163,7 +165,7 @@ class ChainSettingsActivity : ProfileSettingsActivity<ChainBean>() {
                             ExpressivePillBadge(text = entity.displayType())
                         }
                         if (idx > 0) {
-                            IconButton(onClick = {
+                            IconButton(onClick = hapticClick {
                                 val mutable = proxyIds.toMutableList()
                                 val tmp = mutable[idx - 1]
                                 mutable[idx - 1] = mutable[idx]
@@ -174,7 +176,7 @@ class ChainSettingsActivity : ProfileSettingsActivity<ChainBean>() {
                             }
                         }
                         if (idx < proxyIds.lastIndex) {
-                            IconButton(onClick = {
+                            IconButton(onClick = hapticClick {
                                 val mutable = proxyIds.toMutableList()
                                 val tmp = mutable[idx + 1]
                                 mutable[idx + 1] = mutable[idx]
@@ -184,7 +186,7 @@ class ChainSettingsActivity : ProfileSettingsActivity<ChainBean>() {
                                 Icon(Icons.Rounded.ArrowDownward, contentDescription = "Move down")
                             }
                         }
-                        IconButton(onClick = {
+                        IconButton(onClick = hapticClick {
                             val mutable = proxyIds.toMutableList()
                             if (idx in mutable.indices) {
                                 mutable.removeAt(idx)
@@ -199,7 +201,7 @@ class ChainSettingsActivity : ProfileSettingsActivity<ChainBean>() {
 
             item {
                 Button(
-                    onClick = {
+                    onClick = hapticClick {
                         selectLauncher.launch(Intent(context, ProfileSelectActivity::class.java))
                     },
                     shape = CircleShape,

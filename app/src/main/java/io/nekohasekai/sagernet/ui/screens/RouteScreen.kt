@@ -1,5 +1,8 @@
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+import io.nekohasekai.sagernet.ui.components.hapticBooleanChange
+
 import io.nekohasekai.sagernet.ui.components.AppDialog
 import io.nekohasekai.sagernet.ui.components.DialogCancelButton
 import io.nekohasekai.sagernet.ui.components.DialogDestructiveButton
@@ -184,7 +187,7 @@ fun RouteScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Switch(
                                 checked = rule.enabled,
-                                onCheckedChange = { checked ->
+                                onCheckedChange = hapticBooleanChange { checked ->
                                     val updated = rule.copy(enabled = checked)
                                     rules = rules.map { if (it.id == rule.id) updated else it }
                                     runOnDefaultDispatcher {
@@ -192,7 +195,7 @@ fun RouteScreen(
                                     }
                                 },
                             )
-                            IconButton(onClick = {
+                            IconButton(onClick = hapticClick {
                                 runOnDefaultDispatcher {
                                     ProfileManager.deleteRule(rule.id)
                                 }
@@ -215,15 +218,15 @@ fun RouteScreen(
             backdrop = topBackdrop,
             title = null,
             actions = {
-                IconButton(onClick = {
+                IconButton(onClick = hapticClick {
                     context.startActivity(Intent(context, AssetsActivity::class.java))
                 }) {
                     Icon(Icons.Rounded.FolderZip, contentDescription = stringResource(R.string.route_manage_assets))
                 }
-                IconButton(onClick = { showResetDialog = true }) {
+                IconButton(onClick = hapticClick { showResetDialog = true }) {
                     Icon(Icons.Rounded.RestartAlt, contentDescription = stringResource(R.string.route_reset))
                 }
-                IconButton(onClick = {
+                IconButton(onClick = hapticClick {
                     context.startActivity(Intent(context, RouteSettingsActivity::class.java))
                 }) {
                     Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.route_add))

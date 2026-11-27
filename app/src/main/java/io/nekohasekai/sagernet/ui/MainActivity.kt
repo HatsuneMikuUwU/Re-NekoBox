@@ -140,6 +140,7 @@ import io.nekohasekai.sagernet.ui.background.BackgroundType
 import io.nekohasekai.sagernet.ui.background.LocalAnimatedBackgroundActive
 import io.nekohasekai.sagernet.ui.background.rememberActiveBackground
 import io.nekohasekai.sagernet.ui.components.AppDialog
+import io.nekohasekai.sagernet.ui.components.hapticClick
 import io.nekohasekai.sagernet.ui.components.AppMotion
 import io.nekohasekai.sagernet.ui.settings.AppearanceSettingsSheet
 import io.nekohasekai.sagernet.ui.theme.Appearance
@@ -542,7 +543,7 @@ class MainActivity : ThemedActivity(),
         )
         val backdrop = LocalBlurBackdrop.current
         Surface(
-            onClick = {
+            onClick = hapticClick {
                 testing = true
                 testStatusText = getString(R.string.connection_test_testing)
                 runOnDefaultDispatcher {
@@ -610,7 +611,7 @@ class MainActivity : ThemedActivity(),
                 Spacer(modifier = Modifier.width(8.dp))
 
                 FloatingActionButton(
-                    onClick = onToggleConnection,
+                    onClick = hapticClick(block = onToggleConnection),
                     shape = CircleShape,
                     elevation = FloatingActionButtonDefaults.elevation(
                         defaultElevation = 0.dp,

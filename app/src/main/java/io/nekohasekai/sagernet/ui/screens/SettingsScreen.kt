@@ -2,6 +2,9 @@
 
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+import io.nekohasekai.sagernet.ui.components.hapticBooleanChange
+
 import io.nekohasekai.sagernet.ui.components.AppDialog
 import io.nekohasekai.sagernet.ui.components.DialogCancelButton
 import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
@@ -584,18 +587,18 @@ fun SettingsScreen(
             backdrop = topBackdrop,
             title = null,
             actions = {
-                IconButton(onClick = onOpenTools) {
+                IconButton(onClick = hapticClick(block = onOpenTools)) {
                     Icon(Icons.Rounded.Build, contentDescription = stringResource(R.string.menu_tools))
                 }
-                IconButton(onClick = onOpenLogcat) {
+                IconButton(onClick = hapticClick(block = onOpenLogcat)) {
                     Icon(Icons.Rounded.Terminal, contentDescription = stringResource(R.string.menu_log))
                 }
                 if (clashApiEnabled) {
-                    IconButton(onClick = onOpenDashboard) {
+                    IconButton(onClick = hapticClick(block = onOpenDashboard)) {
                         Icon(Icons.Rounded.Dashboard, contentDescription = stringResource(R.string.menu_dashboard))
                     }
                 }
-                IconButton(onClick = onOpenAbout) {
+                IconButton(onClick = hapticClick(block = onOpenAbout)) {
                     Icon(Icons.Rounded.Info, contentDescription = stringResource(R.string.menu_about))
                 }
             },
@@ -642,7 +645,7 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text(stringResource(R.string.allow_access), style = MaterialTheme.typography.bodyLarge)
-                        Switch(checked = allowLan, onCheckedChange = { allowLan = it })
+                        Switch(checked = allowLan, onCheckedChange = hapticBooleanChange { allowLan = it })
                     }
                     OutlinedTextField(
                         value = username,

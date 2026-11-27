@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -109,7 +111,7 @@ fun LogcatScreen(
                     .fillMaxSize()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 tonalElevation = 1.dp,
             ) {
                 SelectionContainer {
@@ -145,17 +147,17 @@ fun LogcatScreen(
             title = stringResource(R.string.menu_log),
             onBack = onBack,
             actions = {
-                IconButton(onClick = { reloadLogs() }) {
+                IconButton(onClick = hapticClick { reloadLogs() }) {
                     Icon(Icons.Rounded.Refresh, contentDescription = "Refresh")
                 }
-                IconButton(onClick = {
+                IconButton(onClick = hapticClick {
                     runOnDefaultDispatcher {
                         SendLog.sendLog(context, "NB4A")
                     }
                 }) {
                     Icon(Icons.Rounded.Share, contentDescription = "Send Log")
                 }
-                IconButton(onClick = {
+                IconButton(onClick = hapticClick {
                     runOnDefaultDispatcher {
                         try {
                             Libcore.nekoLogClear()

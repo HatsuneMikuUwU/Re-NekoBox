@@ -2,6 +2,8 @@
 
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+
 import io.nekohasekai.sagernet.ui.components.AppDialog
 import io.nekohasekai.sagernet.ui.components.DialogCancelButton
 import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
@@ -96,10 +98,10 @@ fun WebviewScreen(
             title = stringResource(R.string.menu_dashboard),
             onBack = onBack,
             actions = {
-                IconButton(onClick = { webViewRef?.reload() }) {
+                IconButton(onClick = hapticClick { webViewRef?.reload() }) {
                     Icon(Icons.Rounded.Refresh, contentDescription = "Reload")
                 }
-                IconButton(onClick = { showUrlDialog = true }) {
+                IconButton(onClick = hapticClick { showUrlDialog = true }) {
                     Icon(Icons.Rounded.Link, contentDescription = stringResource(R.string.set_panel_url))
                 }
             },

@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+
 import io.nekohasekai.sagernet.ui.components.AppDialog
 import io.nekohasekai.sagernet.ui.components.DialogCancelButton
 import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
@@ -252,10 +254,10 @@ fun GroupScreen(
             backdrop = topBackdrop,
             title = null,
             actions = {
-                IconButton(onClick = { showUpdateAllDialog = true }) {
+                IconButton(onClick = hapticClick { showUpdateAllDialog = true }) {
                     Icon(Icons.Rounded.Sync, contentDescription = stringResource(R.string.update_all_subscription))
                 }
-                IconButton(onClick = {
+                IconButton(onClick = hapticClick {
                     context.startActivity(Intent(context, GroupSettingsActivity::class.java))
                 }) {
                     Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.group_create))
@@ -381,7 +383,7 @@ private fun GroupExpressiveCard(
                         LoadingIndicator(modifier = Modifier.size(32.dp))
                     } else {
                         FilledTonalButton(
-                            onClick = onUpdateSubscription,
+                            onClick = hapticClick(block = onUpdateSubscription),
                             shape = CircleShape,
                             contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
                         ) {
@@ -393,49 +395,49 @@ private fun GroupExpressiveCard(
                 }
 
                 Box {
-                    IconButton(onClick = { menuExpanded = true }) {
+                    IconButton(onClick = hapticClick { menuExpanded = true }) {
                         Icon(Icons.Rounded.MoreVert, contentDescription = "Options")
                     }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.edit)) },
                             leadingIcon = { Icon(Icons.Rounded.Edit, null) },
-                            onClick = { menuExpanded = false; onEdit() },
+                            onClick = hapticClick { menuExpanded = false; onEdit() },
                         )
                         if (isSubscription) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.share_qr_nfc)) },
                                 leadingIcon = { Icon(Icons.Rounded.QrCode2, null) },
-                                onClick = { menuExpanded = false; onShowQr() },
+                                onClick = hapticClick { menuExpanded = false; onShowQr() },
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_export_clipboard)) },
                                 leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
-                                onClick = { menuExpanded = false; onCopySubscriptionLink() },
+                                onClick = hapticClick { menuExpanded = false; onCopySubscriptionLink() },
                             )
                         }
                         if (profileCount > 0) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_export_clipboard)) },
                                 leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
-                                onClick = { menuExpanded = false; onExportProfilesClipboard() },
+                                onClick = hapticClick { menuExpanded = false; onExportProfilesClipboard() },
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_export_file)) },
                                 leadingIcon = { Icon(Icons.Rounded.FileDownload, null) },
-                                onClick = { menuExpanded = false; onExportProfilesFile() },
+                                onClick = hapticClick { menuExpanded = false; onExportProfilesFile() },
                             )
                         }
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.clear_profiles)) },
                             leadingIcon = { Icon(Icons.Rounded.DeleteSweep, null) },
-                            onClick = { menuExpanded = false; onClearProfiles() },
+                            onClick = hapticClick { menuExpanded = false; onClearProfiles() },
                         )
                         if (!group.ungrouped) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
                                 leadingIcon = { Icon(Icons.Rounded.Delete, null, tint = MaterialTheme.colorScheme.error) },
-                                onClick = { menuExpanded = false; onDelete() },
+                                onClick = hapticClick { menuExpanded = false; onDelete() },
                             )
                         }
                     }

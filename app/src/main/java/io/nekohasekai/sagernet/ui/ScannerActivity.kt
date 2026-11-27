@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.ImageDecoder
@@ -120,12 +122,12 @@ class ScannerActivity : ThemedActivity() {
                     TopAppBar(
                         title = { Text(stringResource(R.string.add_profile_methods_scan_qr_code), fontWeight = FontWeight.Bold) },
                         navigationIcon = {
-                            IconButton(onClick = { finish() }) {
+                            IconButton(onClick = hapticClick { finish() }) {
                                 Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
                             }
                         },
                         actions = {
-                            IconButton(onClick = {
+                            IconButton(onClick = hapticClick {
                                 torchOn = !torchOn
                                 cameraRef?.cameraControl?.enableTorch(torchOn)
                             }) {
@@ -134,7 +136,7 @@ class ScannerActivity : ThemedActivity() {
                                     contentDescription = "Flashlight",
                                 )
                             }
-                            IconButton(onClick = { galleryLauncher.launch("image/*") }) {
+                            IconButton(onClick = hapticClick { galleryLauncher.launch("image/*") }) {
                                 Icon(Icons.Rounded.PhotoLibrary, contentDescription = "Import from Gallery")
                             }
                         },

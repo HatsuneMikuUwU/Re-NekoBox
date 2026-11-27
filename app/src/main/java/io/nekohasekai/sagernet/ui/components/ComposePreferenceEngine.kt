@@ -319,7 +319,7 @@ fun PrefActionRow(
                     Icon(
                         imageVector = Icons.Rounded.ChevronRight,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(16.dp),
                     )
                 }
@@ -402,7 +402,7 @@ fun StoreEditTextPref(
                         },
                         trailingIcon = if (isPassword) {
                             {
-                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                IconButton(onClick = hapticClick { passwordVisible = !passwordVisible }) {
                                     Icon(
                                         imageVector = if (passwordVisible) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
                                         contentDescription = null,

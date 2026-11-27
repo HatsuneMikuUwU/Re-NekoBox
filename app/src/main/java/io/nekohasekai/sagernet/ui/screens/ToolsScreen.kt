@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -149,8 +151,11 @@ fun ToolsScreen(
                 tabs.forEachIndexed { index, label ->
                     SegmentedButton(
                         selected = selectedTab == index,
-                        onClick = { selectedTab = index },
+                        onClick = hapticClick { selectedTab = index },
                         shape = SegmentedButtonDefaults.itemShape(index = index, count = tabs.size),
+                        colors = SegmentedButtonDefaults.colors(
+                            inactiveContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        ),
                     ) {
                         Text(label, fontWeight = FontWeight.SemiBold)
                     }
@@ -209,7 +214,7 @@ fun ToolsScreen(
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             Button(
-                                onClick = { exportBackupLauncher.launch("nekobox_backup.json") },
+                                onClick = hapticClick { exportBackupLauncher.launch("nekobox_backup.json") },
                                 modifier = Modifier.weight(1f),
                                 shape = CircleShape,
                             ) {
@@ -218,7 +223,7 @@ fun ToolsScreen(
                                 Text(stringResource(R.string.action_export_file))
                             }
                             FilledTonalButton(
-                                onClick = { importBackupLauncher.launch(arrayOf("application/json", "*/*")) },
+                                onClick = hapticClick { importBackupLauncher.launch(arrayOf("application/json", "*/*")) },
                                 modifier = Modifier.weight(1f),
                                 shape = CircleShape,
                             ) {

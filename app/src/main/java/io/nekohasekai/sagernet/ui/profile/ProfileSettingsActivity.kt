@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui.profile
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -213,13 +215,13 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                         if (DataStore.dirty) showUnsavedDialog = true else finish()
                     },
                     actions = {
-                        IconButton(onClick = {
+                        IconButton(onClick = hapticClick {
                             if (DataStore.editingId == 0L) finish() else showDeleteDialog = true
                         }) {
                             Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete))
                         }
                         Box {
-                            IconButton(onClick = { moreMenuOpen = true }) {
+                            IconButton(onClick = hapticClick { moreMenuOpen = true }) {
                                 Icon(Icons.Rounded.MoreVert, contentDescription = "More")
                             }
                             DropdownMenu(expanded = moreMenuOpen, onDismissRequest = { moreMenuOpen = false }) {
@@ -227,7 +229,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.move)) },
                                         leadingIcon = { Icon(Icons.AutoMirrored.Rounded.DriveFileMove, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             moreMenuOpen = false
                                             showMoveDialog = true
                                         },
@@ -237,7 +239,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.share_qr_nfc)) },
                                         leadingIcon = { Icon(Icons.Rounded.QrCode2, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             moreMenuOpen = false
                                             proxyEntity?.let { ent ->
                                                 qrDialogData = ent.displayName() to ent.toStdLink()
@@ -247,7 +249,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.action_export_clipboard)) },
                                         leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             moreMenuOpen = false
                                             proxyEntity?.let { ent ->
                                                 SagerNet.trySetPrimaryClip(ent.toStdLink())
@@ -258,7 +260,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.menu_configuration)) },
                                         leadingIcon = { Icon(Icons.Rounded.DataObject, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             moreMenuOpen = false
                                             proxyEntity?.let { ent ->
                                                 runOnDefaultDispatcher {
@@ -278,7 +280,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.action_export_file)) },
                                         leadingIcon = { Icon(Icons.Rounded.FileDownload, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             moreMenuOpen = false
                                             proxyEntity?.let { ent ->
                                                 runOnDefaultDispatcher {
@@ -300,7 +302,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.create_shortcut)) },
                                         leadingIcon = { Icon(Icons.AutoMirrored.Rounded.AddToHomeScreen, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             moreMenuOpen = false
                                             proxyEntity?.let { ent ->
                                                 val shortcut = ShortcutInfoCompat.Builder(
@@ -325,7 +327,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.custom_outbound_json)) },
                                     leadingIcon = { Icon(Icons.Rounded.Code, null) },
-                                    onClick = {
+                                    onClick = hapticClick {
                                         moreMenuOpen = false
                                         proxyEntity?.let { ent ->
                                             DataStore.serverCustomOutbound = ent.requireBean().customOutboundJson
@@ -340,7 +342,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.custom_config_json)) },
                                     leadingIcon = { Icon(Icons.Rounded.DataObject, null) },
-                                    onClick = {
+                                    onClick = hapticClick {
                                         moreMenuOpen = false
                                         proxyEntity?.let { ent ->
                                             DataStore.serverCustom = ent.requireBean().customConfigJson
@@ -359,7 +361,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                 )
 
                 ExtendedFloatingActionButton(
-                    onClick = { runOnDefaultDispatcher { saveAndExit() } },
+                    onClick = hapticClick { runOnDefaultDispatcher { saveAndExit() } },
                     expanded = fabExpanded,
                     shape = RoundedCornerShape(16.dp),
                     icon = { Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply)) },

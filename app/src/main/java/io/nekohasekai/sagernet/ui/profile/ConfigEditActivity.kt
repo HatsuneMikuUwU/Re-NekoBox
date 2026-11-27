@@ -2,6 +2,8 @@
 
 package io.nekohasekai.sagernet.ui.profile
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+
 import android.os.Bundle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -64,12 +66,12 @@ class ConfigEditActivity : ThemedActivity() {
                     TopAppBar(
                         title = { Text(stringResource(R.string.custom_config), fontWeight = FontWeight.Bold) },
                         navigationIcon = {
-                            IconButton(onClick = { finish() }) {
+                            IconButton(onClick = hapticClick { finish() }) {
                                 Icon(Icons.Rounded.Close, contentDescription = "Close")
                             }
                         },
                         actions = {
-                            IconButton(onClick = {
+                            IconButton(onClick = hapticClick {
                                 val trimmed = content.trim()
                                 try {
                                     content = when {
@@ -83,7 +85,7 @@ class ConfigEditActivity : ThemedActivity() {
                             }) {
                                 Icon(Icons.Rounded.AutoFixHigh, contentDescription = "Format JSON")
                             }
-                            IconButton(onClick = {
+                            IconButton(onClick = hapticClick {
                                 store.putString(key, content)
                                 DataStore.dirty = true
                                 setResult(RESULT_OK)
@@ -122,7 +124,7 @@ class ConfigEditActivity : ThemedActivity() {
                     ) {
                         items(quickSymbols) { sym ->
                             FilledTonalButton(
-                                onClick = { content += sym },
+                                onClick = hapticClick { content += sym },
                                 shape = CircleShape,
                                 contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
                             ) {

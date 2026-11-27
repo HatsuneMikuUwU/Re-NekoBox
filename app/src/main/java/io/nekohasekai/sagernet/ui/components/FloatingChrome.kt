@@ -538,7 +538,7 @@ fun FloatingSearchBar(
                     )
                 }
                 if (query.isNotEmpty()) {
-                    IconButton(onClick = { onQueryChange("") }) {
+                    IconButton(onClick = hapticClick { onQueryChange("") }) {
                         Icon(
                             imageVector = Icons.Rounded.Close,
                             contentDescription = "Clear",

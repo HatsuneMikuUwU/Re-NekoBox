@@ -83,3 +83,17 @@ fun hapticToggle(
     checked: Boolean,
     block: () -> Unit,
 ): () -> Unit = hapticClick(type = toggleHaptic(checked), block = block)
+
+@Composable
+fun hapticBooleanChange(
+    onChange: (Boolean) -> Unit,
+): (Boolean) -> Unit {
+    val perform = rememberHapticPerformer()
+    val latest by rememberUpdatedState(onChange)
+    return remember(perform) {
+        { next ->
+            perform(if (next) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
+            latest(next)
+        }
+    }
+}

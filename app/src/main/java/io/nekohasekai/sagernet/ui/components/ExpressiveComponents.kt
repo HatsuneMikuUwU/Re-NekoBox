@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -114,6 +115,7 @@ fun ExpressiveSurfaceItem(
     selected: Boolean = false,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
+    clickHapticType: HapticFeedbackType = HapticFeedbackType.ContextClick,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
@@ -122,10 +124,12 @@ fun ExpressiveSurfaceItem(
         targetValue = if (selected) {
             MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.72f)
         } else {
-            MaterialTheme.colorScheme.surfaceContainerLow
+            MaterialTheme.colorScheme.surfaceContainer
         },
         label = "expressiveCardColor",
     )
+    val performClickHaptic = rememberHapticAction(clickHapticType)
+    val performLongHaptic = rememberHapticAction(HapticFeedbackType.LongPress)
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -133,8 +137,19 @@ fun ExpressiveSurfaceItem(
             .then(
                 if (onClick != null || onLongClick != null) {
                     Modifier.combinedClickable(
-                        onClick = { onClick?.invoke() },
-                        onLongClick = onLongClick,
+                        onClick = {
+                            if (onClick != null) {
+                                performClickHaptic()
+                                onClick()
+                            }
+                        },
+                        onLongClick = onLongClick?.let { longAction ->
+                            {
+                                performLongHaptic()
+                                longAction()
+                            }
+                        },
+                        hapticFeedbackEnabled = false,
                     )
                 } else {
                     Modifier
@@ -217,7 +232,7 @@ fun ExpressiveSearchField(
         },
         trailingIcon = {
             if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }) {
+                IconButton(onClick = hapticClick { onQueryChange("") }) {
                     Icon(
                         imageVector = Icons.Rounded.Close,
                         contentDescription = null,
@@ -283,7 +298,7 @@ fun ExpressiveEmptyState(
         if (actionLabel != null && onAction != null) {
             Spacer(modifier = Modifier.height(20.dp))
             Button(
-                onClick = onAction,
+                onClick = hapticClick(block = onAction),
                 shape = CircleShape,
             ) {
                 Text(actionLabel)

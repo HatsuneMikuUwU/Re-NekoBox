@@ -1,5 +1,8 @@
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+import io.nekohasekai.sagernet.ui.components.hapticBooleanChange
+
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -146,28 +149,28 @@ class AppManagerActivity : ThemedActivity() {
                     TopAppBar(
                         title = { Text(stringResource(R.string.proxied_apps), fontWeight = FontWeight.Bold) },
                         navigationIcon = {
-                            IconButton(onClick = { finish() }) {
+                            IconButton(onClick = hapticClick { finish() }) {
                                 Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
                             }
                         },
                         actions = {
                             Switch(
                                 checked = proxyAppsEnabled,
-                                onCheckedChange = {
+                                onCheckedChange = hapticBooleanChange {
                                     proxyAppsEnabled = it
                                     DataStore.proxyApps = it
                                 },
                                 modifier = Modifier.padding(end = 6.dp),
                             )
                             Box {
-                                IconButton(onClick = { menuOpen = true }) {
+                                IconButton(onClick = hapticClick { menuOpen = true }) {
                                     Icon(Icons.Rounded.MoreVert, contentDescription = "More")
                                 }
                                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.action_invert_selections)) },
                                         leadingIcon = { Icon(Icons.Rounded.SwapHoriz, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             menuOpen = false
                                             val allVisible = filtered.map { it.packageName }.toSet()
                                             val next = (selectedPackages - allVisible) + (allVisible - selectedPackages)
@@ -177,7 +180,7 @@ class AppManagerActivity : ThemedActivity() {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.clear_selections)) },
                                         leadingIcon = { Icon(Icons.Rounded.Deselect, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             menuOpen = false
                                             persist(emptySet())
                                         },
@@ -185,7 +188,7 @@ class AppManagerActivity : ThemedActivity() {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.action_copy)) },
                                         leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             menuOpen = false
                                             SagerNet.trySetPrimaryClip(selectedPackages.joinToString("\n"))
                                             showComposeSnackbar(getString(R.string.copy_success))
@@ -209,19 +212,25 @@ class AppManagerActivity : ThemedActivity() {
                     ) {
                         SegmentedButton(
                             selected = !bypassMode,
-                            onClick = {
+                            onClick = hapticClick {
                                 bypassMode = false
                                 DataStore.bypass = false
                             },
                             shape = SegmentedButtonDefaults.itemShape(0, 2),
+                            colors = SegmentedButtonDefaults.colors(
+                                inactiveContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            ),
                         ) { Text(stringResource(R.string.route_proxy)) }
                         SegmentedButton(
                             selected = bypassMode,
-                            onClick = {
+                            onClick = hapticClick {
                                 bypassMode = true
                                 DataStore.bypass = true
                             },
                             shape = SegmentedButtonDefaults.itemShape(1, 2),
+                            colors = SegmentedButtonDefaults.colors(
+                                inactiveContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            ),
                         ) { Text(stringResource(R.string.bypass_apps)) }
                     }
 
@@ -240,7 +249,7 @@ class AppManagerActivity : ThemedActivity() {
                         )
                         FilterChip(
                             selected = showSystemApps,
-                            onClick = { showSystemApps = !showSystemApps },
+                            onClick = hapticClick { showSystemApps = !showSystemApps },
                             label = { Text("System") },
                             shape = CircleShape,
                         )

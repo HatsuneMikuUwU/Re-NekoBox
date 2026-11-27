@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.text.format.Formatter
@@ -175,7 +177,7 @@ class AssetsActivity : ThemedActivity() {
                                         )
                                     }
                                     if (!isBuiltIn && file.exists()) {
-                                        IconButton(onClick = {
+                                        IconButton(onClick = hapticClick {
                                             file.delete()
                                             reload()
                                         }) {
@@ -193,10 +195,10 @@ class AssetsActivity : ThemedActivity() {
                     title = stringResource(R.string.route_manage_assets),
                     onBack = { finish() },
                     actions = {
-                        IconButton(onClick = { reload() }) {
+                        IconButton(onClick = hapticClick { reload() }) {
                             Icon(Icons.Rounded.Refresh, contentDescription = "Refresh")
                         }
-                        IconButton(onClick = { importLauncher.launch(arrayOf("*/*")) }) {
+                        IconButton(onClick = hapticClick { importLauncher.launch(arrayOf("*/*")) }) {
                             Icon(Icons.Rounded.FileOpen, contentDescription = stringResource(R.string.action_import_file))
                         }
                     },

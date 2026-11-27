@@ -3,6 +3,9 @@
 
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+import io.nekohasekai.sagernet.ui.components.hapticBooleanChange
+
 import io.nekohasekai.sagernet.ui.components.AppDialog
 import io.nekohasekai.sagernet.ui.components.DialogCancelButton
 import io.nekohasekai.sagernet.ui.components.DialogDestructiveButton
@@ -384,13 +387,13 @@ fun ConfigurationScreen(
                                 }
                                 ToggleButton(
                                     checked = selected,
-                                    onCheckedChange = {
+                                    onCheckedChange = hapticBooleanChange {
                                         selectedGroupId = group.id
                                         DataStore.selectedGroup = group.id
                                     },
                                     shapes = shapes,
                                     colors = ToggleButtonDefaults.colors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
                                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                         checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                                         checkedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -495,12 +498,12 @@ fun ConfigurationScreen(
                     title = if (selectMode) stringResource(R.string.select_profile) else null,
                     onBack = if (selectMode) onBack else null,
                     actions = {
-                        IconButton(onClick = { searchActive = true }) {
+                        IconButton(onClick = hapticClick { searchActive = true }) {
                             Icon(Icons.Rounded.Search, contentDescription = stringResource(R.string.search))
                         }
                         if (!selectMode) {
                             Box {
-                                IconButton(onClick = { showAddMenu = true }) {
+                                IconButton(onClick = hapticClick { showAddMenu = true }) {
                                     Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_profile))
                                 }
                                 DropdownMenu(
@@ -510,7 +513,7 @@ fun ConfigurationScreen(
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.add_profile_methods_scan_qr_code)) },
                                         leadingIcon = { Icon(Icons.Rounded.QrCodeScanner, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             showAddMenu = false
                                             context.startActivity(Intent(context, ScannerActivity::class.java))
                                         },
@@ -518,7 +521,7 @@ fun ConfigurationScreen(
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.action_import)) },
                                         leadingIcon = { Icon(Icons.Rounded.ContentPaste, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             showAddMenu = false
                                             val text = SagerNet.getClipboardText()
                                             if (text.isBlank()) {
@@ -546,7 +549,7 @@ fun ConfigurationScreen(
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.action_import_file)) },
                                         leadingIcon = { Icon(Icons.Rounded.FileOpen, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             showAddMenu = false
                                             importFileLauncher.launch("*/*")
                                         },
@@ -556,7 +559,7 @@ fun ConfigurationScreen(
                                         text = { Text(stringResource(R.string.add_profile_methods_manual_settings)) },
                                         leadingIcon = { Icon(Icons.Rounded.Tune, null) },
                                         trailingIcon = { Icon(Icons.Rounded.ChevronRight, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             showAddMenu = false
                                             showManualMenu = true
                                         },
@@ -574,7 +577,7 @@ fun ConfigurationScreen(
                                             )
                                         },
                                         leadingIcon = { Icon(Icons.AutoMirrored.Rounded.ArrowBack, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             showManualMenu = false
                                             showAddMenu = true
                                         },
@@ -650,7 +653,7 @@ fun ConfigurationScreen(
                                         DropdownMenuItem(
                                             text = { Text(label) },
                                             leadingIcon = { Icon(icon, null) },
-                                            onClick = {
+                                            onClick = hapticClick {
                                                 showManualMenu = false
                                                 action()
                                             },
@@ -659,7 +662,7 @@ fun ConfigurationScreen(
                                 }
                             }
                             Box {
-                                IconButton(onClick = { showSortMenu = true }) {
+                                IconButton(onClick = hapticClick { showSortMenu = true }) {
                                     Icon(Icons.AutoMirrored.Rounded.Sort, contentDescription = stringResource(R.string.group_order))
                                 }
                                 DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
@@ -672,7 +675,7 @@ fun ConfigurationScreen(
                                         DropdownMenuItem(
                                             text = { Text(stringResource(labelRes)) },
                                             leadingIcon = { Icon(orderIcon, null) },
-                                            onClick = {
+                                            onClick = hapticClick {
                                                 showSortMenu = false
                                                 if (currentGroup != null) {
                                                     runOnDefaultDispatcher {
@@ -687,7 +690,7 @@ fun ConfigurationScreen(
                                 }
                             }
                             Box {
-                                IconButton(onClick = { showMoreMenu = true }) {
+                                IconButton(onClick = hapticClick { showMoreMenu = true }) {
                                     Icon(Icons.Rounded.MoreVert, contentDescription = "More")
                                 }
                                 DropdownMenu(expanded = showMoreMenu, onDismissRequest = { showMoreMenu = false }) {
@@ -700,18 +703,18 @@ fun ConfigurationScreen(
                                         },
                                         leadingIcon = { Icon(Icons.Rounded.NetworkCheck, null) },
                                         enabled = !isTestingAll && profiles.isNotEmpty(),
-                                        onClick = { showMoreMenu = false; runPingAll() },
+                                        onClick = hapticClick { showMoreMenu = false; runPingAll() },
                                     )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.connection_test_icmp_ping)) },
                                         leadingIcon = { Icon(Icons.Rounded.NetworkPing, null) },
                                         enabled = !isTestingAll && profiles.isNotEmpty(),
-                                        onClick = { showMoreMenu = false; runPingAll() },
+                                        onClick = hapticClick { showMoreMenu = false; runPingAll() },
                                     )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.connection_test_clear_results)) },
                                         leadingIcon = { Icon(Icons.Rounded.ClearAll, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             showMoreMenu = false
                                             val cleared = profiles.map { it.copy(status = 0, ping = 0, error = null) }
                                             profiles = cleared
@@ -723,7 +726,7 @@ fun ConfigurationScreen(
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.connection_test_delete_unavailable)) },
                                         leadingIcon = { Icon(Icons.Rounded.DeleteSweep, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             showMoreMenu = false
                                             runOnDefaultDispatcher {
                                                 val unavailable = profiles.filter { it.status == 2 || it.status == 3 }
@@ -737,7 +740,7 @@ fun ConfigurationScreen(
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.clear_traffic_statistics)) },
                                         leadingIcon = { Icon(Icons.Rounded.CleaningServices, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             showMoreMenu = false
                                             val ids = profiles.map { it.id }.toLongArray()
                                             profiles = profiles.map { it.copy(tx = 0L, rx = 0L) }
@@ -751,7 +754,7 @@ fun ConfigurationScreen(
                                         DropdownMenuItem(
                                             text = { Text(stringResource(R.string.update_current_subscription)) },
                                             leadingIcon = { Icon(Icons.Rounded.CloudSync, null) },
-                                            onClick = {
+                                            onClick = hapticClick {
                                                 showMoreMenu = false
                                                 GroupUpdater.startUpdate(activeGroup, true)
                                             },
@@ -761,7 +764,7 @@ fun ConfigurationScreen(
                                         text = { Text(stringResource(R.string.remove_duplicate)) },
                                         leadingIcon = { Icon(Icons.Rounded.LayersClear, null) },
                                         enabled = profiles.size > 1,
-                                        onClick = {
+                                        onClick = hapticClick {
                                             showMoreMenu = false
                                             val snapshot = profiles.toList()
                                             runOnDefaultDispatcher {
@@ -784,7 +787,7 @@ fun ConfigurationScreen(
                                         trailingIcon = if (globalMode) {
                                             { Icon(Icons.Rounded.Check, null) }
                                         } else null,
-                                        onClick = {
+                                        onClick = hapticClick {
                                             showMoreMenu = false
                                             val next = !globalMode
                                             globalMode = next
@@ -943,7 +946,7 @@ private fun ProfileExpressiveCard(
             }
 
             if (!selectMode) {
-                IconButton(onClick = onEdit) {
+                IconButton(onClick = hapticClick(block = onEdit)) {
                     Icon(
                         imageVector = Icons.Rounded.Edit,
                         contentDescription = stringResource(R.string.edit),
@@ -951,7 +954,7 @@ private fun ProfileExpressiveCard(
                     )
                 }
                 Box {
-                    IconButton(onClick = { menuExpanded = true }) {
+                    IconButton(onClick = hapticClick { menuExpanded = true }) {
                         Icon(
                             imageVector = Icons.Rounded.MoreVert,
                             contentDescription = "Options",
@@ -962,22 +965,22 @@ private fun ProfileExpressiveCard(
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.share_qr_nfc)) },
                             leadingIcon = { Icon(Icons.Rounded.QrCode2, null) },
-                            onClick = { menuExpanded = false; onShareQr() },
+                            onClick = hapticClick { menuExpanded = false; onShareQr() },
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.action_export_clipboard)) },
                             leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
-                            onClick = { menuExpanded = false; onCopyLink() },
+                            onClick = hapticClick { menuExpanded = false; onCopyLink() },
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.duplicate)) },
                             leadingIcon = { Icon(Icons.Rounded.FileCopy, null) },
-                            onClick = { menuExpanded = false; onDuplicate() },
+                            onClick = hapticClick { menuExpanded = false; onDuplicate() },
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
                             leadingIcon = { Icon(Icons.Rounded.Delete, null, tint = MaterialTheme.colorScheme.error) },
-                            onClick = { menuExpanded = false; onDelete() },
+                            onClick = hapticClick { menuExpanded = false; onDelete() },
                         )
                     }
                 }

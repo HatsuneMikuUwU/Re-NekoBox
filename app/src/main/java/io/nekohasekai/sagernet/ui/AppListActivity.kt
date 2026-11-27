@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import androidx.compose.foundation.Image
@@ -109,13 +111,13 @@ class AppListActivity : ThemedActivity() {
                     TopAppBar(
                         title = { Text(stringResource(R.string.apps), fontWeight = FontWeight.Bold) },
                         navigationIcon = {
-                            IconButton(onClick = { finish() }) {
+                            IconButton(onClick = hapticClick { finish() }) {
                                 Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
                             }
                         },
                         actions = {
                             var moreOpen by remember { mutableStateOf(false) }
-                            IconButton(onClick = {
+                            IconButton(onClick = hapticClick {
                                 DataStore.routePackages = selectedPackages.joinToString("\n")
                                 setResult(RESULT_OK)
                                 finish()
@@ -123,14 +125,14 @@ class AppListActivity : ThemedActivity() {
                                 Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply))
                             }
                             Box {
-                                IconButton(onClick = { moreOpen = true }) {
+                                IconButton(onClick = hapticClick { moreOpen = true }) {
                                     Icon(Icons.Rounded.MoreVert, contentDescription = "More")
                                 }
                                 DropdownMenu(expanded = moreOpen, onDismissRequest = { moreOpen = false }) {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.action_invert_selections)) },
                                         leadingIcon = { Icon(Icons.Rounded.SwapHoriz, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             moreOpen = false
                                             val allVisible = filtered.map { it.packageName }.toSet()
                                             selectedPackages = (selectedPackages - allVisible) + (allVisible - selectedPackages)
@@ -139,7 +141,7 @@ class AppListActivity : ThemedActivity() {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.clear_selections)) },
                                         leadingIcon = { Icon(Icons.Rounded.ClearAll, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             moreOpen = false
                                             selectedPackages = emptySet()
                                         },
@@ -147,7 +149,7 @@ class AppListActivity : ThemedActivity() {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.action_export_clipboard)) },
                                         leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             moreOpen = false
                                             SagerNet.trySetPrimaryClip(selectedPackages.joinToString("\n"))
                                             showComposeSnackbar(getString(R.string.copy_success))
@@ -156,7 +158,7 @@ class AppListActivity : ThemedActivity() {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.action_import)) },
                                         leadingIcon = { Icon(Icons.Rounded.ContentPaste, null) },
-                                        onClick = {
+                                        onClick = hapticClick {
                                             moreOpen = false
                                             val clip = SagerNet.getClipboardText()
                                             if (clip.isNotBlank()) {
@@ -194,7 +196,7 @@ class AppListActivity : ThemedActivity() {
                         )
                         FilterChip(
                             selected = showSystem,
-                            onClick = { showSystem = !showSystem },
+                            onClick = hapticClick { showSystem = !showSystem },
                             label = { Text("System") },
                             shape = CircleShape,
                         )

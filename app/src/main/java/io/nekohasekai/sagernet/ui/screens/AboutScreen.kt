@@ -241,7 +241,7 @@ fun AboutScreen(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 6.dp),
                             shape = RoundedCornerShape(20.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
+                            color = MaterialTheme.colorScheme.surfaceContainer,
                         ) {
                             Text(
                                 text = licenseText,

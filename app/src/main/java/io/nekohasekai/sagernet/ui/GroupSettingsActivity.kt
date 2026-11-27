@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.components.hapticClick
+
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -390,7 +392,7 @@ class GroupSettingsActivity : ThemedActivity() {
                     onBack = { if (DataStore.dirty) showUnsavedDialog = true else finish() },
                     actions = if (editingId != 0L) {
                         {
-                            IconButton(onClick = { showDeleteDialog = true }) {
+                            IconButton(onClick = hapticClick { showDeleteDialog = true }) {
                                 Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete))
                             }
                         }
@@ -399,7 +401,7 @@ class GroupSettingsActivity : ThemedActivity() {
                 )
 
                 ExtendedFloatingActionButton(
-                    onClick = { saveGroup() },
+                    onClick = hapticClick { saveGroup() },
                     expanded = fabExpanded,
                     shape = RoundedCornerShape(16.dp),
                     icon = { Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply)) },
