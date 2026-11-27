@@ -2,10 +2,8 @@
 
 package io.nekohasekai.sagernet.ui.screens
 
-import io.nekohasekai.sagernet.ui.components.ExpressiveSwitch
 
 import io.nekohasekai.sagernet.ui.components.hapticClick
-import io.nekohasekai.sagernet.ui.components.hapticBooleanChange
 
 import io.nekohasekai.sagernet.ui.components.AppDialog
 import io.nekohasekai.sagernet.ui.components.DialogCancelButton
@@ -60,7 +58,6 @@ import androidx.compose.material.icons.rounded.Construction
 import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Dns
-import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Lock
@@ -98,11 +95,8 @@ import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.database.CustomDnsServerStore
 import io.nekohasekai.sagernet.ktx.triggerFullRestart
 import io.nekohasekai.sagernet.ui.AppManagerActivity
-import io.nekohasekai.sagernet.ui.AdblockSettingsActivity
-import io.nekohasekai.sagernet.ui.CustomDnsServersActivity
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
 import io.nekohasekai.sagernet.ui.components.FloatingTopBar
 import io.nekohasekai.sagernet.ui.components.LocalBottomInset
@@ -416,17 +410,7 @@ fun SettingsScreen(
                         titleRes = R.string.ruleset_update_interval,
                         defaultValue = "0",
                         isNumber = true,
-                    )
-                    PrefActionRow(
-                        title = stringResource(R.string.adblock_settings),
-                        summary = stringResource(
-                            if (store.getBoolean(Key.ADBLOCK_ENABLED, false)) R.string.adblock_status_enabled else R.string.disable,
-                        ),
-                        icon = Icons.Rounded.Shield,
                         position = ExpressiveGroupPosition.BOTTOM,
-                        onClick = {
-                            context.startActivity(Intent(context, AdblockSettingsActivity::class.java))
-                        },
                     )
                 }
             }
@@ -495,21 +479,6 @@ fun SettingsScreen(
                         icon = Icons.Rounded.Policy,
                         onChanged = { notifyNeedReload(); true },
                     )
-                    val customDnsCount = remember(store.getString(Key.CUSTOM_DNS_SERVERS, "")) {
-                        CustomDnsServerStore.enabledServers().size
-                    }
-                    PrefActionRow(
-                        title = stringResource(R.string.custom_dns_servers),
-                        summary = if (customDnsCount > 0) {
-                            stringResource(R.string.custom_dns_enabled_count, customDnsCount)
-                        } else {
-                            stringResource(R.string.custom_dns_servers_sum)
-                        },
-                        icon = Icons.Rounded.Dns,
-                        onClick = {
-                            context.startActivity(Intent(context, CustomDnsServersActivity::class.java))
-                        },
-                    )
                     StoreEditTextPref(
                         store = store,
                         key = Key.DNS_HOSTS,
@@ -525,7 +494,8 @@ fun SettingsScreen(
 
             // Inbound Settings
             item {
-                val host = if (DataStore.allowAccess) "0.0.0.0" else "127.0.0.1"
+                val allowAccess = store.getBoolean(Key.ALLOW_ACCESS, false)
+                val host = if (allowAccess) "0.0.0.0" else "127.0.0.1"
                 PrefCategory(titleRes = R.string.inbound_settings) {
                     PrefActionRow(
                         title = stringResource(R.string.local_proxy_settings),
@@ -533,6 +503,14 @@ fun SettingsScreen(
                         icon = Icons.Rounded.Router,
                         position = ExpressiveGroupPosition.TOP,
                         onClick = { showLocalProxyDialog = true },
+                    )
+                    StoreSwitchPref(
+                        store = store,
+                        key = Key.ALLOW_ACCESS,
+                        icon = Icons.Rounded.Lan,
+                        titleRes = R.string.allow_access,
+                        summaryRes = R.string.allow_access_sum,
+                        onChanged = { notifyNeedReload(); true },
                     )
                     StoreSwitchPref(
                         store = store,
@@ -651,7 +629,6 @@ fun SettingsScreen(
 
     if (showLocalProxyDialog) {
         var portText by remember { mutableStateOf(DataStore.mixedPort.toString()) }
-        var allowLan by remember { mutableStateOf(DataStore.allowAccess) }
         var username by remember { mutableStateOf(DataStore.mixedUsername) }
         var password by remember { mutableStateOf(DataStore.mixedSecret) }
 
@@ -670,14 +647,6 @@ fun SettingsScreen(
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(stringResource(R.string.allow_access), style = MaterialTheme.typography.bodyLarge)
-                        ExpressiveSwitch(checked = allowLan, onCheckedChange = hapticBooleanChange { allowLan = it })
-                    }
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
@@ -703,7 +672,6 @@ fun SettingsScreen(
                         Toast.makeText(context, R.string.port_out_of_range, Toast.LENGTH_SHORT).show()
                     } else {
                         DataStore.mixedPort = p
-                        DataStore.allowAccess = allowLan
                         DataStore.mixedUsername = username.trim()
                         DataStore.configurationStore.putString(Key.MIXED_SECRET, password)
                         showLocalProxyDialog = false

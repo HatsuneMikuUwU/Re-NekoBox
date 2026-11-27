@@ -208,18 +208,6 @@
             android:name="moe.matsuri.nb4a.proxy.config.ConfigSettingActivity"
             android:configChanges="uiMode" />
         <activity
-            android:name="io.nekohasekai.sagernet.ui.CustomDnsServersActivity"
-            android:configChanges="uiMode"
-            android:exported="false" />
-        <activity
-            android:name="io.nekohasekai.sagernet.ui.CustomDnsServerSettingsActivity"
-            android:configChanges="uiMode"
-            android:exported="false" />
-        <activity
-            android:name="io.nekohasekai.sagernet.ui.AdblockSettingsActivity"
-            android:configChanges="uiMode"
-            android:exported="false" />
-        <activity
             android:name="io.nekohasekai.sagernet.ui.GroupSettingsActivity"
             android:configChanges="uiMode" />
         <activity

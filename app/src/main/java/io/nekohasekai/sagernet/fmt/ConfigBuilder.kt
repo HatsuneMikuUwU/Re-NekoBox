@@ -4,8 +4,6 @@ import android.widget.Toast
 import io.nekohasekai.sagernet.*
 import io.nekohasekai.sagernet.bg.VpnService
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.database.CustomDnsServerStore
-import io.nekohasekai.sagernet.utils.AdblockConfig
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.ProxyEntity.Companion.TYPE_CONFIG
 import io.nekohasekai.sagernet.database.ProxyGroup
@@ -1014,20 +1012,6 @@ fun buildConfig(
                     _hack_config_map["ip_accept_any"] = true
                 })
             }
-            // Custom DNS servers & per-server domain rules
-            val customDnsServers = CustomDnsServerStore.enabledServers()
-            val existingDnsTags = dns.servers.mapNotNull { it.tag }.toMutableSet()
-            customDnsServers.forEach { customServer ->
-                val tag = customServer.tag.trim()
-                if (tag.isNotEmpty() && existingDnsTags.add(tag)) {
-                    dns.servers.add(buildCustomDnsServerOptions(customServer))
-                    buildCustomDnsDomainRule(customServer)?.let { domainRule ->
-                        dns.rules.add(0, domainRule)
-                    }
-                }
-            }
-            // Native DNS & Rule-Set Adblock
-            AdblockConfig.applyToConfig(dns, route)
             // avoid loopback
             dns.rules.add(0, DNSRule_DefaultOptions().apply {
                 outbound = mutableListOf("any")
