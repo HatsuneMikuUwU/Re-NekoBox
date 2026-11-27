@@ -78,7 +78,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -367,10 +366,11 @@ private fun AboutHero() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         RotatingCookieFrame {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(colorResource(R.color.ic_launcher_background)),
+            Image(
+                painter = painterResource(R.mipmap.ic_launcher_background),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
             )
             Image(
                 painter = painterResource(R.mipmap.ic_launcher_foreground),
