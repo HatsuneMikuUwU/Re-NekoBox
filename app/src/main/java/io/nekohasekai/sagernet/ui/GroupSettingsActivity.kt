@@ -66,6 +66,8 @@ import io.nekohasekai.sagernet.ui.components.StoreSwitchPref
 import io.nekohasekai.sagernet.ui.components.rememberComposePreferenceStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.material.icons.rounded.LayersClear
+import androidx.compose.material.icons.rounded.TravelExplore
 
 class GroupSettingsActivity : ThemedActivity() {
 
@@ -223,14 +225,14 @@ class GroupSettingsActivity : ThemedActivity() {
                                     StoreSwitchPref(
                                         store = store,
                                         key = Key.SUBSCRIPTION_FORCE_RESOLVE,
-                                        icon = Icons.Rounded.Dns,
+                                        icon = Icons.Rounded.TravelExplore,
                                         titleRes = R.string.force_resolve,
                                         summaryRes = R.string.force_resolve_sum,
                                     )
                                     StoreSwitchPref(
                                         store = store,
                                         key = Key.SUBSCRIPTION_DEDUPLICATION,
-                                        icon = Icons.Rounded.FilterList,
+                                        icon = Icons.Rounded.LayersClear,
                                         titleRes = R.string.deduplication,
                                         summaryRes = R.string.deduplication_sum,
                                     )

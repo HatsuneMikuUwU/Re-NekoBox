@@ -2,7 +2,6 @@
 
 package io.nekohasekai.sagernet.ui.components
 
-import androidx.compose.material.icons.rounded.Edit
 import android.content.Intent
 import androidx.annotation.ArrayRes
 import androidx.annotation.StringRes
@@ -22,7 +21,6 @@ import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.Numbers
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material.icons.rounded.SwapVert
@@ -46,6 +44,60 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ui.profile.ConfigEditActivity
+import androidx.compose.material.icons.rounded.AdminPanelSettings
+import androidx.compose.material.icons.rounded.AltRoute
+import androidx.compose.material.icons.rounded.AvTimer
+import androidx.compose.material.icons.rounded.Badge
+import androidx.compose.material.icons.rounded.BlurOn
+import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.BookmarkBorder
+import androidx.compose.material.icons.rounded.Build
+import androidx.compose.material.icons.rounded.CallMade
+import androidx.compose.material.icons.rounded.Category
+import androidx.compose.material.icons.rounded.DataObject
+import androidx.compose.material.icons.rounded.DeviceHub
+import androidx.compose.material.icons.rounded.Dialpad
+import androidx.compose.material.icons.rounded.DoNotDisturbOn
+import androidx.compose.material.icons.rounded.Domain
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.EnhancedEncryption
+import androidx.compose.material.icons.rounded.Fingerprint
+import androidx.compose.material.icons.rounded.FlashOn
+import androidx.compose.material.icons.rounded.Grain
+import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.Http
+import androidx.compose.material.icons.rounded.Https
+import androidx.compose.material.icons.rounded.Inventory2
+import androidx.compose.material.icons.rounded.Lan
+import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.Layers
+import androidx.compose.material.icons.rounded.ListAlt
+import androidx.compose.material.icons.rounded.MyLocation
+import androidx.compose.material.icons.rounded.Notes
+import androidx.compose.material.icons.rounded.Password
+import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.PushPin
+import androidx.compose.material.icons.rounded.Repeat
+import androidx.compose.material.icons.rounded.RocketLaunch
+import androidx.compose.material.icons.rounded.Route
+import androidx.compose.material.icons.rounded.SettingsEthernet
+import androidx.compose.material.icons.rounded.SettingsInputComponent
+import androidx.compose.material.icons.rounded.Shield
+import androidx.compose.material.icons.rounded.ShortText
+import androidx.compose.material.icons.rounded.SpaceBar
+import androidx.compose.material.icons.rounded.Straighten
+import androidx.compose.material.icons.rounded.Stream
+import androidx.compose.material.icons.rounded.Subject
+import androidx.compose.material.icons.rounded.SyncAlt
+import androidx.compose.material.icons.rounded.Tag
+import androidx.compose.material.icons.rounded.Timer
+import androidx.compose.material.icons.rounded.Traffic
+import androidx.compose.material.icons.rounded.Upload
+import androidx.compose.material.icons.rounded.ViewAgenda
+import androidx.compose.material.icons.rounded.ViewStream
+import androidx.compose.material.icons.rounded.VisibilityOff
+import androidx.compose.material.icons.rounded.VpnKey
+import androidx.compose.material.icons.rounded.WorkspacePremium
 
 sealed interface PrefText {
     data class Res(@StringRes val id: Int) : PrefText
@@ -66,6 +118,7 @@ data class PrefFieldSpec(
     val type: PrefFieldType,
     val key: String,
     val title: PrefText,
+    val icon: ImageVector = Icons.Rounded.Tune,
     val summary: PrefText? = null,
     val defaultValue: String = "",
     @ArrayRes val entriesRes: Int? = null,
@@ -133,7 +186,7 @@ fun ProtocolPreferenceComposeScreen(
                                     PrefSwitchRow(
                                         title = titleStr,
                                         summary = summaryStr,
-                                        icon = iconForProtocolField(item.key),
+                                        icon = item.icon,
                                         checked = store.getBoolean(item.key, def),
                                         onCheckedChange = { store.putBoolean(item.key, it) },
                                         enabled = enabled,
@@ -145,7 +198,7 @@ fun ProtocolPreferenceComposeScreen(
                                     PrefActionRow(
                                         title = titleStr,
                                         summary = if (value.isBlank()) stringResource(R.string.not_set) else "JSON (${value.lines().size} lines)",
-                                        icon = Icons.Rounded.Code,
+                                        icon = item.icon,
                                         enabled = enabled,
                                         position = pos,
                                         onClick = {
@@ -168,7 +221,7 @@ fun ProtocolPreferenceComposeScreen(
                                         entries = entries,
                                         entryValues = values,
                                         defaultValue = item.defaultValue,
-                                        icon = iconForProtocolField(item.key),
+                                        icon = item.icon,
                                         enabled = enabled,
                                         position = pos,
                                     )
@@ -191,7 +244,7 @@ fun ProtocolPreferenceComposeScreen(
                                         key = item.key,
                                         title = titleStr,
                                         defaultValue = item.defaultValue,
-                                        icon = iconForProtocolField(item.key),
+                                        icon = item.icon,
                                         isPassword = isPassword,
                                         isNumber = isNumber,
                                         multiline = isMultiline,
@@ -208,132 +261,41 @@ fun ProtocolPreferenceComposeScreen(
     }
 }
 
-private fun iconForProtocolField(key: String): ImageVector {
-    val k = key.lowercase()
-    return when {
-        k == "name" || k == "profilename" -> Icons.Rounded.Title
-        k.contains("address") || k == "host" || k == "serverhost" || k == "obfshost" -> Icons.Rounded.Dns
-        k.contains("port") -> Icons.Rounded.Numbers
-        k.contains("allowinsecure") || k.contains("insecure") -> Icons.Rounded.LockOpen
-        k.contains("password") || k.contains("privatekey") || k.contains("pubkey") || k.contains("publickey") || k.contains("psk") || k.contains("presharedkey") || k.contains("userkey") || k.contains("shortid") -> Icons.Rounded.Key
-        k.contains("uuid") || k.contains("userid") || k.contains("username") || k.contains("alterid") -> Icons.Rounded.Person
-        k.contains("cert") || k.contains("pinned") -> Icons.Rounded.Security
-        k.contains("sni") || k.contains("alpn") || k.contains("utls") || k.contains("ech") || k.contains("fingerprint") -> Icons.Rounded.VerifiedUser
-        k.contains("encrypt") || k.contains("method") || k.contains("security") || k.contains("auth") -> Icons.Rounded.Lock
-        k.contains("upload") || k.contains("download") -> Icons.Rounded.SwapVert
-        k.contains("mux") || k.contains("brutal") || k.contains("concurrency") || k.contains("streams") || k.contains("reuse") -> Icons.Rounded.CallSplit
-        k.contains("mtu") || k.contains("kcp") || k.contains("quic") || k.contains("congestion") || k.contains("window") || k.contains("rtt") || k.contains("hop") || k.contains("udp") || k.contains("suot") || k.contains("packet") -> Icons.Rounded.Speed
-        k.contains("plugin") || k.contains("config") || k.contains("extra") -> Icons.Rounded.Extension
-        k.contains("local") || k.contains("reserved") || k.contains("outbound") -> Icons.Rounded.Router
-        k.contains("network") || k.contains("protocol") || k.contains("type") || k.contains("mode") || k.contains("obfs") || k.contains("path") || k.contains("header") || k.contains("earlydata") -> Icons.Rounded.Hub
-        else -> Icons.Rounded.Tune
-    }
-}
-
-@Composable
-private fun PureComposeEditTextRow(
-    store: ComposePreferenceStore,
-    key: String,
-    title: String,
-    defaultValue: String,
-    icon: ImageVector?,
-    isPassword: Boolean,
-    isNumber: Boolean,
-    multiline: Boolean,
-    enabled: Boolean,
-    position: ExpressiveGroupPosition,
-) {
-    val currentValue = store.getString(key, defaultValue)
-    var showDialog by remember { mutableStateOf(false) }
-
-    val displaySummary = when {
-        currentValue.isBlank() -> stringResource(R.string.not_set)
-        isPassword -> "•".repeat(currentValue.length.coerceAtMost(16))
-        else -> currentValue.lineSequence().firstOrNull { it.isNotBlank() } ?: currentValue
-    }
-
-    PrefActionRow(
-        title = title,
-        summary = displaySummary,
-        icon = icon,
-        enabled = enabled,
-        position = position,
-        onClick = { showDialog = true },
-    )
-
-    if (showDialog) {
-        var draft by remember(currentValue) { mutableStateOf(currentValue) }
-        AppDialog(
-            icon = icon ?: Icons.Rounded.Edit,
-            title = title,
-            onDismiss = { showDialog = false },
-            text = {
-                OutlinedTextField(
-                    value = draft,
-                    onValueChange = { draft = it },
-                    singleLine = !multiline,
-                    minLines = if (multiline) 4 else 1,
-                    maxLines = if (multiline) 8 else 1,
-                    shape = RoundedCornerShape(16.dp),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = when {
-                            isNumber -> KeyboardType.Number
-                            isPassword -> KeyboardType.Password
-                            else -> KeyboardType.Text
-                        }
-                    ),
-                )
-            },
-            confirmButton = {
-                DialogConfirmButton(label = stringResource(android.R.string.ok)) {
-                    store.putString(key, draft)
-                    showDialog = false
-                }
-            },
-            dismissButton = {
-                DialogCancelButton(label = stringResource(android.R.string.cancel)) {
-                    showDialog = false
-                }
-            },
-        )
-    }
-}
-
 object ProtocolPreferenceSchemas {
     val AnyTLS: List<PrefSectionSpec> = listOf(
         PrefSectionSpec(
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "password", title = PrefText.Res(R.string.password), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "password", title = PrefText.Res(R.string.password), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.security_settings),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "sni", title = PrefText.Res(R.string.sni), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "alpn", title = PrefText.Res(R.string.alpn), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "certificates", title = PrefText.Res(R.string.certificates), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "allowInsecure", title = PrefText.Res(R.string.allow_insecure), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "sni", title = PrefText.Res(R.string.sni), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "alpn", title = PrefText.Res(R.string.alpn), icon = Icons.Rounded.Layers, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "certificates", title = PrefText.Res(R.string.certificates), icon = Icons.Rounded.WorkspacePremium, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "allowInsecure", title = PrefText.Res(R.string.allow_insecure), icon = Icons.Rounded.LockOpen, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.tls_camouflage_settings),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "utlsFingerprint", title = PrefText.Res(R.string.utls_fingerprint), summary = null, defaultValue = "", entriesRes = R.array.utls_fingerprint_entry, entryValuesRes = R.array.utls_fingerprint_entry, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "realityPubKey", title = PrefText.Literal("Reality Public Key"), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "realityShortId", title = PrefText.Literal("Reality ShortId"), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "utlsFingerprint", title = PrefText.Res(R.string.utls_fingerprint), icon = Icons.Rounded.VerifiedUser, summary = null, defaultValue = "", entriesRes = R.array.utls_fingerprint_entry, entryValuesRes = R.array.utls_fingerprint_entry, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "realityPubKey", title = PrefText.Literal("Reality Public Key"), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "realityShortId", title = PrefText.Literal("Reality ShortId"), icon = Icons.Rounded.ShortText, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -343,9 +305,9 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "isOutboundOnly", title = PrefText.Res(R.string.is_outbound_only), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.CONFIG, key = "serverConfig", title = PrefText.Res(R.string.custom_config), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "isOutboundOnly", title = PrefText.Res(R.string.is_outbound_only), icon = Icons.Rounded.CallMade, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.CONFIG, key = "serverConfig", title = PrefText.Res(R.string.custom_config), icon = Icons.Rounded.Code, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -355,30 +317,30 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "protocolVersion", title = PrefText.Res(R.string.protocol_version), summary = null, defaultValue = "2", entriesRes = R.array.hysteria_version, entryValuesRes = R.array.hysteria_version, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "protocolVersion", title = PrefText.Res(R.string.protocol_version), icon = Icons.Rounded.Numbers, summary = null, defaultValue = "2", entriesRes = R.array.hysteria_version, entryValuesRes = R.array.hysteria_version, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPorts", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverObfs", title = PrefText.Res(R.string.hysteria_obfs), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverAuthType", title = PrefText.Res(R.string.hysteria_auth_type), summary = null, defaultValue = "", entriesRes = R.array.hysteria_auth_type, entryValuesRes = R.array.int_array_3, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.hysteria_auth_payload), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverProtocol", title = PrefText.Res(R.string.protocol), summary = null, defaultValue = "https", entriesRes = R.array.hysteria_protocol, entryValuesRes = R.array.int_array_3, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverSNI", title = PrefText.Res(R.string.sni), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverALPN", title = PrefText.Res(R.string.alpn), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverCertificates", title = PrefText.Res(R.string.certificates), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverAllowInsecure", title = PrefText.Res(R.string.allow_insecure), summary = PrefText.Res(R.string.allow_insecure_sum), defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUploadSpeed", title = PrefText.Res(R.string.hysteria_upload_mbps), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverDownloadSpeed", title = PrefText.Res(R.string.hysteria_download_mbps), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverStreamReceiveWindow", title = PrefText.Res(R.string.hysteria_stream_receive_window), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverConnectionReceiveWindow", title = PrefText.Res(R.string.hysteria_connection_receive_window), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverDisableMtuDiscovery", title = PrefText.Res(R.string.hysteria_disable_mtu_discovery), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "hopInterval", title = PrefText.Res(R.string.hop_interval), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPorts", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.Dialpad, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverObfs", title = PrefText.Res(R.string.hysteria_obfs), icon = Icons.Rounded.BlurOn, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverAuthType", title = PrefText.Res(R.string.hysteria_auth_type), icon = Icons.Rounded.AdminPanelSettings, summary = null, defaultValue = "", entriesRes = R.array.hysteria_auth_type, entryValuesRes = R.array.int_array_3, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.hysteria_auth_payload), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverProtocol", title = PrefText.Res(R.string.protocol), icon = Icons.Rounded.Http, summary = null, defaultValue = "https", entriesRes = R.array.hysteria_protocol, entryValuesRes = R.array.int_array_3, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverSNI", title = PrefText.Res(R.string.sni), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverALPN", title = PrefText.Res(R.string.alpn), icon = Icons.Rounded.Layers, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverCertificates", title = PrefText.Res(R.string.certificates), icon = Icons.Rounded.WorkspacePremium, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverAllowInsecure", title = PrefText.Res(R.string.allow_insecure), icon = Icons.Rounded.LockOpen, summary = PrefText.Res(R.string.allow_insecure_sum), defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUploadSpeed", title = PrefText.Res(R.string.hysteria_upload_mbps), icon = Icons.Rounded.Upload, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverDownloadSpeed", title = PrefText.Res(R.string.hysteria_download_mbps), icon = Icons.Rounded.Download, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverStreamReceiveWindow", title = PrefText.Res(R.string.hysteria_stream_receive_window), icon = Icons.Rounded.ViewStream, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverConnectionReceiveWindow", title = PrefText.Res(R.string.hysteria_connection_receive_window), icon = Icons.Rounded.SettingsEthernet, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverDisableMtuDiscovery", title = PrefText.Res(R.string.hysteria_disable_mtu_discovery), icon = Icons.Rounded.DoNotDisturbOn, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "hopInterval", title = PrefText.Res(R.string.hop_interval), icon = Icons.Rounded.AvTimer, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -388,20 +350,20 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUserId", title = PrefText.Res(R.string.uuid), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverSNI", title = PrefText.Res(R.string.sni), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPinnedCertChainSha256", title = PrefText.Res(R.string.pinned_certchain_sha256), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverAllowInsecure", title = PrefText.Res(R.string.allow_insecure), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUserId", title = PrefText.Res(R.string.uuid), icon = Icons.Rounded.Fingerprint, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverSNI", title = PrefText.Res(R.string.sni), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPinnedCertChainSha256", title = PrefText.Res(R.string.pinned_certchain_sha256), icon = Icons.Rounded.PushPin, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverAllowInsecure", title = PrefText.Res(R.string.allow_insecure), icon = Icons.Rounded.LockOpen, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -411,19 +373,19 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverProtocol", title = PrefText.Res(R.string.protocol), summary = null, defaultValue = "TCP", entriesRes = R.array.mieru_protocol, entryValuesRes = R.array.mieru_protocol, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUsername", title = PrefText.Res(R.string.username), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverMTU", title = PrefText.Res(R.string.mtu), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverProtocol", title = PrefText.Res(R.string.protocol), icon = Icons.Rounded.Http, summary = null, defaultValue = "TCP", entriesRes = R.array.mieru_protocol, entryValuesRes = R.array.mieru_protocol, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUsername", title = PrefText.Res(R.string.username), icon = Icons.Rounded.Person, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverMTU", title = PrefText.Res(R.string.mtu), icon = Icons.Rounded.Straighten, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -433,29 +395,29 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUsername", title = PrefText.Res(R.string.username_opt), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password_opt), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverProtocol", title = PrefText.Res(R.string.protocol), summary = null, defaultValue = "https", entriesRes = R.array.naive_proto_entry, entryValuesRes = R.array.naive_proto_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverHeaders", title = PrefText.Res(R.string.extra_headers), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverSNI", title = PrefText.Res(R.string.sni), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverCertificates", title = PrefText.Res(R.string.certificates), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverInsecureConcurrency", title = PrefText.Res(R.string.naive_insecure_concurrency), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUsername", title = PrefText.Res(R.string.username_opt), icon = Icons.Rounded.Person, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password_opt), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverProtocol", title = PrefText.Res(R.string.protocol), icon = Icons.Rounded.Http, summary = null, defaultValue = "https", entriesRes = R.array.naive_proto_entry, entryValuesRes = R.array.naive_proto_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverHeaders", title = PrefText.Res(R.string.extra_headers), icon = Icons.Rounded.ListAlt, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverSNI", title = PrefText.Res(R.string.sni), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverCertificates", title = PrefText.Res(R.string.certificates), icon = Icons.Rounded.WorkspacePremium, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverInsecureConcurrency", title = PrefText.Res(R.string.naive_insecure_concurrency), icon = Icons.Rounded.Speed, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Literal("sing-box server"),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "sUoT", title = PrefText.Literal("UDP over TCP"), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "sUoT", title = PrefText.Literal("UDP over TCP"), icon = Icons.Rounded.SwapVert, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -465,48 +427,48 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "method", title = PrefText.Res(R.string.enc_method), summary = null, defaultValue = "", entriesRes = R.array.ss_enc_method_value, entryValuesRes = R.array.ss_enc_method_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "password", title = PrefText.Res(R.string.password), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "method", title = PrefText.Res(R.string.enc_method), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = R.array.ss_enc_method_value, entryValuesRes = R.array.ss_enc_method_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "password", title = PrefText.Res(R.string.password), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.plugin),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "pluginName", title = PrefText.Res(R.string.plugin), summary = null, defaultValue = "", entriesRes = R.array.box_shadowsocks_plugins, entryValuesRes = R.array.box_shadowsocks_plugins, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "pluginConfig", title = PrefText.Res(R.string.plugin_configure), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "pluginName", title = PrefText.Res(R.string.plugin), icon = Icons.Rounded.Extension, summary = null, defaultValue = "", entriesRes = R.array.box_shadowsocks_plugins, entryValuesRes = R.array.box_shadowsocks_plugins, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "pluginConfig", title = PrefText.Res(R.string.plugin_configure), icon = Icons.Rounded.Build, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Literal("sing-box server"),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "sUoT", title = PrefText.Literal("UDP over TCP"), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "sUoT", title = PrefText.Literal("UDP over TCP"), icon = Icons.Rounded.SwapVert, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = "serverMuxCategory",
             title = PrefText.Res(R.string.mux_preference),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "enableMux", title = PrefText.Res(R.string.enable_mux), summary = PrefText.Res(R.string.mux_sum), defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "muxType", title = PrefText.Res(R.string.mux_type), summary = null, defaultValue = "0", entriesRes = R.array.mux_type, entryValuesRes = R.array.int_array_3, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "muxMode", title = PrefText.Res(R.string.mux_mode), summary = null, defaultValue = "0", entriesRes = R.array.mux_mode, entryValuesRes = R.array.int_array_2, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxConcurrency", title = PrefText.Res(R.string.mux_concurrency), summary = null, defaultValue = "8", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxMaxConnections", title = PrefText.Res(R.string.mux_max_connections), summary = null, defaultValue = "4", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxMinStreams", title = PrefText.Res(R.string.mux_min_streams), summary = null, defaultValue = "4", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "muxPadding", title = PrefText.Res(R.string.padding), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "muxBrutal", title = PrefText.Res(R.string.mux_brutal), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxBrutalUpMbps", title = PrefText.Res(R.string.mux_brutal_up_mbps), summary = null, defaultValue = "100", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxBrutalDownMbps", title = PrefText.Res(R.string.mux_brutal_down_mbps), summary = null, defaultValue = "100", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "enableMux", title = PrefText.Res(R.string.enable_mux), icon = Icons.Rounded.CallSplit, summary = PrefText.Res(R.string.mux_sum), defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "muxType", title = PrefText.Res(R.string.mux_type), icon = Icons.Rounded.Category, summary = null, defaultValue = "0", entriesRes = R.array.mux_type, entryValuesRes = R.array.int_array_3, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "muxMode", title = PrefText.Res(R.string.mux_mode), icon = Icons.Rounded.AltRoute, summary = null, defaultValue = "0", entriesRes = R.array.mux_mode, entryValuesRes = R.array.int_array_2, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxConcurrency", title = PrefText.Res(R.string.mux_concurrency), icon = Icons.Rounded.GridView, summary = null, defaultValue = "8", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxMaxConnections", title = PrefText.Res(R.string.mux_max_connections), icon = Icons.Rounded.DeviceHub, summary = null, defaultValue = "4", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxMinStreams", title = PrefText.Res(R.string.mux_min_streams), icon = Icons.Rounded.Stream, summary = null, defaultValue = "4", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "muxPadding", title = PrefText.Res(R.string.padding), icon = Icons.Rounded.SpaceBar, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "muxBrutal", title = PrefText.Res(R.string.mux_brutal), icon = Icons.Rounded.FlashOn, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxBrutalUpMbps", title = PrefText.Res(R.string.mux_brutal_up_mbps), icon = Icons.Rounded.Upload, summary = null, defaultValue = "100", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxBrutalDownMbps", title = PrefText.Res(R.string.mux_brutal_down_mbps), icon = Icons.Rounded.Download, summary = null, defaultValue = "100", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -516,21 +478,21 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverMethod", title = PrefText.Res(R.string.enc_method), summary = null, defaultValue = "", entriesRes = R.array.ssr_enc_method_value, entryValuesRes = R.array.ssr_enc_method_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverProtocol", title = PrefText.Res(R.string.protocol), summary = null, defaultValue = "", entriesRes = R.array.ssr_protocol_value, entryValuesRes = R.array.ssr_protocol_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverProtocolParam", title = PrefText.Res(R.string.protocol_param), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverObfs", title = PrefText.Res(R.string.obfs), summary = null, defaultValue = "", entriesRes = R.array.ssr_obfs_value, entryValuesRes = R.array.ssr_obfs_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverObfsParam", title = PrefText.Res(R.string.obfs_param), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverMethod", title = PrefText.Res(R.string.enc_method), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = R.array.ssr_enc_method_value, entryValuesRes = R.array.ssr_enc_method_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverProtocol", title = PrefText.Res(R.string.protocol), icon = Icons.Rounded.Http, summary = null, defaultValue = "", entriesRes = R.array.ssr_protocol_value, entryValuesRes = R.array.ssr_protocol_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverProtocolParam", title = PrefText.Res(R.string.protocol_param), icon = Icons.Rounded.Subject, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverObfs", title = PrefText.Res(R.string.obfs), icon = Icons.Rounded.BlurOn, summary = null, defaultValue = "", entriesRes = R.array.ssr_obfs_value, entryValuesRes = R.array.ssr_obfs_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverObfsParam", title = PrefText.Res(R.string.obfs_param), icon = Icons.Rounded.Notes, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -540,28 +502,28 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "version", title = PrefText.Res(R.string.protocol_version), summary = null, defaultValue = "", entriesRes = R.array.shadowtls_version_value, entryValuesRes = R.array.shadowtls_version_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "password", title = PrefText.Res(R.string.password), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "version", title = PrefText.Res(R.string.protocol_version), icon = Icons.Rounded.Numbers, summary = null, defaultValue = "", entriesRes = R.array.shadowtls_version_value, entryValuesRes = R.array.shadowtls_version_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "password", title = PrefText.Res(R.string.password), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = "serverSecurityCategory",
             title = PrefText.Res(R.string.security_settings),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "sni", title = PrefText.Res(R.string.sni), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "alpn", title = PrefText.Res(R.string.alpn), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "certificates", title = PrefText.Res(R.string.certificates), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "allowInsecure", title = PrefText.Res(R.string.allow_insecure), summary = PrefText.Res(R.string.allow_insecure_sum), defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "utlsFingerprint", title = PrefText.Res(R.string.utls_fingerprint), summary = null, defaultValue = "", entriesRes = R.array.utls_fingerprint_entry, entryValuesRes = R.array.utls_fingerprint_entry, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "sni", title = PrefText.Res(R.string.sni), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "alpn", title = PrefText.Res(R.string.alpn), icon = Icons.Rounded.Layers, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "certificates", title = PrefText.Res(R.string.certificates), icon = Icons.Rounded.WorkspacePremium, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "allowInsecure", title = PrefText.Res(R.string.allow_insecure), icon = Icons.Rounded.LockOpen, summary = PrefText.Res(R.string.allow_insecure_sum), defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "utlsFingerprint", title = PrefText.Res(R.string.utls_fingerprint), icon = Icons.Rounded.VerifiedUser, summary = null, defaultValue = "", entriesRes = R.array.utls_fingerprint_entry, entryValuesRes = R.array.utls_fingerprint_entry, dependency = null),
             ),
         ),
     )
@@ -571,24 +533,24 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "psk", title = PrefText.Res(R.string.snell_psk), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "userKey", title = PrefText.Res(R.string.snell_userkey), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "version", title = PrefText.Res(R.string.snell_version), summary = null, defaultValue = "4", entriesRes = R.array.snell_versions_entry, entryValuesRes = R.array.snell_versions_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "network", title = PrefText.Res(R.string.snell_network), summary = null, defaultValue = "", entriesRes = R.array.snell_network_entry, entryValuesRes = R.array.snell_network_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "obfsMode", title = PrefText.Res(R.string.snell_obfs_mode), summary = null, defaultValue = "", entriesRes = R.array.snell_obfs_modes_entry, entryValuesRes = R.array.snell_obfs_modes_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "obfsHost", title = PrefText.Res(R.string.snell_obfs_host), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "mode", title = PrefText.Res(R.string.snell_mode), summary = null, defaultValue = "default", entriesRes = R.array.snell_v6_modes_entry, entryValuesRes = R.array.snell_v6_modes_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "quicProxyMode", title = PrefText.Res(R.string.snell_quic_proxy), summary = PrefText.Res(R.string.snell_quic_proxy_summary), defaultValue = "false", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "reuse", title = PrefText.Res(R.string.snell_reuse), summary = PrefText.Res(R.string.snell_reuse_summary), defaultValue = "false", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "psk", title = PrefText.Res(R.string.snell_psk), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "userKey", title = PrefText.Res(R.string.snell_userkey), icon = Icons.Rounded.VpnKey, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "version", title = PrefText.Res(R.string.snell_version), icon = Icons.Rounded.Numbers, summary = null, defaultValue = "4", entriesRes = R.array.snell_versions_entry, entryValuesRes = R.array.snell_versions_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "network", title = PrefText.Res(R.string.snell_network), icon = Icons.Rounded.Lan, summary = null, defaultValue = "", entriesRes = R.array.snell_network_entry, entryValuesRes = R.array.snell_network_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "obfsMode", title = PrefText.Res(R.string.snell_obfs_mode), icon = Icons.Rounded.BlurOn, summary = null, defaultValue = "", entriesRes = R.array.snell_obfs_modes_entry, entryValuesRes = R.array.snell_obfs_modes_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "obfsHost", title = PrefText.Res(R.string.snell_obfs_host), icon = Icons.Rounded.Domain, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "mode", title = PrefText.Res(R.string.snell_mode), icon = Icons.Rounded.Tune, summary = null, defaultValue = "default", entriesRes = R.array.snell_v6_modes_entry, entryValuesRes = R.array.snell_v6_modes_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "quicProxyMode", title = PrefText.Res(R.string.snell_quic_proxy), icon = Icons.Rounded.RocketLaunch, summary = PrefText.Res(R.string.snell_quic_proxy_summary), defaultValue = "false", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "reuse", title = PrefText.Res(R.string.snell_reuse), icon = Icons.Rounded.Repeat, summary = PrefText.Res(R.string.snell_reuse_summary), defaultValue = "false", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -598,25 +560,25 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverProtocol", title = PrefText.Res(R.string.app_version), summary = null, defaultValue = "2", entriesRes = R.array.socks_versions, entryValuesRes = R.array.int_array_3, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUsername", title = PrefText.Res(R.string.username_opt), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password_opt), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverProtocol", title = PrefText.Res(R.string.app_version), icon = Icons.Rounded.Http, summary = null, defaultValue = "2", entriesRes = R.array.socks_versions, entryValuesRes = R.array.int_array_3, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUsername", title = PrefText.Res(R.string.username_opt), icon = Icons.Rounded.Person, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password_opt), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Literal("sing-box server"),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "sUoT", title = PrefText.Literal("UDP over TCP"), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "sUoT", title = PrefText.Literal("UDP over TCP"), icon = Icons.Rounded.SwapVert, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -626,21 +588,21 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUsername", title = PrefText.Res(R.string.username), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverAuthType", title = PrefText.Res(R.string.hysteria_auth_type), summary = null, defaultValue = "", entriesRes = R.array.ssh_auth_type, entryValuesRes = R.array.int_array_3, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPrivateKey", title = PrefText.Res(R.string.ssh_private_key), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword1", title = PrefText.Res(R.string.ssh_private_key_passphrase), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverCertificates", title = PrefText.Res(R.string.ssh_public_key), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUsername", title = PrefText.Res(R.string.username), icon = Icons.Rounded.Person, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverAuthType", title = PrefText.Res(R.string.hysteria_auth_type), icon = Icons.Rounded.AdminPanelSettings, summary = null, defaultValue = "", entriesRes = R.array.ssh_auth_type, entryValuesRes = R.array.int_array_3, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPrivateKey", title = PrefText.Res(R.string.ssh_private_key), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword1", title = PrefText.Res(R.string.ssh_private_key_passphrase), icon = Icons.Rounded.VpnKey, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverCertificates", title = PrefText.Res(R.string.ssh_public_key), icon = Icons.Rounded.WorkspacePremium, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -650,90 +612,90 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "username", title = PrefText.Res(R.string.username_opt), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "password", title = PrefText.Res(R.string.password_opt), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "uuid", title = PrefText.Res(R.string.uuid), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "alterId", title = PrefText.Res(R.string.alter_id), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "encryption", title = PrefText.Res(R.string.encryption), summary = null, defaultValue = "", entriesRes = R.array.vmess_encryption_value, entryValuesRes = R.array.vmess_encryption_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "vlessEncryption", title = PrefText.Res(R.string.vless_encryption), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "packetEncoding", title = PrefText.Res(R.string.packet_encoding), summary = null, defaultValue = "", entriesRes = R.array.packet_encoding_entry, entryValuesRes = R.array.int_array_3, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "type", title = PrefText.Res(R.string.network), summary = null, defaultValue = "", entriesRes = R.array.networks_value, entryValuesRes = R.array.networks_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "host", title = PrefText.Res(R.string.http_host), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "path", title = PrefText.Res(R.string.http_path), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "headerType", title = PrefText.Res(R.string.kcp_header_type), summary = null, defaultValue = "none", entriesRes = R.array.kcp_headers_value, entryValuesRes = R.array.kcp_headers_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "kcpCwndMultiplier", title = PrefText.Res(R.string.kcp_cwnd_multiplier), summary = null, defaultValue = "20", entriesRes = R.array.kcp_cwnd_multiplier_entry, entryValuesRes = R.array.kcp_cwnd_multiplier_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "mKcpSeed", title = PrefText.Res(R.string.kcp_seed), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "kcpMtu", title = PrefText.Res(R.string.kcp_mtu), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "kcpTti", title = PrefText.Res(R.string.kcp_tti), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "security", title = PrefText.Res(R.string.security), summary = null, defaultValue = "", entriesRes = R.array.transport_layer_encryption_value, entryValuesRes = R.array.transport_layer_encryption_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "username", title = PrefText.Res(R.string.username_opt), icon = Icons.Rounded.Person, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "password", title = PrefText.Res(R.string.password_opt), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "uuid", title = PrefText.Res(R.string.uuid), icon = Icons.Rounded.Fingerprint, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "alterId", title = PrefText.Res(R.string.alter_id), icon = Icons.Rounded.Tag, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "encryption", title = PrefText.Res(R.string.encryption), icon = Icons.Rounded.EnhancedEncryption, summary = null, defaultValue = "", entriesRes = R.array.vmess_encryption_value, entryValuesRes = R.array.vmess_encryption_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "vlessEncryption", title = PrefText.Res(R.string.vless_encryption), icon = Icons.Rounded.Shield, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "packetEncoding", title = PrefText.Res(R.string.packet_encoding), icon = Icons.Rounded.Inventory2, summary = null, defaultValue = "", entriesRes = R.array.packet_encoding_entry, entryValuesRes = R.array.int_array_3, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "type", title = PrefText.Res(R.string.network), icon = Icons.Rounded.Hub, summary = null, defaultValue = "", entriesRes = R.array.networks_value, entryValuesRes = R.array.networks_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "host", title = PrefText.Res(R.string.http_host), icon = Icons.Rounded.Language, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "path", title = PrefText.Res(R.string.http_path), icon = Icons.Rounded.Route, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "headerType", title = PrefText.Res(R.string.kcp_header_type), icon = Icons.Rounded.ViewAgenda, summary = null, defaultValue = "none", entriesRes = R.array.kcp_headers_value, entryValuesRes = R.array.kcp_headers_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "kcpCwndMultiplier", title = PrefText.Res(R.string.kcp_cwnd_multiplier), icon = Icons.Rounded.Speed, summary = null, defaultValue = "20", entriesRes = R.array.kcp_cwnd_multiplier_entry, entryValuesRes = R.array.kcp_cwnd_multiplier_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "mKcpSeed", title = PrefText.Res(R.string.kcp_seed), icon = Icons.Rounded.Grain, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "kcpMtu", title = PrefText.Res(R.string.kcp_mtu), icon = Icons.Rounded.Straighten, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "kcpTti", title = PrefText.Res(R.string.kcp_tti), icon = Icons.Rounded.Timer, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "security", title = PrefText.Res(R.string.security), icon = Icons.Rounded.Security, summary = null, defaultValue = "", entriesRes = R.array.transport_layer_encryption_value, entryValuesRes = R.array.transport_layer_encryption_value, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = "serverWsCategory",
             title = PrefText.Res(R.string.cag_ws),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "wsMaxEarlyData", title = PrefText.Res(R.string.ws_max_early_data), summary = null, defaultValue = "0", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "earlyDataHeaderName", title = PrefText.Res(R.string.early_data_header_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "wsMaxEarlyData", title = PrefText.Res(R.string.ws_max_early_data), icon = Icons.Rounded.Bolt, summary = null, defaultValue = "0", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "earlyDataHeaderName", title = PrefText.Res(R.string.early_data_header_name), icon = Icons.Rounded.Title, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = "serverXhttpCategory",
             title = PrefText.Res(R.string.xhttp_settings),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "xhttpMode", title = PrefText.Res(R.string.xhttp_mode), summary = null, defaultValue = "auto", entriesRes = R.array.xhttp_mode_entry, entryValuesRes = R.array.xhttp_mode_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "xhttpExtra", title = PrefText.Res(R.string.xhttp_extra), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "xhttpMode", title = PrefText.Res(R.string.xhttp_mode), icon = Icons.Rounded.Tune, summary = null, defaultValue = "auto", entriesRes = R.array.xhttp_mode_entry, entryValuesRes = R.array.xhttp_mode_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "xhttpExtra", title = PrefText.Res(R.string.xhttp_extra), icon = Icons.Rounded.DataObject, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = "serverSecurityCategory",
             title = PrefText.Res(R.string.security_settings),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "sni", title = PrefText.Res(R.string.sni), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "alpn", title = PrefText.Res(R.string.alpn), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "certificates", title = PrefText.Res(R.string.certificates), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "allowInsecure", title = PrefText.Res(R.string.allow_insecure), summary = PrefText.Res(R.string.allow_insecure_sum), defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "sni", title = PrefText.Res(R.string.sni), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "alpn", title = PrefText.Res(R.string.alpn), icon = Icons.Rounded.Layers, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "certificates", title = PrefText.Res(R.string.certificates), icon = Icons.Rounded.WorkspacePremium, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "allowInsecure", title = PrefText.Res(R.string.allow_insecure), icon = Icons.Rounded.LockOpen, summary = PrefText.Res(R.string.allow_insecure_sum), defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = "serverTlsCamouflageCategory",
             title = PrefText.Res(R.string.tls_camouflage_settings),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "utlsFingerprint", title = PrefText.Res(R.string.utls_fingerprint), summary = null, defaultValue = "", entriesRes = R.array.utls_fingerprint_entry, entryValuesRes = R.array.utls_fingerprint_entry, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "realityPubKey", title = PrefText.Literal("Reality Public Key"), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "realityShortId", title = PrefText.Literal("Reality ShortId"), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "utlsFingerprint", title = PrefText.Res(R.string.utls_fingerprint), icon = Icons.Rounded.VerifiedUser, summary = null, defaultValue = "", entriesRes = R.array.utls_fingerprint_entry, entryValuesRes = R.array.utls_fingerprint_entry, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "realityPubKey", title = PrefText.Literal("Reality Public Key"), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "realityShortId", title = PrefText.Literal("Reality ShortId"), icon = Icons.Rounded.ShortText, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = "serverMuxCategory",
             title = PrefText.Res(R.string.mux_preference),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "enableMux", title = PrefText.Res(R.string.enable_mux), summary = PrefText.Res(R.string.mux_sum), defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "muxType", title = PrefText.Res(R.string.mux_type), summary = null, defaultValue = "0", entriesRes = R.array.mux_type, entryValuesRes = R.array.int_array_3, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "muxMode", title = PrefText.Res(R.string.mux_mode), summary = null, defaultValue = "0", entriesRes = R.array.mux_mode, entryValuesRes = R.array.int_array_2, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxConcurrency", title = PrefText.Res(R.string.mux_concurrency), summary = null, defaultValue = "8", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxMaxConnections", title = PrefText.Res(R.string.mux_max_connections), summary = null, defaultValue = "4", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxMinStreams", title = PrefText.Res(R.string.mux_min_streams), summary = null, defaultValue = "4", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "muxPadding", title = PrefText.Res(R.string.padding), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "muxBrutal", title = PrefText.Res(R.string.mux_brutal), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxBrutalUpMbps", title = PrefText.Res(R.string.mux_brutal_up_mbps), summary = null, defaultValue = "100", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxBrutalDownMbps", title = PrefText.Res(R.string.mux_brutal_down_mbps), summary = null, defaultValue = "100", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "enableMux", title = PrefText.Res(R.string.enable_mux), icon = Icons.Rounded.CallSplit, summary = PrefText.Res(R.string.mux_sum), defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "muxType", title = PrefText.Res(R.string.mux_type), icon = Icons.Rounded.Category, summary = null, defaultValue = "0", entriesRes = R.array.mux_type, entryValuesRes = R.array.int_array_3, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "muxMode", title = PrefText.Res(R.string.mux_mode), icon = Icons.Rounded.AltRoute, summary = null, defaultValue = "0", entriesRes = R.array.mux_mode, entryValuesRes = R.array.int_array_2, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxConcurrency", title = PrefText.Res(R.string.mux_concurrency), icon = Icons.Rounded.GridView, summary = null, defaultValue = "8", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxMaxConnections", title = PrefText.Res(R.string.mux_max_connections), icon = Icons.Rounded.DeviceHub, summary = null, defaultValue = "4", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxMinStreams", title = PrefText.Res(R.string.mux_min_streams), icon = Icons.Rounded.Stream, summary = null, defaultValue = "4", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "muxPadding", title = PrefText.Res(R.string.padding), icon = Icons.Rounded.SpaceBar, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "muxBrutal", title = PrefText.Res(R.string.mux_brutal), icon = Icons.Rounded.FlashOn, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxBrutalUpMbps", title = PrefText.Res(R.string.mux_brutal_up_mbps), icon = Icons.Rounded.Upload, summary = null, defaultValue = "100", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "muxBrutalDownMbps", title = PrefText.Res(R.string.mux_brutal_down_mbps), icon = Icons.Rounded.Download, summary = null, defaultValue = "100", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = "serverECHCategory",
             title = PrefText.Literal("ECH"),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "enableECH", title = PrefText.Res(R.string.enable), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "echConfig", title = PrefText.Res(R.string.ech_config), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "enableECH", title = PrefText.Res(R.string.enable), icon = Icons.Rounded.Https, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "echConfig", title = PrefText.Res(R.string.ech_config), icon = Icons.Rounded.Code, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -743,36 +705,36 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverSNI", title = PrefText.Res(R.string.sni), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverAllowInsecure", title = PrefText.Res(R.string.allow_insecure), summary = PrefText.Res(R.string.allow_insecure_sum), defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverNetwork", title = PrefText.Res(R.string.network), summary = null, defaultValue = "none", entriesRes = R.array.trojan_go_networks_entry, entryValuesRes = R.array.trojan_go_networks_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverEncryption", title = PrefText.Res(R.string.encryption), summary = null, defaultValue = "", entriesRes = R.array.trojan_go_security_entry, entryValuesRes = R.array.trojan_go_security_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverSNI", title = PrefText.Res(R.string.sni), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverAllowInsecure", title = PrefText.Res(R.string.allow_insecure), icon = Icons.Rounded.LockOpen, summary = PrefText.Res(R.string.allow_insecure_sum), defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverNetwork", title = PrefText.Res(R.string.network), icon = Icons.Rounded.Lan, summary = null, defaultValue = "none", entriesRes = R.array.trojan_go_networks_entry, entryValuesRes = R.array.trojan_go_networks_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverEncryption", title = PrefText.Res(R.string.encryption), icon = Icons.Rounded.EnhancedEncryption, summary = null, defaultValue = "", entriesRes = R.array.trojan_go_security_entry, entryValuesRes = R.array.trojan_go_security_value, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = "serverWsCategory",
             title = PrefText.Res(R.string.cag_ws),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverHost", title = PrefText.Res(R.string.ws_host), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPath", title = PrefText.Res(R.string.ws_path), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverHost", title = PrefText.Res(R.string.ws_host), icon = Icons.Rounded.Language, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPath", title = PrefText.Res(R.string.ws_path), icon = Icons.Rounded.Route, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = "serverSsCategory",
             title = PrefText.Res(R.string.ss_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverMethod", title = PrefText.Res(R.string.enc_method), summary = null, defaultValue = "AES-128-GCM", entriesRes = R.array.trojan_go_methods, entryValuesRes = R.array.trojan_go_methods, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword1", title = PrefText.Res(R.string.password), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverMethod", title = PrefText.Res(R.string.enc_method), icon = Icons.Rounded.Key, summary = null, defaultValue = "AES-128-GCM", entriesRes = R.array.trojan_go_methods, entryValuesRes = R.array.trojan_go_methods, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword1", title = PrefText.Res(R.string.password), icon = Icons.Rounded.VpnKey, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -782,25 +744,25 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "profileName", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUsername", title = PrefText.Res(R.string.uuid), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverALPN", title = PrefText.Res(R.string.alpn), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverCertificates", title = PrefText.Res(R.string.certificates), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverUDPRelayMode", title = PrefText.Res(R.string.tuic_udp_relay_mode), summary = null, defaultValue = "https", entriesRes = R.array.tuic_udp_relay_mode_value, entryValuesRes = R.array.tuic_udp_relay_mode_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverCongestionController", title = PrefText.Res(R.string.tuic_congestion_controller), summary = null, defaultValue = "https", entriesRes = R.array.tuic_congestion_controller_value, entryValuesRes = R.array.tuic_congestion_controller_value, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverDisableSNI", title = PrefText.Res(R.string.tuic_disable_sni), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverSNI", title = PrefText.Res(R.string.sni), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverReduceRTT", title = PrefText.Res(R.string.tuic_reduce_rtt), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverAllowInsecure", title = PrefText.Res(R.string.allow_insecure), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverUsername", title = PrefText.Res(R.string.uuid), icon = Icons.Rounded.Person, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPassword", title = PrefText.Res(R.string.password), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverALPN", title = PrefText.Res(R.string.alpn), icon = Icons.Rounded.Layers, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverCertificates", title = PrefText.Res(R.string.certificates), icon = Icons.Rounded.WorkspacePremium, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverUDPRelayMode", title = PrefText.Res(R.string.tuic_udp_relay_mode), icon = Icons.Rounded.SyncAlt, summary = null, defaultValue = "https", entriesRes = R.array.tuic_udp_relay_mode_value, entryValuesRes = R.array.tuic_udp_relay_mode_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.LIST, key = "serverCongestionController", title = PrefText.Res(R.string.tuic_congestion_controller), icon = Icons.Rounded.Traffic, summary = null, defaultValue = "https", entriesRes = R.array.tuic_congestion_controller_value, entryValuesRes = R.array.tuic_congestion_controller_value, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverDisableSNI", title = PrefText.Res(R.string.tuic_disable_sni), icon = Icons.Rounded.VisibilityOff, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverSNI", title = PrefText.Res(R.string.sni), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverReduceRTT", title = PrefText.Res(R.string.tuic_reduce_rtt), icon = Icons.Rounded.Bolt, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.SWITCH, key = "serverAllowInsecure", title = PrefText.Res(R.string.allow_insecure), icon = Icons.Rounded.LockOpen, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )
@@ -810,21 +772,21 @@ object ProtocolPreferenceSchemas {
             key = null,
             title = null,
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
         PrefSectionSpec(
             key = null,
             title = PrefText.Res(R.string.proxy_cat),
             items = listOf(
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "localAddress", title = PrefText.Res(R.string.wireguard_local_address), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "privateKey", title = PrefText.Res(R.string.ssh_private_key), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "peerPublicKey", title = PrefText.Res(R.string.wireguard_public_key), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "peerPreSharedKey", title = PrefText.Res(R.string.wireguard_psk), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "mtu", title = PrefText.Res(R.string.mtu), summary = null, defaultValue = "1420", entriesRes = null, entryValuesRes = null, dependency = null),
-            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "reserved", title = PrefText.Literal("Reserved"), summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "localAddress", title = PrefText.Res(R.string.wireguard_local_address), icon = Icons.Rounded.MyLocation, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "privateKey", title = PrefText.Res(R.string.ssh_private_key), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "peerPublicKey", title = PrefText.Res(R.string.wireguard_public_key), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "peerPreSharedKey", title = PrefText.Res(R.string.wireguard_psk), icon = Icons.Rounded.VpnKey, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "mtu", title = PrefText.Res(R.string.mtu), icon = Icons.Rounded.Straighten, summary = null, defaultValue = "1420", entriesRes = null, entryValuesRes = null, dependency = null),
+            PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "reserved", title = PrefText.Literal("Reserved"), icon = Icons.Rounded.BookmarkBorder, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
             ),
         ),
     )

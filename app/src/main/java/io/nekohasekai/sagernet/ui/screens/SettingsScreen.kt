@@ -65,7 +65,6 @@ import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.RuleFolder
-import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.SettingsEthernet
 import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material.icons.rounded.Terminal
@@ -111,6 +110,12 @@ import io.nekohasekai.sagernet.ui.components.rememberComposePreferenceStore
 import io.nekohasekai.sagernet.ui.profile.ConfigEditActivity
 import io.nekohasekai.sagernet.utils.AppLocale
 import java.io.File
+import androidx.compose.material.icons.rounded.CloudQueue
+import androidx.compose.material.icons.rounded.Domain
+import androidx.compose.material.icons.rounded.Policy
+import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.LinearScale
+import androidx.compose.material.icons.rounded.Straighten
 
 @Composable
 fun SettingsScreen(
@@ -228,7 +233,7 @@ fun SettingsScreen(
                     PrefActionRow(
                         title = stringResource(R.string.mtu),
                         summary = store.getString(Key.MTU, "9000"),
-                        icon = Icons.Rounded.Public,
+                        icon = Icons.Rounded.Straighten,
                         onClick = { showMtuDialog = true },
                     )
                     StoreListPref(
@@ -414,11 +419,11 @@ fun SettingsScreen(
                         store = store,
                         key = Key.ENABLE_TLS_FRAGMENT,
                         titleRes = R.string.enable_tls_fragment,
-                        icon = Icons.Rounded.Security,
+                        icon = Icons.Rounded.ContentCut,
                         position = ExpressiveGroupPosition.TOP,
                         onChanged = { notifyNeedReload(); true },
                     )
-                    StoreEditTextPref(store = store, key = Key.FRAGMENT_LENGTH, titleRes = R.string.fragment_length, defaultValue = "100-200", icon = Icons.Rounded.ContentCut)
+                    StoreEditTextPref(store = store, key = Key.FRAGMENT_LENGTH, titleRes = R.string.fragment_length, defaultValue = "100-200", icon = Icons.Rounded.LinearScale)
                     StoreEditTextPref(
                         store = store,
                         key = Key.FRAGMENT_INTERVAL,
@@ -438,7 +443,7 @@ fun SettingsScreen(
                         key = Key.REMOTE_DNS,
                         titleRes = R.string.remote_dns,
                         defaultValue = "https://dns.google/dns-query",
-                        icon = Icons.Rounded.Dns,
+                        icon = Icons.Rounded.CloudQueue,
                         position = ExpressiveGroupPosition.TOP,
                         onChanged = { notifyNeedReload() },
                     )
@@ -452,7 +457,7 @@ fun SettingsScreen(
                         onChanged = { notifyNeedReload() },
                     )
                     StoreListPref(store = store, key = "domain_strategy_for_direct", titleRes = R.string.domain_strategy_for_direct, entriesRes = R.array.dns_network_select, defaultValue = "auto", icon = Icons.Rounded.AltRoute)
-                    StoreListPref(store = store, key = "domain_strategy_for_server", titleRes = R.string.domain_strategy_for_server, entriesRes = R.array.dns_network_select, defaultValue = "auto", icon = Icons.Rounded.Dns)
+                    StoreListPref(store = store, key = "domain_strategy_for_server", titleRes = R.string.domain_strategy_for_server, entriesRes = R.array.dns_network_select, defaultValue = "auto", icon = Icons.Rounded.Domain)
                     StoreSwitchPref(
                         store = store,
                         key = Key.ENABLE_DNS_ROUTING,
@@ -468,7 +473,7 @@ fun SettingsScreen(
                         titleRes = R.string.enable_fakedns,
                         summaryRes = R.string.fakedns_message,
                         defaultValue = true,
-                        icon = Icons.Rounded.Lock,
+                        icon = Icons.Rounded.Policy,
                         onChanged = { notifyNeedReload(); true },
                     )
                     StoreEditTextPref(
@@ -560,7 +565,7 @@ fun SettingsScreen(
                     StoreSwitchPref(store = store, key = Key.GLOBAL_ALLOW_INSECURE, titleRes = R.string.global_allow_insecure, icon = Icons.Rounded.LockOpen)
                     StoreSwitchPref(store = store, key = Key.ALLOW_INSECURE_ON_REQUEST, titleRes = R.string.allow_insecure_on_request_sum, icon = Icons.Rounded.Warning)
                     StoreListPref(store = store, key = Key.APP_TLS_VERSION, titleRes = R.string.app_tls_version, entriesRes = R.array.app_tls_version, defaultValue = "1.2", icon = Icons.Rounded.VerifiedUser)
-                    PrefActionRow(title = stringResource(R.string.reset_settings), icon = Icons.Rounded.RestartAlt, onClick = { showResetConfirm = true })
+                    PrefActionRow(title = stringResource(R.string.reset_settings), icon = Icons.Rounded.Restore, onClick = { showResetConfirm = true })
                     PrefActionRow(
                         title = stringResource(R.string.clear_cache),
                         summary = stringResource(R.string.clear_cache_summary),
