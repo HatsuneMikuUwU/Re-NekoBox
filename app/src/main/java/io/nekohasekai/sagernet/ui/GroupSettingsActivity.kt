@@ -31,8 +31,8 @@ import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.LayersClear
 import androidx.compose.material.icons.rounded.Link
-import androidx.compose.material.icons.rounded.Login
-import androidx.compose.material.icons.rounded.Logout
+import androidx.compose.material.icons.automirrored.rounded.Login
+import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material.icons.rounded.Title
 import androidx.compose.material.icons.rounded.TravelExplore
@@ -278,13 +278,13 @@ class GroupSettingsActivity : ThemedActivity() {
                                 PrefActionRow(
                                     title = stringResource(R.string.front_proxy),
                                     summary = frontProxySummary,
-                                    icon = Icons.Rounded.Login,
+                                    icon = Icons.AutoMirrored.Rounded.Login,
                                     onClick = { showFrontProxyDialog = true },
                                 )
                                 PrefActionRow(
                                     title = stringResource(R.string.landing_proxy),
                                     summary = landingProxySummary,
-                                    icon = Icons.Rounded.Logout,
+                                    icon = Icons.AutoMirrored.Rounded.Logout,
                                     position = ExpressiveGroupPosition.BOTTOM,
                                     onClick = { showLandingProxyDialog = true },
                                 )
@@ -413,7 +413,7 @@ class GroupSettingsActivity : ThemedActivity() {
 
             if (showFrontProxyDialog) {
                 AppDialog(
-                    icon = Icons.Rounded.Login,
+                    icon = Icons.AutoMirrored.Rounded.Login,
                     title = stringResource(R.string.front_proxy),
                     onDismiss = { showFrontProxyDialog = false },
                     text = {
@@ -448,7 +448,7 @@ class GroupSettingsActivity : ThemedActivity() {
 
             if (showLandingProxyDialog) {
                 AppDialog(
-                    icon = Icons.Rounded.Logout,
+                    icon = Icons.AutoMirrored.Rounded.Logout,
                     title = stringResource(R.string.landing_proxy),
                     onDismiss = { showLandingProxyDialog = false },
                     text = {

@@ -22,10 +22,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AddToHomeScreen
+import androidx.compose.material.icons.automirrored.rounded.AddToHomeScreen
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.DataObject
-import androidx.compose.material.icons.rounded.DriveFileMove
+import androidx.compose.material.icons.automirrored.rounded.DriveFileMove
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.MoreVert
@@ -226,7 +226,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                 if (editingId != 0L && moveCandidateGroups.isNotEmpty()) {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.move)) },
-                                        leadingIcon = { Icon(Icons.Rounded.DriveFileMove, null) },
+                                        leadingIcon = { Icon(Icons.AutoMirrored.Rounded.DriveFileMove, null) },
                                         onClick = {
                                             moreMenuOpen = false
                                             showMoveDialog = true
@@ -299,7 +299,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                                 if (Build.VERSION.SDK_INT >= 26 && editingId != 0L) {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.create_shortcut)) },
-                                        leadingIcon = { Icon(Icons.Rounded.AddToHomeScreen, null) },
+                                        leadingIcon = { Icon(Icons.AutoMirrored.Rounded.AddToHomeScreen, null) },
                                         onClick = {
                                             moreMenuOpen = false
                                             proxyEntity?.let { ent ->
@@ -446,7 +446,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
 
             if (showMoveDialog) {
                 AppDialog(
-                    icon = Icons.Rounded.DriveFileMove,
+                    icon = Icons.AutoMirrored.Rounded.DriveFileMove,
                     title = stringResource(R.string.move),
                     onDismiss = { showMoveDialog = false },
                     text = {

@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -125,6 +124,9 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sign
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 
 val FloatingBarHeight = 56.dp
 val FloatingBarHorizontalPadding = 16.dp
@@ -486,14 +488,24 @@ fun FloatingSearchBar(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
+                    val textFieldState = rememberTextFieldState(initialText = query)
+                    LaunchedEffect(textFieldState) {
+                        snapshotFlow { textFieldState.text.toString() }.collect { current ->
+                            if (current != query) onQueryChange(current)
+                        }
+                    }
+                    LaunchedEffect(query) {
+                        if (textFieldState.text.toString() != query) {
+                            textFieldState.setTextAndPlaceCursorAtEnd(query)
+                        }
+                    }
                     BasicTextField(
-                        value = query,
-                        onValueChange = onQueryChange,
-                        singleLine = true,
+                        state = textFieldState,
+                        lineLimits = TextFieldLineLimits.SingleLine,
                         textStyle = MaterialTheme.typography.bodyLarge.copy(color = cs.onSurface),
                         cursorBrush = SolidColor(cs.primary),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                        onKeyboardAction = { focusManager.clearFocus() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(focusRequester),

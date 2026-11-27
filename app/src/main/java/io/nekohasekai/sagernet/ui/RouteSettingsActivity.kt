@@ -25,7 +25,7 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Domain
 import androidx.compose.material.icons.rounded.Http
-import androidx.compose.material.icons.rounded.Input
+import androidx.compose.material.icons.automirrored.rounded.Input
 import androidx.compose.material.icons.rounded.Lan
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.LocationOn
@@ -288,7 +288,7 @@ class RouteSettingsActivity : ThemedActivity() {
                                 StoreEditTextPref(
                                     store = store,
                                     key = Key.ROUTE_SOURCE_PORT,
-                                    icon = Icons.Rounded.Input,
+                                    icon = Icons.AutoMirrored.Rounded.Input,
                                     titleRes = R.string.route_source_port,
                                     multiline = true,
                                 )

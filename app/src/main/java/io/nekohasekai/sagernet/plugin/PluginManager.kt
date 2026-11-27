@@ -86,6 +86,7 @@ object PluginManager {
             }
     }
 
+    @Suppress("DEPRECATION")
     fun ComponentInfo.loadString(key: String) = when (val value = metaData.get(key)) {
         is String -> value
         is Int -> SagerNet.application.packageManager.getResourcesForApplication(applicationInfo)
