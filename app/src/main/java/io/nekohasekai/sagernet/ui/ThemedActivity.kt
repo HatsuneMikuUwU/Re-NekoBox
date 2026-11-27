@@ -13,7 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.app.ActivityCompat
+import io.nekohasekai.sagernet.ui.theme.Appearance
 import io.nekohasekai.sagernet.ui.theme.ReNekoBoxTheme
+import io.nekohasekai.sagernet.ui.theme.UiScaled
 import io.nekohasekai.sagernet.utils.Theme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +49,7 @@ abstract class ThemedActivity : AppCompatActivity() {
         }
         Theme.applyNightTheme()
 
+        Appearance.init(this)
         super.onCreate(savedInstanceState)
         if (!isDialog) {
             enableEdgeToEdge()
@@ -57,8 +60,10 @@ abstract class ThemedActivity : AppCompatActivity() {
     protected fun setComposeContent(content: @Composable () -> Unit) {
         setContent {
             CompositionLocalProvider(LocalSnackbarHostState provides composeSnackbarHostState) {
-                ReNekoBoxTheme {
-                    content()
+                UiScaled {
+                    ReNekoBoxTheme {
+                        content()
+                    }
                 }
             }
         }

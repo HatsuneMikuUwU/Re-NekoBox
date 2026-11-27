@@ -12,6 +12,7 @@ import android.os.RemoteException
 import android.text.format.Formatter
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -61,6 +62,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
@@ -126,7 +128,15 @@ import moe.matsuri.nb4a.utils.Util
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Extension
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.nekohasekai.sagernet.ui.background.AnimatedBackground
+import io.nekohasekai.sagernet.ui.background.BackgroundType
+import io.nekohasekai.sagernet.ui.background.LocalAnimatedBackgroundActive
+import io.nekohasekai.sagernet.ui.background.rememberActiveBackground
 import io.nekohasekai.sagernet.ui.components.AppDialog
+import io.nekohasekai.sagernet.ui.components.AppMotion
+import io.nekohasekai.sagernet.ui.settings.AppearanceSettingsSheet
+import io.nekohasekai.sagernet.ui.theme.Appearance
 import io.nekohasekai.sagernet.ui.components.DialogCancelButton
 import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
 
@@ -222,6 +232,9 @@ class MainActivity : ThemedActivity(),
             }
         }
 
+        val appearance by Appearance.settings.collectAsStateWithLifecycle()
+        val backgroundActive = appearance.backgroundType != BackgroundType.NONE
+        var showAppearanceSheet by rememberSaveable { mutableStateOf(false) }
         val bottomTabs = remember { MainDestination.entries.filter { it.inBottomBar } }
         val backdrop = rememberBlurBackdrop()
         val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -234,6 +247,7 @@ class MainActivity : ThemedActivity(),
         CompositionLocalProvider(
             LocalBottomInset provides bottomInset,
             LocalBlurBackdrop provides backdrop,
+            LocalAnimatedBackgroundActive provides backgroundActive,
         ) {
         Box(
             modifier = Modifier
@@ -245,6 +259,16 @@ class MainActivity : ThemedActivity(),
                     .fillMaxSize()
                     .blurBackdropSource(backdrop),
             ) {
+                AnimatedVisibility(
+                    visible = backgroundActive,
+                    enter = AppMotion.fadeEnter(),
+                    exit = AppMotion.fadeExit(),
+                ) {
+                    AnimatedBackground(
+                        type = rememberActiveBackground(),
+                        enableParallax = appearance.backgroundParallax,
+                    )
+                }
                 val backToSettings: () -> Unit = { currentDestination.value = MainDestination.SETTINGS }
                 AnimatedContent(
                     targetState = destination,
@@ -265,6 +289,7 @@ class MainActivity : ThemedActivity(),
                         )
                         MainDestination.SETTINGS -> SettingsScreen(
                             clashApiEnabled = clashApiEnabled,
+                            onOpenAppearance = { showAppearanceSheet = true },
                             onOpenTools = { currentDestination.value = MainDestination.TOOLS },
                             onOpenLogcat = { currentDestination.value = MainDestination.LOGCAT },
                             onOpenDashboard = { currentDestination.value = MainDestination.TRAFFIC },
@@ -353,6 +378,11 @@ class MainActivity : ThemedActivity(),
                     )
                 }
             }
+
+            AppearanceSettingsSheet(
+                visible = showAppearanceSheet,
+                onDismiss = { showAppearanceSheet = false },
+            )
 
             SnackbarHost(
                 hostState = composeSnackbarHostState,

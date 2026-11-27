@@ -1,7 +1,6 @@
 package io.nekohasekai.sagernet.ui.components
 
 import android.os.Build
-
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.spring
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -32,9 +30,13 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
@@ -73,6 +75,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -81,7 +84,6 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerId
@@ -93,7 +95,6 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -109,12 +110,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirstOrNull
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.nekohasekai.sagernet.ui.liquid.liquidGlass
+import io.nekohasekai.sagernet.ui.theme.Appearance
+import io.nekohasekai.sagernet.ui.theme.BarEffect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import androidx.compose.ui.graphics.RectangleShape
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
@@ -124,9 +129,6 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sign
-import androidx.compose.foundation.text.input.TextFieldLineLimits
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 
 val FloatingBarHeight = 56.dp
 val FloatingBarHorizontalPadding = 16.dp
@@ -138,6 +140,19 @@ val LocalBottomInset = compositionLocalOf { 0.dp }
 val LocalBlurBackdrop = compositionLocalOf<LayerBackdrop?> { null }
 val LocalEditorListState = compositionLocalOf<LazyListState?> { null }
 val LocalEditorContentPadding = compositionLocalOf<PaddingValues?> { null }
+
+enum class GlassStyle { Flat, Blur, Liquid }
+
+@Composable
+fun resolveGlassStyle(
+    backdrop: LayerBackdrop?,
+    effect: BarEffect,
+): GlassStyle =
+    when {
+        backdrop == null -> GlassStyle.Flat
+        effect == BarEffect.LIQUID_GLASS && isRuntimeShaderSupported() -> GlassStyle.Liquid
+        else -> GlassStyle.Blur
+    }
 
 @Composable
 fun rememberFabExpanded(listState: LazyListState): Boolean {
@@ -175,8 +190,10 @@ fun rememberBlurBackdrop(
     enabled: Boolean = true,
     background: Color = MaterialTheme.colorScheme.background,
 ): LayerBackdrop? {
+    val appearance by Appearance.settings.collectAsStateWithLifecycle()
     if (
         !enabled ||
+        !appearance.blur ||
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
         !isRenderEffectSupported()
     ) {
@@ -221,14 +238,26 @@ fun Modifier.barGlass(
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     drawFlatBackground: Boolean = true,
     strokeCornerRadius: Dp = Dp.Infinity,
-): Modifier =
-    if (backdrop != null) {
-        blurEffect(backdrop, shape = shape, blendColor = containerColor)
-            .glassStroke(cornerRadius = strokeCornerRadius)
-    } else {
-        (if (drawFlatBackground) background(containerColor, shape) else this)
-            .glassStroke(cornerRadius = strokeCornerRadius)
+    style: GlassStyle? = null,
+): Modifier {
+    val appearance by Appearance.settings.collectAsStateWithLifecycle()
+    val effectiveStyle = style ?: resolveGlassStyle(backdrop, appearance.barEffect)
+    return when (effectiveStyle) {
+        GlassStyle.Liquid ->
+            if (backdrop != null) {
+                liquidGlass(backdrop, shape, containerColor, strokeCornerRadius)
+            } else {
+                (if (drawFlatBackground) background(containerColor, shape) else this)
+                    .glassStroke(cornerRadius = strokeCornerRadius)
+            }
+        GlassStyle.Blur ->
+            blurEffect(backdrop, shape = shape, blendColor = containerColor)
+                .glassStroke(cornerRadius = strokeCornerRadius)
+        GlassStyle.Flat ->
+            (if (drawFlatBackground) background(containerColor, shape) else this)
+                .glassStroke(cornerRadius = strokeCornerRadius)
     }
+}
 
 private const val FADE_STEPS = 16
 const val DEFAULT_SCRIM_ALPHA = 0.85f
@@ -275,7 +304,7 @@ fun Modifier.glassStroke(
     }
 }
 
-private fun DrawScope.drawGlassStroke(
+internal fun DrawScope.drawGlassStroke(
     topColor: Color,
     bottomColor: Color,
     radius: Float,
@@ -318,17 +347,14 @@ fun FloatingGlassButton(
     size: Dp = FloatingBarHeight,
     content: @Composable () -> Unit,
 ) {
-    val haptic = LocalHapticFeedback.current
+    val onHapticClick = hapticClick(block = onClick)
     Box(
         modifier = modifier
             .size(size)
             .barGlass(backdrop = backdrop, shape = CircleShape, containerColor = MaterialTheme.colorScheme.surfaceContainer)
             .clip(CircleShape)
             .semantics { this.contentDescription = contentDescription }
-            .clickable(role = Role.Button) {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                onClick()
-            },
+            .clickable(role = Role.Button, onClick = onHapticClick),
         contentAlignment = Alignment.Center,
     ) {
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
@@ -554,11 +580,31 @@ fun <T> FloatingTabBar(
     iconContent: @Composable (item: T, index: Int) -> Unit,
     labelContent: @Composable (item: T, index: Int) -> Unit,
 ) {
+    val appearance by Appearance.settings.collectAsStateWithLifecycle()
+    val glassStyle = resolveGlassStyle(backdrop, appearance.barEffect)
+    if (glassStyle == GlassStyle.Liquid && backdrop != null) {
+        LiquidFloatingTabBar(
+            items = items,
+            selectedIndex = selectedIndex,
+            onSelected = onSelected,
+            backdrop = backdrop,
+            modifier = modifier,
+            containerColor = containerColor,
+            indicatorColor = indicatorColor,
+            contentColor = contentColor,
+            activeContentColor = activeContentColor,
+            tabMinWidth = tabMinWidth,
+            iconContent = iconContent,
+            labelContent = labelContent,
+        )
+        return
+    }
+
     val pillShape = CircleShape
     val density = LocalDensity.current
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val scope = rememberCoroutineScope()
-    val haptic = LocalHapticFeedback.current
+    val performHaptic = rememberHapticAction()
     val tabsCount = items.size
 
     var tabWidthPx by remember { mutableFloatStateOf(0f) }
@@ -608,7 +654,7 @@ fun <T> FloatingTabBar(
 
     fun activateTab(index: Int) {
         if (currentIndex != index) {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            performHaptic()
             currentIndex = index
             onSelectedUpdated(index)
         }
@@ -623,7 +669,7 @@ fun <T> FloatingTabBar(
             onDragEnd = {
                 val target = valueAnimation.targetValue.roundToInt().coerceIn(0, tabsCount - 1)
                 if (currentIndex != target) {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    performHaptic()
                     currentIndex = target
                     onSelectedUpdated(target)
                 }
@@ -683,7 +729,7 @@ fun <T> FloatingTabBar(
                     tabWidthPx = (contentWidthPx / tabsCount).coerceAtLeast(0f)
                 }
                 .graphicsLayer { translationX = panelOffset }
-                .barGlass(backdrop = backdrop, shape = pillShape, containerColor = containerColor)
+                .barGlass(backdrop = backdrop, shape = pillShape, containerColor = containerColor, style = resolveGlassStyle(backdrop, BarEffect.BLUR))
                 .then(dragModifier)
                 .height(FloatingTabBarHeight)
                 .padding(4.dp),
@@ -726,7 +772,7 @@ fun <T> FloatingTabBar(
     }
 }
 
-private suspend fun PointerInputScope.inspectDragGestures(
+internal suspend fun PointerInputScope.inspectDragGestures(
     onDragStart: (down: PointerInputChange) -> Unit = {},
     onDragEnd: (change: PointerInputChange) -> Unit = {},
     onDragCancel: () -> Unit = {},

@@ -71,6 +71,9 @@ dependencies {
     // Backdrop Blur (exact same miuix-blur stack as AnimeX)
     implementation("top.yukonga.miuix.kmp:miuix-shader-android:0.9.4")
     implementation("top.yukonga.miuix.kmp:miuix-blur-android:0.9.4")
+    // MaterialKolor (exact same theme customization stack as AnimeX)
+    implementation("com.materialkolor:material-kolor-material3:6.0.0")
+    implementation("com.materialkolor:material-kolor-palette:6.0.0")
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     implementation("androidx.activity:activity-compose:1.13.0")

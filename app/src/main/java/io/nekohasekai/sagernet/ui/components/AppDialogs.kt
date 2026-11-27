@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 
 package io.nekohasekai.sagernet.ui.components
 
@@ -9,21 +9,35 @@ import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -38,11 +52,15 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindowProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.nekohasekai.sagernet.ui.theme.Appearance
+import io.nekohasekai.sagernet.ui.theme.UiScaled
 import java.util.function.Consumer
 
 private const val DefaultWindowBlurRadius = 10
@@ -54,9 +72,10 @@ fun WindowBlurEffect(
 ) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
 
+    val settings by Appearance.settings.collectAsStateWithLifecycle()
     val view = LocalView.current
     val systemAllows = rememberCrossWindowBlurEnabled()
-    val radius = if (enabled && systemAllows) blurRadius else 0
+    val radius = if (enabled && settings.blur && systemAllows) blurRadius else 0
 
     DisposableEffect(view, radius) {
         val apply = Runnable { view.setWindowBlur(radius) }
@@ -114,6 +133,43 @@ private fun WindowManager.LayoutParams.applyBlur(radius: Int) {
     }
 }
 
+internal fun scaledSlot(slot: @Composable () -> Unit): @Composable () -> Unit = { UiScaled { slot() } }
+
+@Composable
+fun AppModalBottomSheet(
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    sheetState: SheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden),
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        modifier = modifier,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.background,
+    ) {
+        val scope = this
+        UiScaled { scope.content() }
+    }
+}
+
+@Composable
+fun AppDropdownMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = modifier,
+    ) {
+        val scope = this
+        UiScaled { scope.content() }
+    }
+}
+
 @Composable
 fun AppDialog(
     icon: ImageVector? = null,
@@ -128,19 +184,21 @@ fun AppDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = confirmButton,
+        confirmButton = { UiScaled { confirmButton() } },
         modifier = modifier,
-        dismissButton = dismissButton,
-        icon = icon?.let { { Icon(it, contentDescription = null) } },
+        dismissButton = dismissButton?.let(::scaledSlot),
+        icon = icon?.let { ic -> { UiScaled { Icon(ic, contentDescription = null) } } },
         title = {
             WindowBlurEffect()
-            Text(
-                text = title,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-            )
+            UiScaled {
+                Text(
+                    text = title,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                )
+            }
         },
-        text = text,
+        text = text?.let(::scaledSlot),
         shape = MaterialTheme.shapes.extraLarge,
     )
 }
@@ -151,17 +209,14 @@ fun DialogOptionRow(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    val haptic = LocalHapticFeedback.current
+    val onHapticClick = hapticClick(block = onClick)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
-            .clickable {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                onClick()
-            }
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+            .clickable(onClick = onHapticClick)
+            .padding(horizontal = 16.dp, vertical = 18.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RadioButton(selected = selected, onClick = null)
@@ -179,17 +234,14 @@ fun DialogCheckRow(
     checked: Boolean,
     onClick: () -> Unit,
 ) {
-    val haptic = LocalHapticFeedback.current
+    val onHapticClick = hapticToggle(checked = checked, block = onClick)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(if (checked) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
-            .clickable {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                onClick()
-            }
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+            .clickable(onClick = onHapticClick)
+            .padding(horizontal = 16.dp, vertical = 18.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked = checked, onCheckedChange = null)
@@ -203,15 +255,11 @@ fun DialogCheckRow(
 
 @Composable
 fun DialogCancelButton(
-    label: String,
+    label: String = "Cancel",
     onClick: () -> Unit,
 ) {
-    val haptic = LocalHapticFeedback.current
     FilledTonalButton(
-        onClick = {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-            onClick()
-        },
+        onClick = hapticClick(block = onClick),
         shapes = ButtonDefaults.shapes(),
         colors = ButtonDefaults.filledTonalButtonColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -227,12 +275,8 @@ fun DialogConfirmButton(
     label: String,
     onClick: () -> Unit,
 ) {
-    val haptic = LocalHapticFeedback.current
     FilledTonalButton(
-        onClick = {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-            onClick()
-        },
+        onClick = hapticClick(block = onClick),
         shapes = ButtonDefaults.shapes(),
         colors = ButtonDefaults.filledTonalButtonColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -248,12 +292,8 @@ fun DialogDestructiveButton(
     label: String,
     onClick: () -> Unit,
 ) {
-    val haptic = LocalHapticFeedback.current
     FilledTonalButton(
-        onClick = {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-            onClick()
-        },
+        onClick = hapticClick(block = onClick),
         shapes = ButtonDefaults.shapes(),
         colors = ButtonDefaults.filledTonalButtonColors(
             containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -267,7 +307,9 @@ fun DialogDestructiveButton(
 private val SheetItemOuter = 19.dp
 private val SheetItemInner = 4.dp
 
-fun groupedSheetItemShape(
+val SingleItemShape: Shape = RoundedCornerShape(SheetItemOuter)
+
+fun groupedItemShape(
     index: Int,
     count: Int,
 ): Shape = RoundedCornerShape(
@@ -277,6 +319,38 @@ fun groupedSheetItemShape(
     bottomEnd = if (index == count - 1) SheetItemOuter else SheetItemInner,
 )
 
+fun groupedSheetItemShape(
+    index: Int,
+    count: Int,
+): Shape = groupedItemShape(index, count)
+
+enum class BadgeStyle { Default, Selected, Tertiary, Error }
+
+@Composable
+fun ShapedIconBadge(
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    style: BadgeStyle = BadgeStyle.Default,
+    size: Dp = 40.dp,
+    iconSize: Dp = 22.dp,
+    contentDescription: String? = null,
+) {
+    val cs = MaterialTheme.colorScheme
+    val (container, tint) =
+        when (style) {
+            BadgeStyle.Default -> cs.primary to cs.onPrimary
+            BadgeStyle.Selected -> cs.onSecondaryContainer to cs.secondaryContainer
+            BadgeStyle.Tertiary -> cs.tertiary to cs.onTertiary
+            BadgeStyle.Error -> cs.error to cs.onError
+        }
+    Box(
+        modifier.size(size).clip(MaterialShapes.Cookie9Sided.toShape()).background(container),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = contentDescription, modifier = Modifier.size(iconSize), tint = tint)
+    }
+}
+
 @Composable
 fun SheetItemSurface(
     shape: Shape,
@@ -284,18 +358,17 @@ fun SheetItemSurface(
     onClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     container: Color = MaterialTheme.colorScheme.surfaceContainer,
+    hapticType: HapticFeedbackType = HapticFeedbackType.ContextClick,
+    horizontalPadding: Dp = 16.dp,
     content: @Composable () -> Unit,
 ) {
-    val haptic = LocalHapticFeedback.current
     val outer = modifier
         .fillMaxWidth()
-        .padding(vertical = 2.dp)
+        .padding(horizontal = horizontalPadding, vertical = 2.dp)
     if (onClick != null) {
+        val hapticOnClick = hapticClick(type = hapticType, block = onClick)
         Surface(
-            onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                onClick()
-            },
+            onClick = hapticOnClick,
             enabled = enabled,
             shape = shape,
             color = container,
@@ -309,5 +382,60 @@ fun SheetItemSurface(
             modifier = outer,
             content = content,
         )
+    }
+}
+
+@Composable
+fun SheetOptionItem(
+    index: Int,
+    count: Int,
+    icon: ImageVector,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    highlight: Boolean = false,
+    trailing: (@Composable RowScope.() -> Unit)? = null,
+) {
+    val cs = MaterialTheme.colorScheme
+    val container = if (selected) cs.primaryContainer else cs.surfaceContainer
+    val content =
+        when {
+            selected -> cs.onPrimaryContainer
+            highlight -> cs.tertiary
+            else -> cs.onSurface
+        }
+    SheetItemSurface(
+        shape = groupedItemShape(index, count),
+        modifier = modifier,
+        onClick = onClick,
+        container = container,
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ShapedIconBadge(
+                icon = icon,
+                style =
+                    when {
+                        selected -> BadgeStyle.Selected
+                        highlight -> BadgeStyle.Tertiary
+                        else -> BadgeStyle.Default
+                    },
+            )
+            Text(
+                label,
+                modifier = Modifier.weight(1f).padding(start = 16.dp),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                color = content,
+            )
+            if (trailing != null) {
+                trailing()
+            } else if (selected) {
+                Icon(Icons.Outlined.Check, contentDescription = null, tint = content)
+            }
+        }
     }
 }
