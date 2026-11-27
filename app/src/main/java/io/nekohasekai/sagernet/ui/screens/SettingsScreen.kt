@@ -115,21 +115,11 @@ import androidx.compose.material.icons.rounded.Domain
 import androidx.compose.material.icons.rounded.Policy
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.LinearScale
-import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.rounded.Straighten
-import androidx.compose.material3.Surface
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.ui.text.font.FontWeight
-import io.nekohasekai.sagernet.ui.components.ShapedIconBadge
-import io.nekohasekai.sagernet.ui.components.hapticClick
-import io.nekohasekai.sagernet.ui.settings.ColorSchemePreview
 
 @Composable
 fun SettingsScreen(
     clashApiEnabled: Boolean,
-    onOpenAppearance: () -> Unit,
     onOpenTools: () -> Unit,
     onOpenLogcat: () -> Unit,
     onOpenDashboard: () -> Unit,
@@ -188,43 +178,6 @@ fun SettingsScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(top = topInset + 6.dp, bottom = bottomInset + 8.dp),
         ) {
-            // Appearance & UI Customization (opens AnimeX-style SettingsSheet)
-            item {
-                val cs = MaterialTheme.colorScheme
-                Surface(
-                    onClick = hapticClick(block = onOpenAppearance),
-                    shape = RoundedCornerShape(24.dp),
-                    color = cs.surfaceContainer,
-                    contentColor = cs.onSurface,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 6.dp),
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        ShapedIconBadge(Icons.Outlined.Palette)
-                        Spacer(Modifier.width(16.dp))
-                        Column(Modifier.weight(1f).padding(end = 12.dp)) {
-                            Text(
-                                text = "UI Customization",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                            Text(
-                                text = "Theme, colors, palette style, blur, liquid glass, background & scale",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = cs.onSurfaceVariant,
-                            )
-                        }
-                        ColorSchemePreview()
-                    }
-                }
-            }
-
             // General Settings
             item {
                 PrefCategory(titleRes = R.string.general_settings) {
@@ -631,9 +584,6 @@ fun SettingsScreen(
             backdrop = topBackdrop,
             title = null,
             actions = {
-                IconButton(onClick = onOpenAppearance) {
-                    Icon(Icons.Outlined.Palette, contentDescription = "UI Customization")
-                }
                 IconButton(onClick = onOpenTools) {
                     Icon(Icons.Rounded.Build, contentDescription = stringResource(R.string.menu_tools))
                 }

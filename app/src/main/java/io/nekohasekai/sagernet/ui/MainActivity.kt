@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +37,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.rounded.AccountTree
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Dashboard
@@ -105,6 +107,10 @@ import io.nekohasekai.sagernet.ktx.parseProxies
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import androidx.compose.ui.graphics.Color
+import io.nekohasekai.sagernet.ui.components.FloatingBarHeight
+import io.nekohasekai.sagernet.ui.components.FloatingBarHorizontalPadding
+import io.nekohasekai.sagernet.ui.components.FloatingBarTopPadding
+import io.nekohasekai.sagernet.ui.components.FloatingGlassButton
 import io.nekohasekai.sagernet.ui.components.FloatingTabBar
 import io.nekohasekai.sagernet.ui.components.FloatingTabBarMargin
 import io.nekohasekai.sagernet.ui.components.LocalBlurBackdrop
@@ -235,6 +241,7 @@ class MainActivity : ThemedActivity(),
         val appearance by Appearance.settings.collectAsStateWithLifecycle()
         val backgroundActive = appearance.backgroundType != BackgroundType.NONE
         var showAppearanceSheet by rememberSaveable { mutableStateOf(false) }
+        var configSearchActive by remember { mutableStateOf(false) }
         val bottomTabs = remember { MainDestination.entries.filter { it.inBottomBar } }
         val backdrop = rememberBlurBackdrop()
         val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -280,6 +287,7 @@ class MainActivity : ThemedActivity(),
                         MainDestination.CONFIGURATION -> ConfigurationScreen(
                             refreshSignal = refreshTick,
                             onShowMessage = { showComposeSnackbar(it) },
+                            onSearchActiveChanged = { configSearchActive = it },
                         )
                         MainDestination.GROUP -> GroupScreen(
                             onShowMessage = { showComposeSnackbar(it) },
@@ -289,7 +297,6 @@ class MainActivity : ThemedActivity(),
                         )
                         MainDestination.SETTINGS -> SettingsScreen(
                             clashApiEnabled = clashApiEnabled,
-                            onOpenAppearance = { showAppearanceSheet = true },
                             onOpenTools = { currentDestination.value = MainDestination.TOOLS },
                             onOpenLogcat = { currentDestination.value = MainDestination.LOGCAT },
                             onOpenDashboard = { currentDestination.value = MainDestination.TRAFFIC },
@@ -375,6 +382,29 @@ class MainActivity : ThemedActivity(),
                                 overflow = TextOverflow.Ellipsis,
                             )
                         },
+                    )
+                }
+            }
+
+            AnimatedVisibility(
+                visible = !isSettingsSubScreen && !(destination == MainDestination.CONFIGURATION && configSearchActive),
+                enter = AppMotion.fadeEnter(),
+                exit = AppMotion.fadeExit(),
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .statusBarsPadding()
+                    .padding(start = FloatingBarHorizontalPadding, top = FloatingBarTopPadding),
+            ) {
+                FloatingGlassButton(
+                    contentDescription = "UI Customization",
+                    onClick = { showAppearanceSheet = true },
+                    backdrop = backdrop,
+                    size = FloatingBarHeight,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Palette,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }

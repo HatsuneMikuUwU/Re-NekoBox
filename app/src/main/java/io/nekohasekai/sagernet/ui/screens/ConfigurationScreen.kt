@@ -189,6 +189,7 @@ fun ConfigurationScreen(
     var selectedProxyId by remember { mutableLongStateOf(DataStore.selectedProxy) }
 
     var searchActive by remember { mutableStateOf(false) }
+    LaunchedEffect(searchActive) { onSearchActiveChanged(searchActive) }
     var searchQuery by remember { mutableStateOf("") }
     var showAddMenu by remember { mutableStateOf(false) }
     var showManualMenu by remember { mutableStateOf(false) }
