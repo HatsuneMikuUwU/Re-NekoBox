@@ -262,7 +262,7 @@ internal fun CustomizationGroup(initiallyExpanded: Boolean = true) {
                 if (settings.paletteStyle.forcesSpec2026) {
                     stringResource(R.string.ui_color_spec_cmf_auto)
                 } else if (runningSpec != settings.colorSpec) {
-                    stringResource(R.string.ui_color_spec_fallback, stringResource(stringResource(settings.colorSpec.labelRes)Res), stringResource(runningSpec.labelRes), stringResource(settings.paletteStyle.labelRes))
+                    stringResource(R.string.ui_color_spec_fallback, stringResource(settings.colorSpec.labelRes), stringResource(runningSpec.labelRes), stringResource(settings.paletteStyle.labelRes))
                 } else {
                     stringResource(settings.colorSpec.labelRes)
                 },
