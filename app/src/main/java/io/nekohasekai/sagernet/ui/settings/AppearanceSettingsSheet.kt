@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
@@ -32,22 +31,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -144,23 +138,6 @@ private fun CommunityGroup() {
             container = cs.secondaryContainer,
             content = cs.onSecondaryContainer,
             onClick = { uriHandler.openUri(TELEGRAM_CHANNEL_URL) },
-            end = {
-                Box(
-                    Modifier
-                        .padding(end = 4.dp)
-                        .size(72.dp)
-                        .clip(MaterialShapes.Clover4Leaf.toShape())
-                        .background(cs.primary),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Outlined.Send,
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp),
-                        tint = cs.onPrimary,
-                    )
-                }
-            },
         )
         PrefItem(
             icon = Icons.Outlined.Groups,
@@ -170,23 +147,6 @@ private fun CommunityGroup() {
             container = cs.primaryContainer,
             content = cs.onPrimaryContainer,
             onClick = { uriHandler.openUri(TELEGRAM_GROUP_URL) },
-            end = {
-                Box(
-                    Modifier
-                        .padding(end = 4.dp)
-                        .size(72.dp)
-                        .clip(MaterialShapes.Clover4Leaf.toShape())
-                        .background(cs.primary),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        Icons.Outlined.Groups,
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp),
-                        tint = cs.onPrimary,
-                    )
-                }
-            },
         )
     }
 }

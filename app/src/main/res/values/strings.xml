@@ -807,7 +807,7 @@
     <string name="ui_bar_effect_enable_blur_toast">Enable blur effect first to configure this</string>
     <string name="ui_haptics">Haptics</string>
     <string name="ui_haptics_desc">Subtle tactile feedback when tapping buttons, cards, switches, and sliders</string>
-    <string name="ui_animated_background">Animated background</string>
+    <string name="ui_animated_background">Background</string>
     <string name="ui_choose_background">Choose background</string>
     <string name="ui_random_interval">Random interval</string>
     <string name="ui_background_parallax">Background parallax</string>
@@ -877,7 +877,7 @@
     <!-- Community -->
     <string name="ui_community">Community</string>
     <string name="ui_telegram_channel">Telegram Channel</string>
-    <string name="ui_telegram_channel_desc">@uwuowoumuchannel · Tap to follow updates</string>
+    <string name="ui_telegram_channel_desc">Tap to follow updates</string>
     <string name="ui_telegram_group">Telegram Group</string>
     <string name="ui_telegram_group_desc">Tap to join the community chat</string>
 
