@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 
 package io.nekohasekai.sagernet.ui.screens
 
@@ -28,7 +30,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -57,8 +58,6 @@ import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -142,6 +141,12 @@ import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.LayersClear
 import io.nekohasekai.sagernet.GroupType
 import io.nekohasekai.sagernet.group.GroupUpdater
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 
 @Composable
 fun ConfigurationScreen(
@@ -362,30 +367,40 @@ fun ConfigurationScreen(
             ) {
                 if (groups.size > 1) {
                     item(key = "group-chips") {
-                        LazyRow(
-                            contentPadding = PaddingValues(bottom = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .padding(bottom = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
                         ) {
-                            items(groups, key = { it.id }) { group ->
+                            groups.forEachIndexed { index, group ->
                                 val selected = group.id == selectedGroupId
-                                FilterChip(
-                                    selected = selected,
-                                    onClick = {
+                                val shapes = when (index) {
+                                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                    groups.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                                }
+                                ToggleButton(
+                                    checked = selected,
+                                    onCheckedChange = {
                                         selectedGroupId = group.id
                                         DataStore.selectedGroup = group.id
                                     },
-                                    label = {
-                                        Text(
-                                            text = group.displayName(),
-                                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                                        )
-                                    },
-                                    shape = CircleShape,
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    shapes = shapes,
+                                    colors = ToggleButtonDefaults.toggleButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        checkedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                                     ),
-                                )
+                                ) {
+                                    Text(
+                                        text = group.displayName(),
+                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                        maxLines = 1,
+                                    )
+                                }
                             }
                         }
                     }
