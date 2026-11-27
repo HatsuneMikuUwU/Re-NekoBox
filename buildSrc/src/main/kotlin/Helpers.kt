@@ -43,7 +43,7 @@ fun Project.setupCommon() {
         }
         defaultConfig {
             minSdk = 24
-            targetSdk = 35
+            targetSdk = 37
         }
         buildTypes {
             getByName("release") {
