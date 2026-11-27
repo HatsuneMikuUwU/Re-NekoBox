@@ -310,12 +310,12 @@ class GroupSettingsActivity : ThemedActivity() {
                             customUserAgent = DataStore.subscriptionUserAgent
                             autoUpdate = DataStore.subscriptionAutoUpdate
                             autoUpdateDelay = DataStore.subscriptionAutoUpdateDelay
-                            hwidEnabled = DataStore.subscriptionHwidEnabled
-                            spoofApp = DataStore.subscriptionSpoofApp
-                            hwid = DataStore.subscriptionHwid
-                            spoofDevice = DataStore.subscriptionSpoofDevice
-                            devicePresetId = DataStore.subscriptionDevicePreset
-                            deviceHeaders = DataStore.subscriptionDeviceHeaders
+                            this.hwidEnabled = DataStore.subscriptionHwidEnabled
+                            this.spoofApp = DataStore.subscriptionSpoofApp
+                            this.hwid = DataStore.subscriptionHwid
+                            this.spoofDevice = DataStore.subscriptionSpoofDevice
+                            this.devicePresetId = DataStore.subscriptionDevicePreset
+                            this.deviceHeaders = DataStore.subscriptionDeviceHeaders
                         }
                         entity.subscription = sub
                     }
