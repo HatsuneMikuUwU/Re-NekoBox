@@ -187,9 +187,10 @@ fun RouteScreen(
                             Switch(
                                 checked = rule.enabled,
                                 onCheckedChange = { checked ->
+                                    val updated = rule.copy(enabled = checked)
+                                    rules = rules.map { if (it.id == rule.id) updated else it }
                                     runOnDefaultDispatcher {
-                                        rule.enabled = checked
-                                        ProfileManager.updateRule(rule)
+                                        ProfileManager.updateRule(updated)
                                     }
                                 },
                             )
