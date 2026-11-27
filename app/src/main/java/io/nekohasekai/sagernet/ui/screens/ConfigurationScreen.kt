@@ -388,7 +388,7 @@ fun ConfigurationScreen(
                                         DataStore.selectedGroup = group.id
                                     },
                                     shapes = shapes,
-                                    colors = ToggleButtonDefaults.toggleButtonColors(
+                                    colors = ToggleButtonDefaults.colors(
                                         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                         checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
