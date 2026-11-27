@@ -208,14 +208,7 @@ internal fun SettingGroup(
                 style = MaterialTheme.typography.titleMedium,
                 color = cs.onSurface,
             )
-            IconButton(
-                onClick = toggle,
-                shapes = IconButtonDefaults.shapes(),
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = cs.surfaceContainerHighest,
-                    contentColor = cs.onSurface,
-                ),
-            ) {
+            IconButton(onClick = toggle, shapes = IconButtonDefaults.shapes()) {
                 Icon(
                     Icons.Outlined.KeyboardArrowDown,
                     contentDescription = if (expanded) "Collapse" else "Expand",

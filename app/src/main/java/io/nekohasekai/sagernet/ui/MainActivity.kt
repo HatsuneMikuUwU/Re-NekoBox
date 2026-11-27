@@ -336,8 +336,6 @@ class MainActivity : ThemedActivity(),
                         .background(fadeBrush),
                 )
 
-                val density = LocalDensity.current
-                var tabBarWidthPx by remember { mutableIntStateOf(0) }
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -359,17 +357,14 @@ class MainActivity : ThemedActivity(),
                             }
                         },
                         onUrlTest = { urlTest() },
-                        modifier = if (tabBarWidthPx > 0) {
-                            Modifier.width(with(density) { tabBarWidthPx.toDp() })
-                        } else {
-                            Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
                     )
                     FloatingTabBar(
                         items = bottomTabs,
                         selectedIndex = { bottomTabs.indexOf(destination).coerceAtLeast(0) },
                         onSelected = { idx -> currentDestination.value = bottomTabs[idx] },
-                        modifier = Modifier.onSizeChanged { tabBarWidthPx = it.width },
                         iconContent = { dest, _ ->
                             Icon(dest.icon, contentDescription = null, modifier = Modifier.size(22.dp))
                         },
