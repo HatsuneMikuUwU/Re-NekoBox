@@ -1,39 +1,51 @@
 package io.nekohasekai.sagernet.ui
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Http
-import androidx.compose.material.icons.rounded.Input
-import androidx.compose.material.icons.rounded.Lan
-import androidx.compose.material.icons.rounded.LocationOn
-import androidx.compose.material.icons.rounded.MyLocation
-import androidx.compose.material.icons.rounded.SettingsInputComponent
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Domain
+import androidx.compose.material.icons.rounded.Http
+import androidx.compose.material.icons.rounded.Input
+import androidx.compose.material.icons.rounded.Lan
 import androidx.compose.material.icons.rounded.Layers
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.RuleFolder
+import androidx.compose.material.icons.rounded.SettingsInputComponent
 import androidx.compose.material.icons.rounded.Title
+import androidx.compose.material.icons.rounded.WarningAmber
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -47,18 +59,22 @@ import io.nekohasekai.sagernet.database.RuleEntity
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
+import io.nekohasekai.sagernet.ui.components.AppDialog
+import io.nekohasekai.sagernet.ui.components.DialogCancelButton
+import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
+import io.nekohasekai.sagernet.ui.components.DialogDestructiveButton
+import io.nekohasekai.sagernet.ui.components.DialogOptionRow
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
 import io.nekohasekai.sagernet.ui.components.FloatingTopBar
-import io.nekohasekai.sagernet.ui.components.blurBackdropSource
-import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
-import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
-import io.nekohasekai.sagernet.ui.components.rememberFabExpanded
 import io.nekohasekai.sagernet.ui.components.PrefActionRow
 import io.nekohasekai.sagernet.ui.components.PrefCategory
 import io.nekohasekai.sagernet.ui.components.StoreEditTextPref
 import io.nekohasekai.sagernet.ui.components.StoreListPref
-import io.nekohasekai.sagernet.ui.components.StoreListPrefRaw
+import io.nekohasekai.sagernet.ui.components.blurBackdropSource
+import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.rememberComposePreferenceStore
+import io.nekohasekai.sagernet.ui.components.rememberFabExpanded
 import io.nekohasekai.sagernet.ui.profile.ConfigEditActivity
 
 class RouteSettingsActivity : ThemedActivity() {
@@ -91,20 +107,53 @@ class RouteSettingsActivity : ThemedActivity() {
         DataStore.routeSource = initialEntity.source
         DataStore.routeProtocol = initialEntity.protocol
         DataStore.routeRuleset = initialEntity.ruleset
-        DataStore.routeOutbound = when (initialEntity.outbound) {
+        val initialOutboundMode = when (initialEntity.outbound) {
             0L -> 0
             -1L -> 1
             -2L -> 2
             else -> 3
         }
+        DataStore.routeOutbound = initialOutboundMode
         DataStore.routeOutboundRule = initialEntity.outbound
-        DataStore.routePackages = initialEntity.packages.joinToString("\n")
+        DataStore.routePackages = initialEntity.packages.joinToString("
+")
         DataStore.serverConfig = initialEntity.config
         DataStore.dirty = false
 
         setComposeContent {
             val context = LocalContext.current
             val store = rememberComposePreferenceStore(DataStore.profileCacheStore, markProfileDirty = true)
+
+            var outboundMode by remember { mutableIntStateOf(initialOutboundMode) }
+            var outboundProfileId by remember { mutableLongStateOf(initialEntity.outbound) }
+            var showOutboundDialog by remember { mutableStateOf(false) }
+            var showUnsavedDialog by remember { mutableStateOf(false) }
+            var showDeleteDialog by remember { mutableStateOf(false) }
+
+            val selectProfileLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.StartActivityForResult()
+            ) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val id = result.data?.getLongExtra(ProfileSelectActivity.EXTRA_PROFILE_ID, 0L) ?: 0L
+                    if (id > 0L) {
+                        outboundMode = 3
+                        outboundProfileId = id
+                        DataStore.routeOutbound = 3
+                        DataStore.routeOutboundRule = id
+                        DataStore.dirty = true
+                    }
+                }
+            }
+
+            val outboundSummary = remember(outboundMode, outboundProfileId) {
+                when (outboundMode) {
+                    0 -> context.getString(R.string.route_proxy)
+                    1 -> context.getString(R.string.route_bypass)
+                    2 -> context.getString(R.string.route_block)
+                    else -> ProfileManager.getProfile(outboundProfileId)?.displayName()
+                        ?: context.getString(R.string.select_profile)
+                }
+            }
 
             val backdrop = rememberBlurBackdrop()
             val topInset = floatingTopBarSpace()
@@ -133,11 +182,11 @@ class RouteSettingsActivity : ThemedActivity() {
                         .filter { it.isNotEmpty() }
                         .toSet()
                     entity.config = DataStore.serverConfig
-                    entity.outbound = when (DataStore.routeOutbound) {
+                    entity.outbound = when (outboundMode) {
                         0 -> 0L
                         1 -> -1L
                         2 -> -2L
-                        else -> DataStore.routeOutboundRule
+                        else -> outboundProfileId
                     }
                     if (editingId == 0L) {
                         ProfileManager.createRule(entity)
@@ -146,6 +195,10 @@ class RouteSettingsActivity : ThemedActivity() {
                     }
                     onMainDispatcher { finish() }
                 }
+            }
+
+            BackHandler(enabled = DataStore.dirty) {
+                showUnsavedDialog = true
             }
 
             Box(
@@ -158,14 +211,14 @@ class RouteSettingsActivity : ThemedActivity() {
                         .fillMaxSize()
                         .blurBackdropSource(backdrop),
                 ) {
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(
-                                top = topInset + 6.dp,
-                                bottom = navBarInset + 88.dp,
-                            ),
-                        ) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            top = topInset + 6.dp,
+                            bottom = navBarInset + 88.dp,
+                        ),
+                    ) {
                         item {
                             PrefCategory(titleRes = R.string.route_name) {
                                 StoreEditTextPref(
@@ -177,7 +230,7 @@ class RouteSettingsActivity : ThemedActivity() {
                                 )
                                 PrefActionRow(
                                     title = stringResource(R.string.custom_config),
-                                    summary = if (store.getString(Key.SERVER_CONFIG).isBlank()) stringResource(R.string.not_set) else "JSON Configured",
+                                    summary = store.getString(Key.SERVER_CONFIG, "").ifBlank { stringResource(R.string.not_set) },
                                     icon = Icons.Rounded.Layers,
                                     position = ExpressiveGroupPosition.BOTTOM,
                                     onClick = {
@@ -193,11 +246,11 @@ class RouteSettingsActivity : ThemedActivity() {
 
                         item {
                             PrefCategory(titleRes = R.string.cag_route) {
+                                val pkgCount = store.getString(Key.ROUTE_PACKAGES, "")
+                                    .lineSequence().count { it.isNotBlank() }
                                 PrefActionRow(
                                     title = stringResource(R.string.apps),
-                                    summary = store.getString(Key.ROUTE_PACKAGES)
-                                        .lineSequence().filter { it.isNotBlank() }.count()
-                                        .let { if (it == 0) stringResource(R.string.not_set) else "$it apps" },
+                                    summary = if (pkgCount == 0) stringResource(R.string.not_set) else "$pkgCount selected",
                                     icon = Icons.Rounded.Apps,
                                     position = ExpressiveGroupPosition.TOP,
                                     onClick = {
@@ -259,21 +312,13 @@ class RouteSettingsActivity : ThemedActivity() {
                                     key = Key.ROUTE_PROTOCOL,
                                     icon = Icons.Rounded.Http,
                                     titleRes = R.string.route_protocol,
-                                    multiline = true,
                                 )
-                                StoreListPrefRaw(
-                                    store = store,
-                                    key = Key.ROUTE_OUTBOUND,
+                                PrefActionRow(
                                     title = stringResource(R.string.route_outbound),
-                                    entries = listOf(
-                                        stringResource(R.string.route_proxy),
-                                        stringResource(R.string.route_bypass),
-                                        stringResource(R.string.route_block),
-                                    ),
-                                    entryValues = listOf("0", "1", "2"),
-                                    defaultValue = "0",
+                                    summary = outboundSummary,
                                     icon = Icons.Rounded.Router,
                                     position = ExpressiveGroupPosition.BOTTOM,
+                                    onClick = { showOutboundDialog = true },
                                 )
                             }
                         }
@@ -283,15 +328,10 @@ class RouteSettingsActivity : ThemedActivity() {
                 FloatingTopBar(
                     backdrop = backdrop,
                     title = stringResource(R.string.menu_route),
-                    onBack = { finish() },
+                    onBack = { if (DataStore.dirty) showUnsavedDialog = true else finish() },
                     actions = if (editingId != 0L) {
                         {
-                            IconButton(onClick = {
-                                runOnDefaultDispatcher {
-                                    ProfileManager.deleteRule(editingId)
-                                    onMainDispatcher { finish() }
-                                }
-                            }) {
+                            IconButton(onClick = { showDeleteDialog = true }) {
                                 Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete))
                             }
                         }
@@ -302,13 +342,97 @@ class RouteSettingsActivity : ThemedActivity() {
                 ExtendedFloatingActionButton(
                     onClick = { saveRoute() },
                     expanded = fabExpanded,
-                    shape = RoundedCornerShape(16.dp),
                     icon = { Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply)) },
                     text = { Text(stringResource(R.string.apply)) },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .navigationBarsPadding()
-                        .padding(16.dp),
+                        .padding(end = 16.dp, bottom = 16.dp),
+                )
+            }
+
+            if (showOutboundDialog) {
+                AppDialog(
+                    icon = Icons.Rounded.Router,
+                    title = stringResource(R.string.route_outbound),
+                    onDismiss = { showOutboundDialog = false },
+                    text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            listOf(
+                                0 to stringResource(R.string.route_proxy),
+                                1 to stringResource(R.string.route_bypass),
+                                2 to stringResource(R.string.route_block),
+                            ).forEach { (mode, label) ->
+                                DialogOptionRow(
+                                    label = label,
+                                    selected = outboundMode == mode,
+                                    onClick = {
+                                        outboundMode = mode
+                                        DataStore.routeOutbound = mode
+                                        DataStore.dirty = true
+                                        showOutboundDialog = false
+                                    },
+                                )
+                            }
+                            DialogOptionRow(
+                                label = stringResource(R.string.select_profile),
+                                selected = outboundMode == 3,
+                                onClick = {
+                                    showOutboundDialog = false
+                                    selectProfileLauncher.launch(Intent(context, ProfileSelectActivity::class.java))
+                                },
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        DialogCancelButton(stringResource(android.R.string.cancel)) {
+                            showOutboundDialog = false
+                        }
+                    },
+                )
+            }
+
+            if (showUnsavedDialog) {
+                AppDialog(
+                    icon = Icons.Rounded.WarningAmber,
+                    title = stringResource(R.string.unsaved_changes_prompt),
+                    onDismiss = { showUnsavedDialog = false },
+                    confirmButton = {
+                        DialogConfirmButton(stringResource(R.string.yes)) {
+                            showUnsavedDialog = false
+                            saveRoute()
+                        }
+                    },
+                    dismissButton = {
+                        DialogCancelButton(stringResource(R.string.no)) {
+                            showUnsavedDialog = false
+                            finish()
+                        }
+                    },
+                )
+            }
+
+            if (showDeleteDialog) {
+                AppDialog(
+                    icon = Icons.Rounded.Delete,
+                    title = stringResource(R.string.delete_route_prompt),
+                    onDismiss = { showDeleteDialog = false },
+                    confirmButton = {
+                        DialogDestructiveButton(stringResource(R.string.yes)) {
+                            showDeleteDialog = false
+                            runOnDefaultDispatcher {
+                                ProfileManager.deleteRule(editingId)
+                                onMainDispatcher { finish() }
+                            }
+                        }
+                    },
+                    dismissButton = {
+                        DialogCancelButton(stringResource(R.string.no)) {
+                            showDeleteDialog = false
+                        }
+                    },
                 )
             }
         }
