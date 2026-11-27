@@ -3,7 +3,6 @@
     <string name="search">Search</string>
     <string name="not_set">Not set</string>
     <string name="action_invert_selections">Invert selections</string>
-    <string name="connection_test_pending">Tap to test connection</string>
     <string name="connection_test_finished">Connection test finished</string>
     <string name="duplicate">Duplicate</string>
     <string name="removed">Removed %1$d</string>

@@ -14,6 +14,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -731,9 +732,9 @@ private fun ProfileExpressiveCard(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Spacer(modifier = Modifier.height(6.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     ExpressivePillBadge(
                         text = entity.displayType(),
@@ -769,13 +770,20 @@ private fun ProfileExpressiveCard(
                     }
 
                     if (DataStore.profileTrafficStatistics && (entity.tx > 0 || entity.rx > 0)) {
-                        val txStr = Formatter.formatFileSize(context, entity.tx)
-                        val rxStr = Formatter.formatFileSize(context, entity.rx)
-                        Text(
+                        val txStr = Formatter.formatShortFileSize(context, entity.tx)
+                        val rxStr = Formatter.formatShortFileSize(context, entity.rx)
+                        ExpressivePillBadge(
                             text = "↑$txStr ↓$rxStr",
-                            style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
+                            containerColor = if (selected) {
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHighest
+                            },
+                            contentColor = if (selected) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
                         )
                     }
                 }

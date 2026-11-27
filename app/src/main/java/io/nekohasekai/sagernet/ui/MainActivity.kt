@@ -526,7 +526,7 @@ class MainActivity : ThemedActivity(),
                     val txStr = Formatter.formatFileSize(this@MainActivity, txRate)
                     val rxStr = Formatter.formatFileSize(this@MainActivity, rxRate)
                     Text(
-                        text = if (isConnected) "↑ $txStr/s  •  ↓ $rxStr/s" else stringResource(R.string.connection_test_pending),
+                        text = "↑ $txStr/s  •  ↓ $rxStr/s",
                         style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
                         color = if (isConnected) {
                             MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f)

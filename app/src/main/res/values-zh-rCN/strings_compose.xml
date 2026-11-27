@@ -3,7 +3,6 @@
     <string name="search">搜索</string>
     <string name="not_set">未设置</string>
     <string name="action_invert_selections">反选</string>
-    <string name="connection_test_pending">点击测试连接</string>
     <string name="connection_test_finished">连接测试完成</string>
     <string name="duplicate">复制</string>
     <string name="removed">已移除 %1$d</string>
