@@ -5,6 +5,13 @@ package io.nekohasekai.sagernet.ui.components
 import androidx.compose.material.icons.rounded.QrCode2
 import android.graphics.Bitmap
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -18,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -42,7 +50,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -260,39 +271,114 @@ fun ExpressiveEmptyState(
     onAction: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
+    val cs = MaterialTheme.colorScheme
+    val t = rememberInfiniteTransition(label = "empty-state")
+    val spin by t.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(20000, easing = LinearEasing)),
+        label = "spin",
+    )
+    val breathe by t.animateFloat(
+        initialValue = 0.94f,
+        targetValue = 1.06f,
+        animationSpec = infiniteRepeatable(tween(3200, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "breathe",
+    )
+    val bob by t.animateFloat(
+        initialValue = -1f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(2600, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "bob",
+    )
+    val bobPx = with(LocalDensity.current) { 4.dp.toPx() }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(32.dp),
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .size(72.dp)
-                .clip(MaterialShapes.Clover4Leaf.toShape())
-                .background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(34.dp),
+        Box(Modifier.size(width = 200.dp, height = 190.dp)) {
+            Box(
+                Modifier
+                    .align(Alignment.Center)
+                    .size(150.dp)
+                    .graphicsLayer {
+                        rotationZ = spin
+                        scaleX = breathe
+                        scaleY = breathe
+                    }
+                    .clip(MaterialShapes.Cookie9Sided.toShape())
+                    .background(cs.primaryContainer),
+            )
+            Box(
+                Modifier
+                    .align(Alignment.Center)
+                    .size(78.dp)
+                    .clip(CircleShape)
+                    .background(cs.primary),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(34.dp),
+                    tint = cs.onPrimary,
+                )
+            }
+            Box(
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .size(54.dp)
+                    .graphicsLayer {
+                        rotationZ = -spin * 0.8f
+                        translationY = bob * bobPx
+                    }
+                    .clip(MaterialShapes.Clover4Leaf.toShape())
+                    .background(cs.primary),
+            )
+            Box(
+                Modifier
+                    .align(Alignment.BottomStart)
+                    .size(36.dp)
+                    .graphicsLayer {
+                        rotationZ = spin * 1.2f
+                        translationY = -bob * bobPx
+                    }
+                    .clip(MaterialShapes.Cookie6Sided.toShape())
+                    .background(cs.secondary),
+            )
+            Box(
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp)
+                    .size(22.dp)
+                    .graphicsLayer {
+                        rotationZ = -spin * 1.6f
+                        translationY = bob * bobPx
+                    }
+                    .clip(MaterialShapes.Cookie12Sided.toShape())
+                    .background(cs.tertiary),
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = cs.onSurface,
+            textAlign = TextAlign.Center,
         )
         if (!subtitle.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = subtitle,
+                modifier = Modifier.widthIn(max = 280.dp),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = cs.onSurfaceVariant,
+                textAlign = TextAlign.Center,
             )
         }
         if (actionLabel != null && onAction != null) {

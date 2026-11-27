@@ -1,5 +1,9 @@
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.components.ExpressiveEmptyState
+
+import androidx.compose.material.icons.rounded.SearchOff
+
 import io.nekohasekai.sagernet.ui.background.screenContainerColor
 
 import io.nekohasekai.sagernet.ui.components.hapticClick
@@ -262,6 +266,12 @@ class AppManagerActivity : ThemedActivity() {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             LoadingIndicator()
                         }
+                    } else if (filtered.isEmpty()) {
+                        ExpressiveEmptyState(
+                            icon = Icons.Rounded.SearchOff,
+                            title = stringResource(R.string.search),
+                            modifier = Modifier.fillMaxSize(),
+                        )
                     } else {
                         LazyColumn(
                             contentPadding = PaddingValues(16.dp),

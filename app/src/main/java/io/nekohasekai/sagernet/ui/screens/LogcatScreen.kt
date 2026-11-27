@@ -1,5 +1,9 @@
 package io.nekohasekai.sagernet.ui.screens
 
+import io.nekohasekai.sagernet.ui.components.ExpressiveEmptyState
+
+import androidx.compose.material.icons.rounded.Terminal
+
 import io.nekohasekai.sagernet.ui.components.hapticClick
 
 import androidx.compose.foundation.layout.Arrangement
@@ -106,6 +110,13 @@ fun LogcatScreen(
                 placeholder = stringResource(R.string.search),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
             )
+            if (visibleLines.isEmpty()) {
+                ExpressiveEmptyState(
+                    icon = Icons.Rounded.Terminal,
+                    title = stringResource(R.string.menu_log),
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
@@ -138,6 +149,7 @@ fun LogcatScreen(
                         }
                     }
                 }
+            }
             }
         }
          }

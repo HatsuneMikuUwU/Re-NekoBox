@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.ui
 
+import io.nekohasekai.sagernet.ui.components.ExpressiveEmptyState
+
 import io.nekohasekai.sagernet.ui.background.screenContainerColor
 
 import io.nekohasekai.sagernet.ui.components.hapticClick
@@ -129,6 +131,15 @@ class AssetsActivity : ThemedActivity() {
                         .fillMaxSize()
                         .blurBackdropSource(backdrop),
                 ) {
+                    if (files.isEmpty()) {
+                        ExpressiveEmptyState(
+                            icon = Icons.Rounded.FolderZip,
+                            title = stringResource(R.string.route_manage_assets),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = topInset, bottom = navBarInset),
+                        )
+                    } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(
@@ -189,6 +200,7 @@ class AssetsActivity : ThemedActivity() {
                                 }
                             }
                         }
+                    }
                     }
                 }
 
