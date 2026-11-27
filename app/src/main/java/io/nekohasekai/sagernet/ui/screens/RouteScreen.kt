@@ -19,13 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountTree
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.FolderZip
-import androidx.compose.material.icons.rounded.NearMe
-import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.RestartAlt
-import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -65,7 +61,6 @@ import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
 import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.blurBackdropSource
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
-import io.nekohasekai.sagernet.ui.components.ExpressiveIconBadge
 import io.nekohasekai.sagernet.ui.components.ExpressivePillBadge
 import io.nekohasekai.sagernet.ui.components.ExpressiveSurfaceItem
 import kotlinx.coroutines.Dispatchers
@@ -139,11 +134,11 @@ fun RouteScreen(
                         idx == rules.lastIndex -> ExpressiveGroupPosition.BOTTOM
                         else -> ExpressiveGroupPosition.MIDDLE
                     }
-                    val (outboundColor, outboundIcon) = when (rule.outbound) {
-                        -2L -> Color(0xFFE53935) to Icons.Rounded.Block
-                        -1L -> Color(0xFF43A047) to Icons.Rounded.NearMe
-                        0L -> Color(0xFF1E88E5) to Icons.Rounded.Public
-                        else -> Color(0xFF8E24AA) to Icons.Rounded.Tune
+                    val outboundColor = when (rule.outbound) {
+                        -2L -> Color(0xFFE53935)
+                        -1L -> Color(0xFF43A047)
+                        0L -> Color(0xFF1E88E5)
+                        else -> Color(0xFF8E24AA)
                     }
 
                     ExpressiveSurfaceItem(
@@ -159,15 +154,9 @@ fun RouteScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 14.dp, vertical = 14.dp),
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            ExpressiveIconBadge(
-                                icon = outboundIcon,
-                                containerColor = outboundColor.copy(alpha = 0.14f),
-                                contentColor = outboundColor,
-                            )
-                            Spacer(Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = rule.displayName(),

@@ -311,7 +311,7 @@ private fun GroupExpressiveCard(
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         ExpressivePillBadge(
-                            text = if (isSubscription) stringResource(R.string.group_type_subscription) else stringResource(R.string.group_type_basic),
+                            text = if (isSubscription) stringResource(R.string.subscription) else stringResource(R.string.group_basic),
                         )
                         ExpressivePillBadge(
                             text = stringResource(R.string.group_status_proxies, profileCount),

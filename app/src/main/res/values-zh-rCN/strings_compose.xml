@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search">搜索</string>
+    <string name="not_set">未设置</string>
+    <string name="action_invert_selections">反选</string>
+    <string name="connection_test_pending">点击测试连接</string>
+    <string name="connection_test_finished">连接测试完成</string>
+    <string name="duplicate">复制</string>
+    <string name="removed">已移除 %1$d</string>
+    <string name="backup_imported">备份已导入</string>
+    <string name="nat_type_test_summary">使用 STUN 服务器检测 NAT 类型</string>
+    <string name="route_domain">域名</string>
+    <string name="route_ip">目标 IP</string>
+    <string name="route_port">目标端口</string>
+    <string name="route_source">源 IP</string>
+    <string name="route_source_port">源端口</string>
+    <string name="route_ruleset">规则集</string>
+    <string name="route_network">网络</string>
+    <string name="route_protocol">协议</string>
+    <string name="route_outbound">出站</string>
+    <string name="service_mode_transproxy">透明代理</string>
+</resources>

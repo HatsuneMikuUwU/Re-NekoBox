@@ -7,8 +7,6 @@
     <string name="connection_test_finished">Connection test finished</string>
     <string name="duplicate">Duplicate</string>
     <string name="removed">Removed %1$d</string>
-    <string name="group_type_basic">Basic</string>
-    <string name="group_type_subscription">Subscription</string>
     <string name="backup_imported">Backup imported</string>
     <string name="nat_type_test_summary">Detect NAT type using a STUN server</string>
     <string name="route_domain">Domain</string>
