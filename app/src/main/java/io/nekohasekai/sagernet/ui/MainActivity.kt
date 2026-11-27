@@ -129,11 +129,6 @@ import androidx.compose.material.icons.rounded.Extension
 import io.nekohasekai.sagernet.ui.components.AppDialog
 import io.nekohasekai.sagernet.ui.components.DialogCancelButton
 import io.nekohasekai.sagernet.ui.components.DialogConfirmButton
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material.icons.rounded.Palette
-import io.nekohasekai.sagernet.ui.components.FloatingBarTopPadding
-import io.nekohasekai.sagernet.ui.components.FloatingGlassButton
-import io.nekohasekai.sagernet.ui.components.UiCustomizationSheet
 
 enum class MainDestination(
     val titleRes: Int,
@@ -214,7 +209,6 @@ class MainActivity : ThemedActivity(),
         val pluginMissing by missingPluginDialog.collectAsState()
         val previewHint by showPreviewDialog.collectAsState()
 
-        var showUiSheet by remember { mutableStateOf(false) }
         val isSettingsSubScreen = destination == MainDestination.TOOLS ||
             destination == MainDestination.ABOUT ||
             destination == MainDestination.LOGCAT ||
@@ -299,20 +293,6 @@ class MainActivity : ThemedActivity(),
             }
 
             if (!isSettingsSubScreen) {
-                FloatingGlassButton(
-                    contentDescription = "UI Customization",
-                    onClick = { showUiSheet = true },
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .statusBarsPadding()
-                        .padding(start = 16.dp, top = FloatingBarTopPadding),
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Palette,
-                        contentDescription = "UI Customization",
-                    )
-                }
-
                 val bg = MaterialTheme.colorScheme.background
                 val fadeBrush = remember(bg) { bottomScrim(bg) }
                 Box(
@@ -373,11 +353,6 @@ class MainActivity : ThemedActivity(),
                     )
                 }
             }
-
-            UiCustomizationSheet(
-                visible = showUiSheet,
-                onDismiss = { showUiSheet = false },
-            )
 
             SnackbarHost(
                 hostState = composeSnackbarHostState,
@@ -531,8 +506,8 @@ class MainActivity : ThemedActivity(),
                 ),
             shape = CircleShape,
             color = if (backdrop != null) Color.Transparent else dockContainerColor,
-            tonalElevation = if (backdrop != null) 0.dp else 6.dp,
-            shadowElevation = if (backdrop != null) 0.dp else 3.dp,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
         ) {
             Row(
                 modifier = Modifier
@@ -577,7 +552,12 @@ class MainActivity : ThemedActivity(),
                 FloatingActionButton(
                     onClick = onToggleConnection,
                     shape = CircleShape,
-                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 2.dp),
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 0.dp,
+                        focusedElevation = 0.dp,
+                        hoveredElevation = 0.dp,
+                    ),
                     containerColor = if (isConnected) {
                         MaterialTheme.colorScheme.errorContainer
                     } else {
