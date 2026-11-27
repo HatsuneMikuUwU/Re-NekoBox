@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import io.nekohasekai.sagernet.ui.components.LocalEditorContentPadding
+import io.nekohasekai.sagernet.ui.components.LocalEditorListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -109,9 +112,13 @@ class ChainSettingsActivity : ProfileSettingsActivity<ChainBean>() {
             }
         }
 
+        val listState = LocalEditorListState.current ?: rememberLazyListState()
+        val contentPadding = LocalEditorContentPadding.current ?: PaddingValues(vertical = 8.dp)
+
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 8.dp),
+            contentPadding = contentPadding,
         ) {
             item {
                 PrefCategory(titleRes = R.string.profile_name) {

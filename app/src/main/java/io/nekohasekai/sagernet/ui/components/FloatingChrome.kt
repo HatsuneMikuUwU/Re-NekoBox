@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -131,6 +133,8 @@ val FloatingTabBarMargin = 12.dp
 
 val LocalBottomInset = compositionLocalOf { 0.dp }
 val LocalBlurBackdrop = compositionLocalOf<LayerBackdrop?> { null }
+val LocalEditorListState = compositionLocalOf<LazyListState?> { null }
+val LocalEditorContentPadding = compositionLocalOf<PaddingValues?> { null }
 
 @Composable
 fun floatingTopBarSpace(): Dp =

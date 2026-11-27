@@ -7,8 +7,14 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,23 +24,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,7 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -62,6 +67,12 @@ import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.ThemedActivity
+import io.nekohasekai.sagernet.ui.components.FloatingTopBar
+import io.nekohasekai.sagernet.ui.components.LocalEditorContentPadding
+import io.nekohasekai.sagernet.ui.components.LocalEditorListState
+import io.nekohasekai.sagernet.ui.components.blurBackdropSource
+import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.ComposePreferenceStore
 import io.nekohasekai.sagernet.ui.components.PrefSectionSpec
 import io.nekohasekai.sagernet.ui.components.ProtocolPreferenceComposeScreen
@@ -149,120 +160,150 @@ abstract class ProfileSettingsActivity<T : AbstractBean> : ThemedActivity() {
                 showUnsavedDialog = true
             }
 
-            Scaffold(
-                snackbarHost = { SnackbarHost(composeSnackbarHostState) },
-                topBar = {
-                    TopAppBar(
-                        title = { Text(stringResource(R.string.profile_config), fontWeight = FontWeight.Bold) },
-                        navigationIcon = {
-                            IconButton(onClick = {
-                                if (DataStore.dirty) showUnsavedDialog = true else finish()
-                            }) {
-                                Icon(Icons.Rounded.Close, contentDescription = "Close")
-                            }
-                        },
-                        actions = {
-                            IconButton(onClick = {
-                                if (DataStore.editingId == 0L) finish() else showDeleteDialog = true
-                            }) {
-                                Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete))
-                            }
-                            IconButton(onClick = {
-                                runOnDefaultDispatcher { saveAndExit() }
-                            }) {
-                                Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply))
-                            }
-                            Box {
-                                IconButton(onClick = { moreMenuOpen = true }) {
-                                    Icon(Icons.Rounded.MoreVert, contentDescription = "More")
-                                }
-                                DropdownMenu(expanded = moreMenuOpen, onDismissRequest = { moreMenuOpen = false }) {
-                                    if (editingId != 0L && moveCandidateGroups.isNotEmpty()) {
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(R.string.move)) },
-                                            onClick = {
-                                                moreMenuOpen = false
-                                                showMoveDialog = true
-                                            },
-                                        )
-                                    }
-                                    if (Build.VERSION.SDK_INT >= 26 && editingId != 0L) {
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(R.string.create_shortcut)) },
-                                            onClick = {
-                                                moreMenuOpen = false
-                                                proxyEntity?.let { ent ->
-                                                    val shortcut = ShortcutInfoCompat.Builder(
-                                                        this@ProfileSettingsActivity,
-                                                        "shortcut-profile-${ent.id}",
-                                                    )
-                                                        .setShortLabel(ent.displayName())
-                                                        .setLongLabel(ent.displayName())
-                                                        .setIcon(IconCompat.createWithResource(this@ProfileSettingsActivity, R.drawable.ic_qu_shadowsocks_launcher))
-                                                        .setIntent(
-                                                            Intent(this@ProfileSettingsActivity, QuickToggleShortcut::class.java).apply {
-                                                                action = Intent.ACTION_MAIN
-                                                                putExtra("profile", ent.id)
-                                                            }
-                                                        )
-                                                        .build()
-                                                    ShortcutManagerCompat.requestPinShortcut(this@ProfileSettingsActivity, shortcut, null)
-                                                }
-                                            },
-                                        )
-                                    }
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.custom_outbound_json)) },
-                                        onClick = {
-                                            moreMenuOpen = false
-                                            proxyEntity?.let { ent ->
-                                                DataStore.serverCustomOutbound = ent.requireBean().customOutboundJson
-                                                customOutboundLauncher.launch(
-                                                    Intent(this@ProfileSettingsActivity, ConfigEditActivity::class.java).apply {
-                                                        putExtra("key", Key.SERVER_CUSTOM_OUTBOUND)
-                                                    }
-                                                )
-                                            }
-                                        },
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.custom_config_json)) },
-                                        onClick = {
-                                            moreMenuOpen = false
-                                            proxyEntity?.let { ent ->
-                                                DataStore.serverCustom = ent.requireBean().customConfigJson
-                                                customConfigLauncher.launch(
-                                                    Intent(this@ProfileSettingsActivity, ConfigEditActivity::class.java).apply {
-                                                        putExtra("key", Key.SERVER_CUSTOM)
-                                                    }
-                                                )
-                                            }
-                                        },
-                                    )
-                                }
-                            }
-                        },
-                    )
-                },
-            ) { padding ->
-                if (!loaded) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        LoadingIndicator()
-                    }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding),
-                    ) {
-                        ProfileSettingsContent(store)
+            val backdrop = rememberBlurBackdrop()
+            val topInset = floatingTopBarSpace()
+            val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            val listState = rememberLazyListState()
+            val fabExpanded by remember {
+                derivedStateOf {
+                    listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 24
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .blurBackdropSource(backdrop),
+                ) {
+                    if (!loaded) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            LoadingIndicator()
+                        }
+                    } else {
+                        CompositionLocalProvider(
+                            LocalEditorListState provides listState,
+                            LocalEditorContentPadding provides PaddingValues(
+                                top = topInset + 6.dp,
+                                bottom = navBarInset + 88.dp,
+                            ),
+                        ) {
+                            ProfileSettingsContent(store)
+                        }
                     }
                 }
+
+                FloatingTopBar(
+                    backdrop = backdrop,
+                    title = stringResource(R.string.profile_config),
+                    onBack = {
+                        if (DataStore.dirty) showUnsavedDialog = true else finish()
+                    },
+                    actions = {
+                        IconButton(onClick = {
+                            if (DataStore.editingId == 0L) finish() else showDeleteDialog = true
+                        }) {
+                            Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete))
+                        }
+                        Box {
+                            IconButton(onClick = { moreMenuOpen = true }) {
+                                Icon(Icons.Rounded.MoreVert, contentDescription = "More")
+                            }
+                            DropdownMenu(expanded = moreMenuOpen, onDismissRequest = { moreMenuOpen = false }) {
+                                if (editingId != 0L && moveCandidateGroups.isNotEmpty()) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.move)) },
+                                        onClick = {
+                                            moreMenuOpen = false
+                                            showMoveDialog = true
+                                        },
+                                    )
+                                }
+                                if (Build.VERSION.SDK_INT >= 26 && editingId != 0L) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.create_shortcut)) },
+                                        onClick = {
+                                            moreMenuOpen = false
+                                            proxyEntity?.let { ent ->
+                                                val shortcut = ShortcutInfoCompat.Builder(
+                                                    this@ProfileSettingsActivity,
+                                                    "shortcut-profile-${ent.id}",
+                                                )
+                                                    .setShortLabel(ent.displayName())
+                                                    .setLongLabel(ent.displayName())
+                                                    .setIcon(IconCompat.createWithResource(this@ProfileSettingsActivity, R.drawable.ic_qu_shadowsocks_launcher))
+                                                    .setIntent(
+                                                        Intent(this@ProfileSettingsActivity, QuickToggleShortcut::class.java).apply {
+                                                            action = Intent.ACTION_MAIN
+                                                            putExtra("profile", ent.id)
+                                                        }
+                                                    )
+                                                    .build()
+                                                ShortcutManagerCompat.requestPinShortcut(this@ProfileSettingsActivity, shortcut, null)
+                                            }
+                                        },
+                                    )
+                                }
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.custom_outbound_json)) },
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        proxyEntity?.let { ent ->
+                                            DataStore.serverCustomOutbound = ent.requireBean().customOutboundJson
+                                            customOutboundLauncher.launch(
+                                                Intent(this@ProfileSettingsActivity, ConfigEditActivity::class.java).apply {
+                                                    putExtra("key", Key.SERVER_CUSTOM_OUTBOUND)
+                                                }
+                                            )
+                                        }
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.custom_config_json)) },
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        proxyEntity?.let { ent ->
+                                            DataStore.serverCustom = ent.requireBean().customConfigJson
+                                            customConfigLauncher.launch(
+                                                Intent(this@ProfileSettingsActivity, ConfigEditActivity::class.java).apply {
+                                                    putExtra("key", Key.SERVER_CUSTOM)
+                                                }
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                    },
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
+
+                ExtendedFloatingActionButton(
+                    onClick = { runOnDefaultDispatcher { saveAndExit() } },
+                    expanded = fabExpanded,
+                    shape = RoundedCornerShape(16.dp),
+                    icon = { Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply)) },
+                    text = { Text(stringResource(R.string.apply)) },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .navigationBarsPadding()
+                        .padding(16.dp),
+                )
+
+                SnackbarHost(
+                    hostState = composeSnackbarHostState,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .padding(bottom = 84.dp),
+                )
             }
 
             if (showUnsavedDialog) {

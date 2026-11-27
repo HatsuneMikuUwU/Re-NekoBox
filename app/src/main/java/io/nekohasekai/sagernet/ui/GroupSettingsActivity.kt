@@ -1,13 +1,20 @@
 package io.nekohasekai.sagernet.ui
 
 import android.os.Bundle
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.FilterList
@@ -16,19 +23,20 @@ import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.Title
 import androidx.compose.material.icons.rounded.Update
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.nekohasekai.sagernet.GroupType
 import io.nekohasekai.sagernet.Key
@@ -42,6 +50,10 @@ import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
+import io.nekohasekai.sagernet.ui.components.FloatingTopBar
+import io.nekohasekai.sagernet.ui.components.blurBackdropSource
+import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.PrefCategory
 import io.nekohasekai.sagernet.ui.components.StoreEditTextPref
 import io.nekohasekai.sagernet.ui.components.StoreListPref
@@ -92,70 +104,67 @@ class GroupSettingsActivity : ThemedActivity() {
 
             val groupType = store.getString(Key.GROUP_TYPE, "0").toIntOrNull() ?: 0
 
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text(stringResource(R.string.group_settings), fontWeight = FontWeight.Bold) },
-                        navigationIcon = {
-                            IconButton(onClick = { finish() }) {
-                                Icon(Icons.Rounded.Close, contentDescription = "Close")
-                            }
-                        },
-                        actions = {
-                            if (editingId != 0L) {
-                                IconButton(onClick = {
-                                    runOnDefaultDispatcher {
-                                        GroupManager.deleteGroup(editingId)
-                                        onMainDispatcher { finish() }
-                                    }
-                                }) {
-                                    Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete))
-                                }
-                            }
-                            IconButton(onClick = {
-                                runOnDefaultDispatcher {
-                                    val entity = if (editingId == 0L) {
-                                        ProxyGroup().applyDefaultValues()
-                                    } else {
-                                        SagerDatabase.groupDao.getById(editingId) ?: ProxyGroup().applyDefaultValues()
-                                    }
-                                    entity.name = DataStore.groupName.ifBlank { "Group" }
-                                    entity.type = DataStore.groupType
-                                    entity.order = DataStore.groupOrder
-                                    entity.isSelector = DataStore.groupIsSelector
-                                    if (entity.type == GroupType.SUBSCRIPTION) {
-                                        val sub = (entity.subscription ?: SubscriptionBean().applyDefaultValues()).apply {
-                                            link = DataStore.subscriptionLink
-                                            forceResolve = DataStore.subscriptionForceResolve
-                                            deduplication = DataStore.subscriptionDeduplication
-                                            updateWhenConnectedOnly = DataStore.subscriptionUpdateWhenConnectedOnly
-                                            customUserAgent = DataStore.subscriptionUserAgent
-                                            autoUpdate = DataStore.subscriptionAutoUpdate
-                                            autoUpdateDelay = DataStore.subscriptionAutoUpdateDelay
-                                        }
-                                        entity.subscription = sub
-                                    }
-                                    if (editingId == 0L) {
-                                        GroupManager.createGroup(entity)
-                                    } else {
-                                        GroupManager.updateGroup(entity)
-                                    }
-                                    onMainDispatcher { finish() }
-                                }
-                            }) {
-                                Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply))
-                            }
-                        },
-                    )
-                },
-            ) { padding ->
-                if (loaded) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding),
-                        contentPadding = PaddingValues(vertical = 8.dp),
-                    ) {
+            val backdrop = rememberBlurBackdrop()
+            val topInset = floatingTopBarSpace()
+            val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            val listState = rememberLazyListState()
+            val fabExpanded by remember {
+                derivedStateOf {
+                    listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 24
+                }
+            }
+
+            fun saveGroup() {
+                runOnDefaultDispatcher {
+                    val entity = if (editingId == 0L) {
+                        ProxyGroup().applyDefaultValues()
+                    } else {
+                        SagerDatabase.groupDao.getById(editingId) ?: ProxyGroup().applyDefaultValues()
+                    }
+                    entity.name = DataStore.groupName.ifBlank { "Group" }
+                    entity.type = DataStore.groupType
+                    entity.order = DataStore.groupOrder
+                    entity.isSelector = DataStore.groupIsSelector
+                    if (entity.type == GroupType.SUBSCRIPTION) {
+                        val sub = (entity.subscription ?: SubscriptionBean().applyDefaultValues()).apply {
+                            link = DataStore.subscriptionLink
+                            forceResolve = DataStore.subscriptionForceResolve
+                            deduplication = DataStore.subscriptionDeduplication
+                            updateWhenConnectedOnly = DataStore.subscriptionUpdateWhenConnectedOnly
+                            customUserAgent = DataStore.subscriptionUserAgent
+                            autoUpdate = DataStore.subscriptionAutoUpdate
+                            autoUpdateDelay = DataStore.subscriptionAutoUpdateDelay
+                        }
+                        entity.subscription = sub
+                    }
+                    if (editingId == 0L) {
+                        GroupManager.createGroup(entity)
+                    } else {
+                        GroupManager.updateGroup(entity)
+                    }
+                    onMainDispatcher { finish() }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .blurBackdropSource(backdrop),
+                ) {
+                    if (loaded) {
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(
+                                top = topInset + 6.dp,
+                                bottom = navBarInset + 88.dp,
+                            ),
+                        ) {
                         item {
                             PrefCategory(titleRes = R.string.group_settings) {
                                 StoreEditTextPref(
@@ -272,6 +281,38 @@ class GroupSettingsActivity : ThemedActivity() {
                         }
                     }
                 }
+                }
+
+                FloatingTopBar(
+                    backdrop = backdrop,
+                    title = stringResource(R.string.group_settings),
+                    onBack = { finish() },
+                    actions = if (editingId != 0L) {
+                        {
+                            IconButton(onClick = {
+                                runOnDefaultDispatcher {
+                                    GroupManager.deleteGroup(editingId)
+                                    onMainDispatcher { finish() }
+                                }
+                            }) {
+                                Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete))
+                            }
+                        }
+                    } else null,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
+
+                ExtendedFloatingActionButton(
+                    onClick = { saveGroup() },
+                    expanded = fabExpanded,
+                    shape = RoundedCornerShape(16.dp),
+                    icon = { Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply)) },
+                    text = { Text(stringResource(R.string.apply)) },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .navigationBarsPadding()
+                        .padding(16.dp),
+                )
             }
         }
     }

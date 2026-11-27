@@ -8,6 +8,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -74,9 +75,13 @@ fun ProtocolPreferenceComposeScreen(
 ) {
     val context = LocalContext.current
 
+    val listState = LocalEditorListState.current ?: rememberLazyListState()
+    val contentPadding = LocalEditorContentPadding.current ?: PaddingValues(vertical = 8.dp)
+
     LazyColumn(
+        state = listState,
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 8.dp),
+        contentPadding = contentPadding,
     ) {
         sections.forEachIndexed { secIdx, section ->
             val sectionVisible = section.key == null || isKeyVisible(section.key, store)

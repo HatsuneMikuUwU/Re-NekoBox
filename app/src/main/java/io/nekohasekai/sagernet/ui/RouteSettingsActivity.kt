@@ -2,34 +2,42 @@ package io.nekohasekai.sagernet.ui
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Domain
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.RuleFolder
 import androidx.compose.material.icons.rounded.Title
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
@@ -40,6 +48,10 @@ import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
+import io.nekohasekai.sagernet.ui.components.FloatingTopBar
+import io.nekohasekai.sagernet.ui.components.blurBackdropSource
+import io.nekohasekai.sagernet.ui.components.floatingTopBarSpace
+import io.nekohasekai.sagernet.ui.components.rememberBlurBackdrop
 import io.nekohasekai.sagernet.ui.components.PrefActionRow
 import io.nekohasekai.sagernet.ui.components.PrefCategory
 import io.nekohasekai.sagernet.ui.components.StoreEditTextPref
@@ -101,74 +113,71 @@ class RouteSettingsActivity : ThemedActivity() {
                 loaded = true
             }
 
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text(stringResource(R.string.menu_route), fontWeight = FontWeight.Bold) },
-                        navigationIcon = {
-                            IconButton(onClick = { finish() }) {
-                                Icon(Icons.Rounded.Close, contentDescription = "Close")
-                            }
-                        },
-                        actions = {
-                            if (editingId != 0L) {
-                                IconButton(onClick = {
-                                    runOnDefaultDispatcher {
-                                        ProfileManager.deleteRule(editingId)
-                                        onMainDispatcher { finish() }
-                                    }
-                                }) {
-                                    Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete))
-                                }
-                            }
-                            IconButton(onClick = {
-                                runOnDefaultDispatcher {
-                                    val entity = if (editingId == 0L) {
-                                        RuleEntity(enabled = true)
-                                    } else {
-                                        SagerDatabase.rulesDao.getById(editingId) ?: RuleEntity(enabled = true)
-                                    }
-                                    entity.name = DataStore.routeName
-                                    entity.domains = DataStore.routeDomain
-                                    entity.ip = DataStore.routeIP
-                                    entity.port = DataStore.routePort
-                                    entity.sourcePort = DataStore.routeSourcePort
-                                    entity.network = DataStore.routeNetwork
-                                    entity.source = DataStore.routeSource
-                                    entity.protocol = DataStore.routeProtocol
-                                    entity.ruleset = DataStore.routeRuleset
-                                    entity.packages = DataStore.routePackages.lineSequence()
-                                        .map { it.trim() }
-                                        .filter { it.isNotEmpty() }
-                                        .toSet()
-                                    entity.config = DataStore.serverConfig
-                                    entity.outbound = when (DataStore.routeOutbound) {
-                                        0 -> 0L
-                                        1 -> -1L
-                                        2 -> -2L
-                                        else -> DataStore.routeOutboundRule
-                                    }
-                                    if (editingId == 0L) {
-                                        ProfileManager.createRule(entity)
-                                    } else {
-                                        ProfileManager.updateRule(entity)
-                                    }
-                                    onMainDispatcher { finish() }
-                                }
-                            }) {
-                                Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply))
-                            }
-                        },
-                    )
-                },
-            ) { padding ->
-                if (loaded) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding),
-                        contentPadding = PaddingValues(vertical = 8.dp),
-                    ) {
+            val backdrop = rememberBlurBackdrop()
+            val topInset = floatingTopBarSpace()
+            val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            val listState = rememberLazyListState()
+            val fabExpanded by remember {
+                derivedStateOf {
+                    listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 24
+                }
+            }
+
+            fun saveRoute() {
+                runOnDefaultDispatcher {
+                    val entity = if (editingId == 0L) {
+                        RuleEntity(enabled = true)
+                    } else {
+                        SagerDatabase.rulesDao.getById(editingId) ?: RuleEntity(enabled = true)
+                    }
+                    entity.name = DataStore.routeName
+                    entity.domains = DataStore.routeDomain
+                    entity.ip = DataStore.routeIP
+                    entity.port = DataStore.routePort
+                    entity.sourcePort = DataStore.routeSourcePort
+                    entity.network = DataStore.routeNetwork
+                    entity.source = DataStore.routeSource
+                    entity.protocol = DataStore.routeProtocol
+                    entity.ruleset = DataStore.routeRuleset
+                    entity.packages = DataStore.routePackages.lineSequence()
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+                        .toSet()
+                    entity.config = DataStore.serverConfig
+                    entity.outbound = when (DataStore.routeOutbound) {
+                        0 -> 0L
+                        1 -> -1L
+                        2 -> -2L
+                        else -> DataStore.routeOutboundRule
+                    }
+                    if (editingId == 0L) {
+                        ProfileManager.createRule(entity)
+                    } else {
+                        ProfileManager.updateRule(entity)
+                    }
+                    onMainDispatcher { finish() }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .blurBackdropSource(backdrop),
+                ) {
+                    if (loaded) {
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(
+                                top = topInset + 6.dp,
+                                bottom = navBarInset + 88.dp,
+                            ),
+                        ) {
                         item {
                             PrefCategory(titleRes = R.string.route_name) {
                                 StoreEditTextPref(
@@ -276,6 +285,38 @@ class RouteSettingsActivity : ThemedActivity() {
                         }
                     }
                 }
+                }
+
+                FloatingTopBar(
+                    backdrop = backdrop,
+                    title = stringResource(R.string.menu_route),
+                    onBack = { finish() },
+                    actions = if (editingId != 0L) {
+                        {
+                            IconButton(onClick = {
+                                runOnDefaultDispatcher {
+                                    ProfileManager.deleteRule(editingId)
+                                    onMainDispatcher { finish() }
+                                }
+                            }) {
+                                Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete))
+                            }
+                        }
+                    } else null,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
+
+                ExtendedFloatingActionButton(
+                    onClick = { saveRoute() },
+                    expanded = fabExpanded,
+                    shape = RoundedCornerShape(16.dp),
+                    icon = { Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.apply)) },
+                    text = { Text(stringResource(R.string.apply)) },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .navigationBarsPadding()
+                        .padding(16.dp),
+                )
             }
         }
     }
