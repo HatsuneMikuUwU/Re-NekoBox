@@ -77,7 +77,8 @@
             android:name="io.nekohasekai.sagernet.ui.MainActivity"
             android:configChanges="uiMode"
             android:exported="true"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.ReNekoBox.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
