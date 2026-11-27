@@ -344,7 +344,7 @@ fun ShapedIconBadge(
             BadgeStyle.Error -> cs.error to cs.onError
         }
     Box(
-        modifier.size(size).clip(MaterialShapes.Cookie9Sided.toShape()).background(container),
+        modifier.size(size).clip(MaterialShapes.Clover4Leaf.toShape()).background(container),
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, contentDescription = contentDescription, modifier = Modifier.size(iconSize), tint = tint)

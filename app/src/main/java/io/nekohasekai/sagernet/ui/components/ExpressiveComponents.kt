@@ -152,8 +152,8 @@ fun ExpressiveSurfaceItem(
 fun ExpressiveIconBadge(
     icon: ImageVector,
     contentDescription: String? = null,
-    containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
-    contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+    containerColor: Color = MaterialTheme.colorScheme.primary,
+    contentColor: Color = MaterialTheme.colorScheme.onPrimary,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -256,13 +256,13 @@ fun ExpressiveEmptyState(
             modifier = Modifier
                 .size(72.dp)
                 .clip(MaterialShapes.Clover4Leaf.toShape())
-                .background(MaterialTheme.colorScheme.primaryContainer),
+                .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(34.dp),
             )
         }

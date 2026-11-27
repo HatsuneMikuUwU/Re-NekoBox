@@ -238,7 +238,7 @@ private fun IconBadge(
     tint: Color,
 ) {
     Box(
-        Modifier.size(40.dp).clip(MaterialShapes.Cookie9Sided.toShape()).background(container),
+        Modifier.size(40.dp).clip(MaterialShapes.Clover4Leaf.toShape()).background(container),
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(22.dp), tint = tint)
