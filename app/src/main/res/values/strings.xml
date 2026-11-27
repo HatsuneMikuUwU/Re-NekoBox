@@ -873,4 +873,11 @@
     <string name="onboarding_start">Get started</string>
     <string name="onboarding_ready">Done</string>
     <string name="onboarding_complete_permissions">Complete permissions</string>
+
+    <!-- Community -->
+    <string name="ui_community">Community</string>
+    <string name="ui_telegram_channel">Telegram Channel</string>
+    <string name="ui_telegram_channel_desc">@uwuowoumuchannel · Tap to follow updates</string>
+    <string name="ui_telegram_group">Telegram Group</string>
+    <string name="ui_telegram_group_desc">Tap to join the community chat</string>
 </resources>

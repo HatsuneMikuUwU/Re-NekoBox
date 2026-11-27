@@ -795,4 +795,11 @@
     <string name="onboarding_start">开始使用</string>
     <string name="onboarding_ready">完成</string>
     <string name="onboarding_complete_permissions">完善权限</string>
+
+    <!-- Community -->
+    <string name="ui_community">社区</string>
+    <string name="ui_telegram_channel">Telegram 频道</string>
+    <string name="ui_telegram_channel_desc">@uwuowoumuchannel · 点击关注最新动态</string>
+    <string name="ui_telegram_group">Telegram 群组</string>
+    <string name="ui_telegram_group_desc">点击加入社区交流群</string>
 </resources>
