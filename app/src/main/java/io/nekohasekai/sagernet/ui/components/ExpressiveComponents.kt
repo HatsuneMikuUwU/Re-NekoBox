@@ -162,7 +162,7 @@ fun ExpressiveIconBadge(
     Box(
         modifier = modifier
             .size(40.dp)
-            .clip(MaterialShapes.Cookie9Sided.toShape())
+            .clip(MaterialShapes.Clover4Leaf.toShape())
             .background(containerColor),
         contentAlignment = Alignment.Center,
     ) {
@@ -258,7 +258,7 @@ fun ExpressiveEmptyState(
         Box(
             modifier = Modifier
                 .size(72.dp)
-                .clip(MaterialShapes.Cookie9Sided.toShape())
+                .clip(MaterialShapes.Clover4Leaf.toShape())
                 .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center,
         ) {
