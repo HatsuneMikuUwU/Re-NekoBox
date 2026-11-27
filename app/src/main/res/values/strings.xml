@@ -880,4 +880,26 @@
     <string name="ui_telegram_channel_desc">@uwuowoumuchannel · Tap to follow updates</string>
     <string name="ui_telegram_group">Telegram Group</string>
     <string name="ui_telegram_group_desc">Tap to join the community chat</string>
+
+    <!-- About Screen -->
+    <string name="about_hl_core_title">sing-box Core</string>
+    <string name="about_hl_core_desc">Fast, modern universal proxy engine</string>
+    <string name="about_hl_protocols_title">20+ Protocols</string>
+    <string name="about_hl_protocols_desc">VLESS, VMess, Trojan, Hysteria2 &amp; more</string>
+    <string name="about_hl_routing_title">Smart Routing</string>
+    <string name="about_hl_routing_desc">Flexible rules, per-app proxy &amp; DNS</string>
+    <string name="about_hl_material_title">Material You</string>
+    <string name="about_hl_material_desc">Expressive colors, blur &amp; Liquid Glass</string>
+    <string name="about_section_links">Links</string>
+    <string name="about_releases">Releases</string>
+    <string name="about_releases_desc">Version history and latest APK builds</string>
+    <string name="about_report_issue">Report an issue</string>
+    <string name="about_report_issue_desc">Found a bug or have a feature idea?</string>
+    <string name="about_upstream">Upstream project</string>
+    <string name="about_section_plugins">Plugins</string>
+    <string name="about_section_built_with">Built with</string>
+    <string name="about_license_title">GNU General Public License</string>
+    <string name="about_license_tap_expand">Open source software · Tap to read full license</string>
+    <string name="about_license_tap_collapse">Open source software · Tap to collapse</string>
+    <string name="about_footer">Made for the Open Proxy Community</string>
 </resources>
