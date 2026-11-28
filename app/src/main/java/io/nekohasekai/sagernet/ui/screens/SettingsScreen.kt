@@ -41,6 +41,11 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.Radar
 import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material.icons.rounded.Shield
+import androidx.compose.material.icons.rounded.Block
+import androidx.compose.material.icons.rounded.Fingerprint
+import androidx.compose.material.icons.rounded.Cached
+import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material.icons.rounded.Timer
@@ -480,6 +485,153 @@ fun SettingsScreen(
                         titleRes = R.string.dns_hosts,
                         dialogMessageRes = R.string.dns_hosts_dialog_message,
                         multiline = true,
+                        position = ExpressiveGroupPosition.BOTTOM,
+                        onChanged = { notifyNeedReload() },
+                    )
+                }
+            }
+
+            // sing-box 1.14 (Stable) & 1.15-alpha (Preview) Core Features
+            item {
+                val dnsCacheEnabled = store.getBoolean(Key.DNS_CACHE, true)
+                val coreFragMode = store.getString(Key.CORE_TLS_FRAGMENT_MODE, "off")
+                val isPreviewCore = remember {
+                    runCatching { CoreRuntime.active.channel == "preview" }.getOrDefault(false)
+                }
+                PrefCategory(titleRes = R.string.core_settings_group) {
+                    StoreSwitchPref(
+                        store = store,
+                        key = Key.DNS_CACHE,
+                        icon = Icons.Rounded.Cached,
+                        titleRes = R.string.advanced_dns_cache,
+                        defaultValue = true,
+                        position = ExpressiveGroupPosition.TOP,
+                        onChanged = { notifyNeedReload(); true },
+                    )
+                    StoreSwitchPref(
+                        store = store,
+                        key = Key.DNS_OPTIMISTIC,
+                        icon = Icons.Rounded.Bolt,
+                        titleRes = R.string.advanced_dns_optimistic,
+                        summaryRes = R.string.advanced_dns_optimistic_help,
+                        enabled = dnsCacheEnabled,
+                        onChanged = { notifyNeedReload(); true },
+                    )
+                    StoreEditTextPref(
+                        store = store,
+                        key = Key.DNS_CACHE_CAPACITY,
+                        icon = Icons.Rounded.Storage,
+                        titleRes = R.string.advanced_dns_capacity,
+                        defaultValue = "4096",
+                        isNumber = true,
+                        enabled = dnsCacheEnabled,
+                        onChanged = { notifyNeedReload() },
+                    )
+                    StoreEditTextPref(
+                        store = store,
+                        key = Key.DNS_QUERY_TIMEOUT,
+                        icon = Icons.Rounded.Timer,
+                        titleRes = R.string.advanced_dns_timeout,
+                        defaultValue = "10",
+                        isNumber = true,
+                        onChanged = { notifyNeedReload() },
+                    )
+                    StoreSwitchPref(
+                        store = store,
+                        key = Key.DNS_BLOCK_AAAA,
+                        icon = Icons.Rounded.Block,
+                        titleRes = R.string.advanced_dns_aaaa,
+                        onChanged = { notifyNeedReload(); true },
+                    )
+                    StoreSwitchPref(
+                        store = store,
+                        key = Key.DNS_BLOCK_HTTPS,
+                        icon = Icons.Rounded.Block,
+                        titleRes = R.string.advanced_dns_https,
+                        summaryRes = R.string.advanced_dns_https_help,
+                        onChanged = { notifyNeedReload(); true },
+                    )
+                    StoreSwitchPref(
+                        store = store,
+                        key = Key.DNS_SYSTEM_HOSTS,
+                        icon = Icons.Rounded.Dns,
+                        titleRes = R.string.advanced_system_hosts,
+                        onChanged = { notifyNeedReload(); true },
+                    )
+                    StoreEditTextPref(
+                        store = store,
+                        key = Key.BOOTSTRAP_DNS,
+                        icon = Icons.Rounded.Dns,
+                        titleRes = R.string.advanced_bootstrap,
+                        dialogMessageRes = R.string.advanced_bootstrap_help,
+                        onChanged = { notifyNeedReload() },
+                    )
+                    StoreListPref(
+                        store = store,
+                        key = Key.TUN_DNS_MODE,
+                        titleRes = R.string.tun_dns_mode,
+                        entriesRes = R.array.tun_dns_mode_entries,
+                        entryValuesRes = R.array.tun_dns_mode_values,
+                        defaultValue = "",
+                        icon = Icons.Rounded.Tune,
+                        onChanged = { notifyNeedReload() },
+                    )
+                    StoreEditTextPref(
+                        store = store,
+                        key = Key.UDP_TIMEOUT,
+                        icon = Icons.Rounded.Timer,
+                        titleRes = R.string.udp_timeout_title,
+                        dialogMessageRes = R.string.udp_timeout_help,
+                        defaultValue = "0",
+                        isNumber = true,
+                        onChanged = { notifyNeedReload() },
+                    )
+                    StoreListPref(
+                        store = store,
+                        key = Key.CORE_TLS_FRAGMENT_MODE,
+                        titleRes = R.string.core_tls_fragment_mode,
+                        entriesRes = R.array.core_tls_fragment_entries,
+                        entryValuesRes = R.array.core_tls_fragment_values,
+                        defaultValue = "off",
+                        icon = Icons.Rounded.Tune,
+                        onChanged = { notifyNeedReload() },
+                    )
+                    if (coreFragMode == "packet") {
+                        StoreEditTextPref(
+                            store = store,
+                            key = Key.CORE_TLS_FRAGMENT_DELAY,
+                            icon = Icons.Rounded.Timer,
+                            titleRes = R.string.core_tls_fragment_delay,
+                            defaultValue = "500",
+                            isNumber = true,
+                            onChanged = { notifyNeedReload() },
+                        )
+                    }
+                    StoreListPref(
+                        store = store,
+                        key = Key.DEFAULT_FINGERPRINT,
+                        titleRes = R.string.advanced_fingerprint,
+                        entriesRes = R.array.core_fingerprint_entries,
+                        entryValuesRes = R.array.core_fingerprint_values,
+                        defaultValue = "",
+                        icon = Icons.Rounded.Fingerprint,
+                        onChanged = { notifyNeedReload() },
+                    )
+                    StoreSwitchPref(
+                        store = store,
+                        key = Key.CORE_CACHE_FILE,
+                        icon = Icons.Rounded.Cached,
+                        titleRes = R.string.advanced_core_cache,
+                        summaryRes = R.string.advanced_core_cache_help,
+                        onChanged = { notifyNeedReload(); true },
+                    )
+                    StoreEditTextPref(
+                        store = store,
+                        key = Key.PREVIEW_TLS_CERT_SHA256,
+                        icon = Icons.Rounded.Shield,
+                        titleRes = R.string.preview_tls_cert_sha256,
+                        dialogMessageRes = R.string.preview_tls_cert_sha256_help,
+                        enabled = isPreviewCore,
                         position = ExpressiveGroupPosition.BOTTOM,
                         onChanged = { notifyNeedReload() },
                     )

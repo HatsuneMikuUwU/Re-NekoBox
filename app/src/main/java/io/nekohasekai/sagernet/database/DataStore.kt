@@ -189,6 +189,21 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var appendHttpProxy by configurationStore.boolean(Key.APPEND_HTTP_PROXY)
     var httpProxyBypass by configurationStore.string(Key.HTTP_PROXY_BYPASS) { "" }
     var dnsHosts by configurationStore.string(Key.DNS_HOSTS) { "" }
+    var dnsCache by configurationStore.boolean(Key.DNS_CACHE) { true }
+    var dnsOptimistic by configurationStore.boolean(Key.DNS_OPTIMISTIC) { false }
+    var dnsCacheCapacity by configurationStore.stringToInt(Key.DNS_CACHE_CAPACITY) { 4096 }
+    var dnsQueryTimeout by configurationStore.stringToInt(Key.DNS_QUERY_TIMEOUT) { 10 }
+    var dnsBlockAAAA by configurationStore.boolean(Key.DNS_BLOCK_AAAA) { false }
+    var dnsBlockHttps by configurationStore.boolean(Key.DNS_BLOCK_HTTPS) { false }
+    var dnsSystemHosts by configurationStore.boolean(Key.DNS_SYSTEM_HOSTS) { false }
+    var bootstrapDns by configurationStore.string(Key.BOOTSTRAP_DNS) { "" }
+    var udpTimeout by configurationStore.stringToInt(Key.UDP_TIMEOUT) { 0 }
+    var coreTlsFragmentMode by configurationStore.string(Key.CORE_TLS_FRAGMENT_MODE) { "off" }
+    var coreTlsFragmentDelay by configurationStore.stringToInt(Key.CORE_TLS_FRAGMENT_DELAY) { 500 }
+    var defaultFingerprint by configurationStore.string(Key.DEFAULT_FINGERPRINT) { "" }
+    var coreCacheFile by configurationStore.boolean(Key.CORE_CACHE_FILE) { false }
+    var tunDnsMode by configurationStore.string(Key.TUN_DNS_MODE) { "" }
+    var previewTlsCertSha256 by configurationStore.string(Key.PREVIEW_TLS_CERT_SHA256) { "" }
     var strictRoute by configurationStore.boolean(Key.STRICT_ROUTE) { true }
     var connectionTestURL by configurationStore.string(Key.CONNECTION_TEST_URL) { CONNECTION_TEST_URL }
     var connectionTestConcurrent by configurationStore.int("connectionTestConcurrent") { 5 }

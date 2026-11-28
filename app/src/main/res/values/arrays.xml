@@ -712,4 +712,38 @@
         <item>v2RayTun</item>
         <item>Incy</item>
     </string-array>
+    <string-array name="core_fingerprint_entries">
+        <item>@string/core_default</item>
+        <item>chrome</item>
+        <item>firefox</item>
+        <item>safari</item>
+        <item>randomized</item>
+    </string-array>
+    <string-array name="core_fingerprint_values" translatable="false">
+        <item></item>
+        <item>chrome</item>
+        <item>firefox</item>
+        <item>safari</item>
+        <item>randomized</item>
+    </string-array>
+    <string-array name="core_tls_fragment_entries">
+        <item>@string/disable</item>
+        <item>@string/core_tls_fragment_record</item>
+        <item>@string/core_tls_fragment_packet</item>
+    </string-array>
+    <string-array name="core_tls_fragment_values" translatable="false">
+        <item>off</item>
+        <item>record</item>
+        <item>packet</item>
+    </string-array>
+    <string-array name="tun_dns_mode_entries">
+        <item>@string/core_default</item>
+        <item>hijack</item>
+        <item>disable</item>
+    </string-array>
+    <string-array name="tun_dns_mode_values" translatable="false">
+        <item></item>
+        <item>hijack</item>
+        <item>disable</item>
+    </string-array>
 </resources>
