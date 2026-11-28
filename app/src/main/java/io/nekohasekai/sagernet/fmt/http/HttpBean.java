@@ -14,20 +14,26 @@ public class HttpBean extends StandardV2RayBean {
 
     public String username;
     public String password;
+    public Integer httpVersion;
+    public Boolean disableVersionFallback;
 
     @Override
     public void initializeDefaultValues() {
         super.initializeDefaultValues();
         if (username == null) username = "";
         if (password == null) password = "";
+        if (httpVersion == null) httpVersion = 0;
+        if (disableVersionFallback == null) disableVersionFallback = false;
     }
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        output.writeInt(0);
+        output.writeInt(1);
         super.serialize(output);
         output.writeString(username);
         output.writeString(password);
+        output.writeInt(httpVersion);
+        output.writeBoolean(disableVersionFallback);
     }
 
     @Override
@@ -36,6 +42,10 @@ public class HttpBean extends StandardV2RayBean {
         super.deserialize(input);
         username = input.readString();
         password = input.readString();
+        if (version >= 1) {
+            httpVersion = input.readInt();
+            disableVersionFallback = input.readBoolean();
+        }
     }
 
     @NotNull

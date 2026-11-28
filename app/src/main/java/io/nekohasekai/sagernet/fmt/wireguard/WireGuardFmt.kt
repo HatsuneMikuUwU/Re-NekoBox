@@ -37,5 +37,7 @@ fun buildSingBoxOutboundWireguardBean(bean: WireGuardBean): SingBoxOptions.Outbo
         pre_shared_key = bean.peerPreSharedKey
         mtu = bean.mtu
         if (bean.reserved.isNotBlank()) reserved = genReserved(bean.reserved)
+        if ((bean.listenPort ?: 0) > 0) _hack_config_map["listen_port"] = bean.listenPort
+        if ((bean.persistentKeepaliveInterval ?: 0) > 0) _hack_config_map["persistent_keepalive_interval"] = bean.persistentKeepaliveInterval
     }
 }

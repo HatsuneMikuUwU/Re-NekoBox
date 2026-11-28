@@ -17,6 +17,19 @@ public class HysteriaBean extends AbstractBean {
 
     // Use serverPorts instead of serverPort
     public String serverPorts;
+    public String bbrProfile;
+    public Boolean disableSNI;
+    public String clientCert;
+    public String clientKey;
+    public String certPublicKeySha256;
+    public String certificateSha256;
+    public Boolean enableECH;
+    public String echConfig;
+    public String echQueryServerName;
+    public String idleTimeout;
+    public String keepAlivePeriod;
+    public Integer initialPacketSize;
+    public Integer maxConcurrentStreams;
 
     // HY1 & 2
 
@@ -78,11 +91,24 @@ public class HysteriaBean extends AbstractBean {
         if (disableMtuDiscovery == null) disableMtuDiscovery = false;
         if (hopInterval == null) hopInterval = 10;
         if (serverPorts == null) serverPorts = "443";
+        if (bbrProfile == null) bbrProfile = "";
+        if (disableSNI == null) disableSNI = false;
+        if (clientCert == null) clientCert = "";
+        if (clientKey == null) clientKey = "";
+        if (certPublicKeySha256 == null) certPublicKeySha256 = "";
+        if (certificateSha256 == null) certificateSha256 = "";
+        if (enableECH == null) enableECH = false;
+        if (echConfig == null) echConfig = "";
+        if (echQueryServerName == null) echQueryServerName = "";
+        if (idleTimeout == null) idleTimeout = "";
+        if (keepAlivePeriod == null) keepAlivePeriod = "";
+        if (initialPacketSize == null) initialPacketSize = 0;
+        if (maxConcurrentStreams == null) maxConcurrentStreams = 0;
     }
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        output.writeInt(7);
+        output.writeInt(8);
         super.serialize(output);
 
         output.writeInt(protocolVersion);
@@ -104,6 +130,20 @@ public class HysteriaBean extends AbstractBean {
         output.writeBoolean(disableMtuDiscovery);
         output.writeInt(hopInterval);
         output.writeString(serverPorts);
+        // v8 (husi-dev parity)
+        output.writeString(bbrProfile);
+        output.writeBoolean(disableSNI);
+        output.writeString(clientCert);
+        output.writeString(clientKey);
+        output.writeString(certPublicKeySha256);
+        output.writeString(certificateSha256);
+        output.writeBoolean(enableECH);
+        output.writeString(echConfig);
+        output.writeString(echQueryServerName);
+        output.writeString(idleTimeout);
+        output.writeString(keepAlivePeriod);
+        output.writeInt(initialPacketSize);
+        output.writeInt(maxConcurrentStreams);
     }
 
     @Override
@@ -147,6 +187,21 @@ public class HysteriaBean extends AbstractBean {
             } else {
                 serverPorts = serverPort.toString();
             }
+        }
+        if (version >= 8) {
+            bbrProfile = input.readString();
+            disableSNI = input.readBoolean();
+            clientCert = input.readString();
+            clientKey = input.readString();
+            certPublicKeySha256 = input.readString();
+            certificateSha256 = input.readString();
+            enableECH = input.readBoolean();
+            echConfig = input.readString();
+            echQueryServerName = input.readString();
+            idleTimeout = input.readString();
+            keepAlivePeriod = input.readString();
+            initialPacketSize = input.readInt();
+            maxConcurrentStreams = input.readInt();
         }
     }
 

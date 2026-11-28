@@ -9,10 +9,29 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
+import moe.matsuri.nb4a.proxy.PreferenceBinding
+import moe.matsuri.nb4a.proxy.PreferenceBindingManager
+import moe.matsuri.nb4a.proxy.Type
 
 class HysteriaSettingsActivity : ProfileSettingsActivity<HysteriaBean>() {
 
     override fun createEntity() = HysteriaBean().applyDefaultValues()
+
+    private val pbm = PreferenceBindingManager().apply {
+        add(PreferenceBinding(Type.Text, "bbrProfile"))
+        add(PreferenceBinding(Type.Bool, "disableSNI"))
+        add(PreferenceBinding(Type.Text, "clientCert"))
+        add(PreferenceBinding(Type.Text, "clientKey"))
+        add(PreferenceBinding(Type.Text, "certPublicKeySha256"))
+        add(PreferenceBinding(Type.Text, "certificateSha256"))
+        add(PreferenceBinding(Type.Bool, "enableECH"))
+        add(PreferenceBinding(Type.Text, "echConfig"))
+        add(PreferenceBinding(Type.Text, "echQueryServerName"))
+        add(PreferenceBinding(Type.Text, "idleTimeout"))
+        add(PreferenceBinding(Type.Text, "keepAlivePeriod"))
+        add(PreferenceBinding(Type.TextToInt, "initialPacketSize"))
+        add(PreferenceBinding(Type.TextToInt, "maxConcurrentStreams"))
+    }
 
     override fun HysteriaBean.init() {
         DataStore.profileName = name
@@ -33,6 +52,7 @@ class HysteriaSettingsActivity : ProfileSettingsActivity<HysteriaBean>() {
         DataStore.serverConnectionReceiveWindow = connectionReceiveWindow
         DataStore.serverDisableMtuDiscovery = disableMtuDiscovery
         DataStore.serverHopInterval = hopInterval
+        pbm.writeToCacheAll(this)
     }
 
     override fun HysteriaBean.serialize() {
@@ -54,6 +74,7 @@ class HysteriaSettingsActivity : ProfileSettingsActivity<HysteriaBean>() {
         connectionReceiveWindow = DataStore.serverConnectionReceiveWindow
         disableMtuDiscovery = DataStore.serverDisableMtuDiscovery
         hopInterval = DataStore.serverHopInterval
+        pbm.fromCacheAll(this)
     }
 
     override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.Hysteria

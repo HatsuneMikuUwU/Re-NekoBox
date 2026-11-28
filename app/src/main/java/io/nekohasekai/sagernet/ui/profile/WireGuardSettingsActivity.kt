@@ -24,6 +24,8 @@ class WireGuardSettingsActivity : ProfileSettingsActivity<WireGuardBean>() {
     private val peerPreSharedKey = pbm.add(PreferenceBinding(Type.Text, "peerPreSharedKey"))
     private val mtu = pbm.add(PreferenceBinding(Type.TextToInt, "mtu"))
     private val reserved = pbm.add(PreferenceBinding(Type.Text, "reserved"))
+    private val listenPort = pbm.add(PreferenceBinding(Type.TextToInt, "listenPort"))
+    private val persistentKeepaliveInterval = pbm.add(PreferenceBinding(Type.TextToInt, "persistentKeepaliveInterval"))
 
     override fun WireGuardBean.init() {
         pbm.writeToCacheAll(this)

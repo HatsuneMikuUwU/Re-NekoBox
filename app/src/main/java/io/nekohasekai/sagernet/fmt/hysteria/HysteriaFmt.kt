@@ -333,19 +333,36 @@ fun buildSingBoxOutboundHysteriaBean(bean: HysteriaBean): SingBoxOptions.SingBox
             }
 //            disable_mtu_discovery = bean.disableMtuDiscovery
             password = bean.authPayload
-//            if (bean.streamReceiveWindow > 0) {
-//                recv_window_conn = bean.streamReceiveWindow.toLong()
-//            }
-//            if (bean.connectionReceiveWindow > 0) {
-//                recv_window_conn = bean.connectionReceiveWindow.toLong()
-//            }
+            bean.bbrProfile?.takeIf { it.isNotBlank() }?.let { _hack_config_map["bbr_profile"] = it }
+            bean.idleTimeout?.takeIf { it.isNotBlank() }?.let { _hack_config_map["idle_timeout"] = it }
+            bean.keepAlivePeriod?.takeIf { it.isNotBlank() }?.let { _hack_config_map["keep_alive_period"] = it }
+            if ((bean.initialPacketSize ?: 0) > 0) _hack_config_map["initial_packet_size"] = bean.initialPacketSize
+            if ((bean.maxConcurrentStreams ?: 0) > 0) _hack_config_map["max_concurrent_streams"] = bean.maxConcurrentStreams
+            if (bean.disableMtuDiscovery == true) _hack_config_map["disable_path_mtu_discovery"] = true
+            if ((bean.streamReceiveWindow ?: 0) > 0) _hack_config_map["stream_receive_window"] = bean.streamReceiveWindow
+            if ((bean.connectionReceiveWindow ?: 0) > 0) _hack_config_map["connection_receive_window"] = bean.connectionReceiveWindow
             tls = SingBoxOptions.OutboundTLSOptions().apply {
                 if (bean.sni.isNotBlank()) {
                     server_name = bean.sni
                 }
-                alpn = listOf("h3")
+                alpn = if (bean.alpn.isNotBlank()) bean.alpn.listByLineOrComma() else listOf("h3")
                 if (bean.caText.isNotBlank()) {
                     certificate = bean.caText
+                }
+                if (bean.disableSNI == true) _hack_config_map["disable_sni"] = true
+                bean.clientCert?.takeIf { it.isNotBlank() }?.let { _hack_config_map["client_certificate"] = it.lines() }
+                bean.clientKey?.takeIf { it.isNotBlank() }?.let { _hack_config_map["client_key"] = it.lines() }
+                bean.certPublicKeySha256?.takeIf { it.isNotBlank() }?.let { _hack_config_map["certificate_public_key_sha256"] = it.listByLineOrComma() }
+                bean.certificateSha256?.takeIf { it.isNotBlank() }?.let { _hack_config_map["certificate_sha256"] = it.listByLineOrComma() }
+                if (bean.enableECH == true) {
+                    ech = SingBoxOptions.OutboundECHOptions().apply {
+                        enabled = true
+                        if (!bean.echConfig.isNullOrBlank()) {
+                            config = if (bean.echConfig.contains("BEGIN ECH CONFIGS")) bean.echConfig.lines()
+                            else listOf("-----BEGIN ECH CONFIGS-----", bean.echConfig.trim(), "-----END ECH CONFIGS-----")
+                        }
+                        bean.echQueryServerName?.takeIf { it.isNotBlank() }?.let { _hack_config_map["query_server_name"] = it }
+                    }
                 }
                 insecure = bean.allowInsecure || DataStore.globalAllowInsecure
                 enabled = true

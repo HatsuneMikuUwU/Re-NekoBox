@@ -37,6 +37,20 @@ public class AnyTLSBean extends AbstractBean {
     public String echConfig;
     public String realityPubKey;
     public String realityShortId;
+    public String idleSessionCheckInterval;
+    public String idleSessionTimeout;
+    public Integer minIdleSession;
+    public Boolean disableSNI;
+    public String clientCert;
+    public String clientKey;
+    public String certPublicKeySha256;
+    public String certificateSha256;
+    public String echQueryServerName;
+    public Boolean tlsFragment;
+    public String tlsFragmentFallbackDelay;
+    public Boolean tlsRecordFragment;
+    public String tlsSpoof;
+    public String tlsSpoofMethod;
 
     @Override
     public void initializeDefaultValues() {
@@ -50,11 +64,25 @@ public class AnyTLSBean extends AbstractBean {
         if (echConfig == null) echConfig = "";
         if (realityPubKey == null) realityPubKey = "";
         if (realityShortId == null) realityShortId = "";
+        if (idleSessionCheckInterval == null) idleSessionCheckInterval = "";
+        if (idleSessionTimeout == null) idleSessionTimeout = "";
+        if (minIdleSession == null) minIdleSession = 0;
+        if (disableSNI == null) disableSNI = false;
+        if (clientCert == null) clientCert = "";
+        if (clientKey == null) clientKey = "";
+        if (certPublicKeySha256 == null) certPublicKeySha256 = "";
+        if (certificateSha256 == null) certificateSha256 = "";
+        if (echQueryServerName == null) echQueryServerName = "";
+        if (tlsFragment == null) tlsFragment = false;
+        if (tlsFragmentFallbackDelay == null) tlsFragmentFallbackDelay = "";
+        if (tlsRecordFragment == null) tlsRecordFragment = false;
+        if (tlsSpoof == null) tlsSpoof = "";
+        if (tlsSpoofMethod == null) tlsSpoofMethod = "";
     }
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        output.writeInt(1);
+        output.writeInt(2);
         super.serialize(output);
         output.writeString(password);
         output.writeString(sni);
@@ -65,6 +93,21 @@ public class AnyTLSBean extends AbstractBean {
         output.writeString(echConfig);
         output.writeString(realityPubKey);
         output.writeString(realityShortId);
+        // v2 (husi-dev parity)
+        output.writeString(idleSessionCheckInterval);
+        output.writeString(idleSessionTimeout);
+        output.writeInt(minIdleSession);
+        output.writeBoolean(disableSNI);
+        output.writeString(clientCert);
+        output.writeString(clientKey);
+        output.writeString(certPublicKeySha256);
+        output.writeString(certificateSha256);
+        output.writeString(echQueryServerName);
+        output.writeBoolean(tlsFragment);
+        output.writeString(tlsFragmentFallbackDelay);
+        output.writeBoolean(tlsRecordFragment);
+        output.writeString(tlsSpoof);
+        output.writeString(tlsSpoofMethod);
     }
 
     @Override
@@ -84,6 +127,22 @@ public class AnyTLSBean extends AbstractBean {
         } else {
             realityPubKey = "";
             realityShortId = "";
+        }
+        if (version >= 2) {
+            idleSessionCheckInterval = input.readString();
+            idleSessionTimeout = input.readString();
+            minIdleSession = input.readInt();
+            disableSNI = input.readBoolean();
+            clientCert = input.readString();
+            clientKey = input.readString();
+            certPublicKeySha256 = input.readString();
+            certificateSha256 = input.readString();
+            echQueryServerName = input.readString();
+            tlsFragment = input.readBoolean();
+            tlsFragmentFallbackDelay = input.readString();
+            tlsRecordFragment = input.readBoolean();
+            tlsSpoof = input.readString();
+            tlsSpoofMethod = input.readString();
         }
     }
 

@@ -67,6 +67,18 @@ public abstract class StandardV2RayBean extends AbstractBean {
     public Boolean enableECH;
 
     public String echConfig;
+    public String echQueryServerName;
+    public Boolean disableSNI;
+    public String clientCert;
+    public String clientKey;
+    public String certPublicKeySha256;
+    public String certificateSha256;
+    public Boolean tlsFragment;
+    public String tlsFragmentFallbackDelay;
+    public Boolean tlsRecordFragment;
+    public String tlsSpoof;
+    public String tlsSpoofMethod;
+    public Boolean authenticatedLength;
 
     // --------------------------------------- Mux
 
@@ -125,6 +137,18 @@ public abstract class StandardV2RayBean extends AbstractBean {
         if (realityShortId == null) realityShortId = "";
 
         if (enableECH == null) enableECH = false;
+        if (echQueryServerName == null) echQueryServerName = "";
+        if (disableSNI == null) disableSNI = false;
+        if (clientCert == null) clientCert = "";
+        if (clientKey == null) clientKey = "";
+        if (certPublicKeySha256 == null) certPublicKeySha256 = "";
+        if (certificateSha256 == null) certificateSha256 = "";
+        if (tlsFragment == null) tlsFragment = false;
+        if (tlsFragmentFallbackDelay == null) tlsFragmentFallbackDelay = "";
+        if (tlsRecordFragment == null) tlsRecordFragment = false;
+        if (tlsSpoof == null) tlsSpoof = "";
+        if (tlsSpoofMethod == null) tlsSpoofMethod = "";
+        if (authenticatedLength == null) authenticatedLength = false;
         if (JavaUtil.isNullOrBlank(echConfig)) echConfig = "";
 
         if (enableMux == null) enableMux = false;
@@ -148,7 +172,7 @@ public abstract class StandardV2RayBean extends AbstractBean {
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        output.writeInt(10);
+        output.writeInt(11);
         super.serialize(output);
         output.writeString(uuid);
         output.writeString(encryption);
@@ -229,6 +253,19 @@ public abstract class StandardV2RayBean extends AbstractBean {
         output.writeBoolean(muxBrutal);
         output.writeInt(muxBrutalUpMbps);
         output.writeInt(muxBrutalDownMbps);
+        // v11 (husi-dev parity)
+        output.writeString(echQueryServerName);
+        output.writeBoolean(disableSNI);
+        output.writeString(clientCert);
+        output.writeString(clientKey);
+        output.writeString(certPublicKeySha256);
+        output.writeString(certificateSha256);
+        output.writeBoolean(tlsFragment);
+        output.writeString(tlsFragmentFallbackDelay);
+        output.writeBoolean(tlsRecordFragment);
+        output.writeString(tlsSpoof);
+        output.writeString(tlsSpoofMethod);
+        output.writeBoolean(authenticatedLength);
     }
 
     @Override
@@ -366,6 +403,22 @@ public abstract class StandardV2RayBean extends AbstractBean {
             muxBrutal = input.readBoolean();
             muxBrutalUpMbps = input.readInt();
             muxBrutalDownMbps = input.readInt();
+        }
+
+        // v11
+        if (version >= 11) {
+            echQueryServerName = input.readString();
+            disableSNI = input.readBoolean();
+            clientCert = input.readString();
+            clientKey = input.readString();
+            certPublicKeySha256 = input.readString();
+            certificateSha256 = input.readString();
+            tlsFragment = input.readBoolean();
+            tlsFragmentFallbackDelay = input.readString();
+            tlsRecordFragment = input.readBoolean();
+            tlsSpoof = input.readString();
+            tlsSpoofMethod = input.readString();
+            authenticatedLength = input.readBoolean();
         }
 
         // Note: xhttp fields are read in the switch case above when version >= 4

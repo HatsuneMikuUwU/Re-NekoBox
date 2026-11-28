@@ -14,6 +14,9 @@ fun buildSingBoxOutboundAnyTLSBean(bean: AnyTLSBean): SingBoxOptions.Outbound_An
         server = bean.serverAddress
         server_port = bean.serverPort
         password = bean.password
+        bean.idleSessionCheckInterval.blankAsNull()?.let { _hack_config_map["idle_session_check_interval"] = it }
+        bean.idleSessionTimeout.blankAsNull()?.let { _hack_config_map["idle_session_timeout"] = it }
+        if ((bean.minIdleSession ?: 0) > 0) _hack_config_map["min_idle_session"] = bean.minIdleSession
 
         tls = SingBoxOptions.OutboundTLSOptions().apply {
             enabled = true
@@ -40,15 +43,31 @@ fun buildSingBoxOutboundAnyTLSBean(bean: AnyTLSBean): SingBoxOptions.Outbound_An
                     fingerprint = it
                 }
             }
-            bean.echConfig.blankAsNull()?.let {
-                // In new version, some complex options will be deprecated, so we just do this.
+            if (bean.disableSNI == true) _hack_config_map["disable_sni"] = true
+            bean.clientCert.blankAsNull()?.let { _hack_config_map["client_certificate"] = it.lines() }
+            bean.clientKey.blankAsNull()?.let { _hack_config_map["client_key"] = it.lines() }
+            bean.certPublicKeySha256.blankAsNull()?.let { _hack_config_map["certificate_public_key_sha256"] = it.listByLineOrComma() }
+            bean.certificateSha256.blankAsNull()?.let { _hack_config_map["certificate_sha256"] = it.listByLineOrComma() }
+            if (bean.tlsFragment == true) {
+                _hack_config_map["fragment"] = true
+                bean.tlsFragmentFallbackDelay.blankAsNull()?.let { _hack_config_map["fragment_fallback_delay"] = it }
+            }
+            if (bean.tlsRecordFragment == true) _hack_config_map["record_fragment"] = true
+            bean.tlsSpoof.blankAsNull()?.let {
+                _hack_config_map["spoof"] = it
+                bean.tlsSpoofMethod.blankAsNull()?.let { m -> _hack_config_map["spoof_method"] = m }
+            }
+            if (!bean.echConfig.isNullOrBlank() || !bean.echQueryServerName.isNullOrBlank()) {
                 ech = SingBoxOptions.OutboundECHOptions().apply {
                     enabled = true
-                    config = if (it.contains("BEGIN ECH CONFIGS")) {
-                        listOf(it)
-                    } else {
-                        listOf("-----BEGIN ECH CONFIGS-----", it.trim(), "-----END ECH CONFIGS-----")
+                    bean.echConfig.blankAsNull()?.let {
+                        config = if (it.contains("BEGIN ECH CONFIGS")) {
+                            listOf(it)
+                        } else {
+                            listOf("-----BEGIN ECH CONFIGS-----", it.trim(), "-----END ECH CONFIGS-----")
+                        }
                     }
+                    bean.echQueryServerName.blankAsNull()?.let { _hack_config_map["query_server_name"] = it }
                 }
             }
         }

@@ -805,6 +805,24 @@ fun buildSingBoxOutboundTLS(bean: StandardV2RayBean): OutboundTLSOptions? {
                 fingerprint = fp
             }
         }
+        if (bean.disableSNI == true) _hack_config_map["disable_sni"] = true
+        bean.clientCert?.takeIf { it.isNotBlank() }?.let { _hack_config_map["client_certificate"] = it.lines() }
+        bean.clientKey?.takeIf { it.isNotBlank() }?.let { _hack_config_map["client_key"] = it.lines() }
+        bean.certPublicKeySha256?.takeIf { it.isNotBlank() }?.let { _hack_config_map["certificate_public_key_sha256"] = it.listByLineOrComma() }
+        bean.certificateSha256?.takeIf { it.isNotBlank() }?.let { _hack_config_map["certificate_sha256"] = it.listByLineOrComma() }
+        if (bean.tlsFragment == true) {
+            _hack_config_map["fragment"] = true
+            bean.tlsFragmentFallbackDelay?.takeIf { it.isNotBlank() }?.let {
+                _hack_config_map["fragment_fallback_delay"] = it
+            }
+        }
+        if (bean.tlsRecordFragment == true) _hack_config_map["record_fragment"] = true
+        bean.tlsSpoof?.takeIf { it.isNotBlank() }?.let {
+            _hack_config_map["spoof"] = it
+            bean.tlsSpoofMethod?.takeIf { m -> m.isNotBlank() }?.let { m ->
+                _hack_config_map["spoof_method"] = m
+            }
+        }
         if (bean.enableECH) {
             ech = OutboundECHOptions().apply {
                 enabled = true
@@ -814,6 +832,9 @@ fun buildSingBoxOutboundTLS(bean: StandardV2RayBean): OutboundTLSOptions? {
                     } else {
                         listOf("-----BEGIN ECH CONFIGS-----", bean.echConfig.trim(), "-----END ECH CONFIGS-----")
                     }
+                }
+                bean.echQueryServerName?.takeIf { it.isNotBlank() }?.let {
+                    _hack_config_map["query_server_name"] = it
                 }
             }
         }
@@ -829,6 +850,8 @@ fun buildSingBoxOutboundStandardV2RayBean(bean: StandardV2RayBean): Outbound {
                 server_port = bean.serverPort
                 username = bean.username
                 password = bean.password
+                if ((bean.httpVersion ?: 0) in 1..3) _hack_config_map["version"] = bean.httpVersion
+                if (bean.disableVersionFallback == true) _hack_config_map["disable_version_fallback"] = true
                 tls = buildSingBoxOutboundTLS(bean)
             }
         }
@@ -860,6 +883,7 @@ fun buildSingBoxOutboundStandardV2RayBean(bean: StandardV2RayBean): Outbound {
                 uuid = bean.uuid
                 alter_id = bean.alterId
                 security = bean.encryption.takeIf { it.isNotBlank() } ?: "auto"
+                if (bean.authenticatedLength == true) _hack_config_map["authenticated_length"] = true
                 when (bean.packetEncoding) {
                     0 -> packet_encoding = ""
                     1 -> packet_encoding = "packetaddr"

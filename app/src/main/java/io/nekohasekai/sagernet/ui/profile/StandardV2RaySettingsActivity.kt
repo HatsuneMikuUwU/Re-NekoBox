@@ -45,6 +45,20 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
 
     private val enableECH = pbm.add(PreferenceBinding(Type.Bool, "enableECH"))
     private val echConfig = pbm.add(PreferenceBinding(Type.Text, "echConfig"))
+    private val echQueryServerName = pbm.add(PreferenceBinding(Type.Text, "echQueryServerName"))
+    private val disableSNI = pbm.add(PreferenceBinding(Type.Bool, "disableSNI"))
+    private val clientCert = pbm.add(PreferenceBinding(Type.Text, "clientCert"))
+    private val clientKey = pbm.add(PreferenceBinding(Type.Text, "clientKey"))
+    private val certPublicKeySha256 = pbm.add(PreferenceBinding(Type.Text, "certPublicKeySha256"))
+    private val certificateSha256 = pbm.add(PreferenceBinding(Type.Text, "certificateSha256"))
+    private val tlsFragment = pbm.add(PreferenceBinding(Type.Bool, "tlsFragment"))
+    private val tlsFragmentFallbackDelay = pbm.add(PreferenceBinding(Type.Text, "tlsFragmentFallbackDelay"))
+    private val tlsRecordFragment = pbm.add(PreferenceBinding(Type.Bool, "tlsRecordFragment"))
+    private val tlsSpoof = pbm.add(PreferenceBinding(Type.Text, "tlsSpoof"))
+    private val tlsSpoofMethod = pbm.add(PreferenceBinding(Type.Text, "tlsSpoofMethod"))
+    private val authenticatedLength = pbm.add(PreferenceBinding(Type.Bool, "authenticatedLength"))
+    private val httpVersion = pbm.add(PreferenceBinding(Type.TextToInt, "httpVersion"))
+    private val disableVersionFallback = pbm.add(PreferenceBinding(Type.Bool, "disableVersionFallback"))
 
     private val enableMux = pbm.add(PreferenceBinding(Type.Bool, "enableMux"))
     private val muxPadding = pbm.add(PreferenceBinding(Type.Bool, "muxPadding"))
@@ -101,10 +115,10 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         return when (key) {
             "type", "uuid" -> !isHttp
             "packetEncoding" -> isVmess || isVless
-            "alterId" -> isVmess
+            "alterId", "authenticatedLength" -> isVmess
             "encryption" -> isVmess || isVless
             "vlessEncryption" -> isVless
-            "username", "password" -> isHttp
+            "username", "password", "httpVersion", "disableVersionFallback" -> isHttp
             "host" -> !isHttp && network in setOf("http", "ws", "httpupgrade", "xhttp")
             "path" -> !isHttp && network in setOf("http", "ws", "grpc", "httpupgrade", "xhttp")
             "mKcpSeed", "headerType", "kcpMtu", "kcpTti", "kcpCwndMultiplier" -> !isHttp && network == "kcp"

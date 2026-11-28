@@ -9,10 +9,30 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.fmt.tuic.TuicBean
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
+import moe.matsuri.nb4a.proxy.PreferenceBinding
+import moe.matsuri.nb4a.proxy.PreferenceBindingManager
+import moe.matsuri.nb4a.proxy.Type
 
 class TuicSettingsActivity : ProfileSettingsActivity<TuicBean>() {
 
     override fun createEntity() = TuicBean().applyDefaultValues()
+
+    private val pbm = PreferenceBindingManager().apply {
+        add(PreferenceBinding(Type.Text, "clientCert"))
+        add(PreferenceBinding(Type.Text, "clientKey"))
+        add(PreferenceBinding(Type.Text, "certPublicKeySha256"))
+        add(PreferenceBinding(Type.Text, "certificateSha256"))
+        add(PreferenceBinding(Type.Bool, "enableECH"))
+        add(PreferenceBinding(Type.Text, "echConfig"))
+        add(PreferenceBinding(Type.Text, "echQueryServerName"))
+        add(PreferenceBinding(Type.Bool, "disablePathMtuDiscovery"))
+        add(PreferenceBinding(Type.Text, "idleTimeout"))
+        add(PreferenceBinding(Type.Text, "keepAlivePeriod"))
+        add(PreferenceBinding(Type.TextToInt, "initialPacketSize"))
+        add(PreferenceBinding(Type.TextToInt, "maxConcurrentStreams"))
+        add(PreferenceBinding(Type.TextToInt, "streamReceiveWindow"))
+        add(PreferenceBinding(Type.TextToInt, "connectionReceiveWindow"))
+    }
 
     override fun TuicBean.init() {
         DataStore.profileName = name
@@ -28,6 +48,7 @@ class TuicSettingsActivity : ProfileSettingsActivity<TuicBean>() {
         DataStore.serverSNI = sni
         DataStore.serverReduceRTT = reduceRTT
         DataStore.serverAllowInsecure = allowInsecure
+        pbm.writeToCacheAll(this)
     }
 
     override fun TuicBean.serialize() {
@@ -44,6 +65,7 @@ class TuicSettingsActivity : ProfileSettingsActivity<TuicBean>() {
         sni = DataStore.serverSNI
         reduceRTT = DataStore.serverReduceRTT
         allowInsecure = DataStore.serverAllowInsecure
+        pbm.fromCacheAll(this)
     }
 
     override val preferenceSchema: List<PrefSectionSpec> = ProtocolPreferenceSchemas.Tuic
