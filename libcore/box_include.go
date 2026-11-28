@@ -19,7 +19,6 @@ import (
 	"github.com/sagernet/sing-box/protocol/anytls"
 	"github.com/sagernet/sing-box/protocol/block"
 	"github.com/sagernet/sing-box/protocol/direct"
-	protocolDns "github.com/sagernet/sing-box/protocol/dns"
 	"github.com/sagernet/sing-box/protocol/group"
 	"github.com/sagernet/sing-box/protocol/http"
 	"github.com/sagernet/sing-box/protocol/hysteria"
@@ -27,9 +26,7 @@ import (
 	"github.com/sagernet/sing-box/protocol/mixed"
 	"github.com/sagernet/sing-box/protocol/redirect"
 	"github.com/sagernet/sing-box/protocol/shadowsocks"
-	"github.com/sagernet/sing-box/protocol/shadowsocksr"
 	"github.com/sagernet/sing-box/protocol/shadowtls"
-	snellprotocol "github.com/sagernet/sing-box/protocol/snell"
 	"github.com/sagernet/sing-box/protocol/socks"
 	"github.com/sagernet/sing-box/protocol/ssh"
 	"github.com/sagernet/sing-box/protocol/tor"
@@ -40,13 +37,11 @@ import (
 	"github.com/sagernet/sing-box/protocol/vmess"
 	"github.com/sagernet/sing-box/protocol/wireguard"
 
-	"libcore/protocol/juicity"
-
 	_ "github.com/sagernet/sing-box/experimental/clashapi"
 	_ "github.com/sagernet/sing-box/transport/v2rayquic"
 )
 
-func nekoboxAndroidInboundRegistry() *inbound.Registry {
+func arcaenboxAndroidInboundRegistry() *inbound.Registry {
 	registry := inbound.NewRegistry()
 
 	tun.RegisterInbound(registry)
@@ -61,13 +56,12 @@ func nekoboxAndroidInboundRegistry() *inbound.Registry {
 	return registry
 }
 
-func nekoboxAndroidOutboundRegistry() *outbound.Registry {
+func arcaenboxAndroidOutboundRegistry() *outbound.Registry {
 	registry := outbound.NewRegistry()
 
 	direct.RegisterOutbound(registry)
 
 	block.RegisterOutbound(registry)
-	protocolDns.RegisterOutbound(registry)
 
 	group.RegisterSelector(registry)
 	group.RegisterURLTest(registry)
@@ -75,7 +69,6 @@ func nekoboxAndroidOutboundRegistry() *outbound.Registry {
 	socks.RegisterOutbound(registry)
 	http.RegisterOutbound(registry)
 	shadowsocks.RegisterOutbound(registry)
-	shadowsocksr.RegisterOutbound(registry)
 	vmess.RegisterOutbound(registry)
 	trojan.RegisterOutbound(registry)
 	tor.RegisterOutbound(registry)
@@ -83,19 +76,15 @@ func nekoboxAndroidOutboundRegistry() *outbound.Registry {
 	shadowtls.RegisterOutbound(registry)
 	vless.RegisterOutbound(registry)
 	anytls.RegisterOutbound(registry)
-	snellprotocol.RegisterOutbound(registry)
 
 	hysteria.RegisterOutbound(registry)
 	tuic.RegisterOutbound(registry)
 	hysteria2.RegisterOutbound(registry)
-	juicity.RegisterOutbound(registry)
-
-	wireguard.RegisterOutbound(registry)
 
 	return registry
 }
 
-func nekoboxAndroidEndpointRegistry() *endpoint.Registry {
+func arcaenboxAndroidEndpointRegistry() *endpoint.Registry {
 	registry := endpoint.NewRegistry()
 
 	wireguard.RegisterEndpoint(registry)
@@ -103,7 +92,7 @@ func nekoboxAndroidEndpointRegistry() *endpoint.Registry {
 	return registry
 }
 
-func nekoboxAndroidDNSTransportRegistry(localTransport LocalDNSTransport) *dns.TransportRegistry {
+func arcaenboxAndroidDNSTransportRegistry(localTransport LocalDNSTransport) *dns.TransportRegistry {
 	registry := dns.NewTransportRegistry()
 
 	transport.RegisterTCP(registry)
@@ -128,7 +117,7 @@ func nekoboxAndroidDNSTransportRegistry(localTransport LocalDNSTransport) *dns.T
 	return registry
 }
 
-func nekoboxAndroidServiceRegistry() *service.Registry {
+func arcaenboxAndroidServiceRegistry() *service.Registry {
 	registry := service.NewRegistry()
 
 	return registry

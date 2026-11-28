@@ -97,6 +97,8 @@ import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.triggerFullRestart
 import io.nekohasekai.sagernet.ui.AppManagerActivity
+import io.nekohasekai.sagernet.ui.KernelManagerActivity
+import io.nekohasekai.sagernet.update.CoreRuntime
 import io.nekohasekai.sagernet.ui.components.ExpressiveGroupPosition
 import io.nekohasekai.sagernet.ui.components.FloatingTopBar
 import io.nekohasekai.sagernet.ui.components.LocalBottomInset
@@ -552,12 +554,25 @@ fun SettingsScreen(
 
             // Misc Settings
             item {
+                val activeCore = remember { runCatching { CoreRuntime.active }.getOrNull() }
                 PrefCategory(titleRes = R.string.cag_misc) {
+                    PrefActionRow(
+                        title = stringResource(R.string.kernel_manager),
+                        summary = activeCore?.let {
+                            val ch = stringResource(if (it.channel == "preview") R.string.core_preview else R.string.core_stable)
+                            val srcLabel = stringResource(if (it.installed) R.string.core_downloaded else R.string.core_builtin)
+                            stringResource(R.string.core_status, ch, it.version, it.revision, srcLabel)
+                        } ?: stringResource(R.string.core_manager),
+                        icon = Icons.Rounded.Memory,
+                        position = ExpressiveGroupPosition.TOP,
+                        onClick = {
+                            context.startActivity(Intent(context, KernelManagerActivity::class.java))
+                        },
+                    )
                     PrefActionRow(
                         title = stringResource(R.string.connection_test_url),
                         summary = "${DataStore.connectionTestURL} (${DataStore.connectionTestConcurrent}x, ${DataStore.connectionTestTimeout}ms)",
                         icon = Icons.Rounded.NetworkCheck,
-                        position = ExpressiveGroupPosition.TOP,
                         onClick = { showUrlTestDialog = true },
                     )
                     StoreSwitchPref(

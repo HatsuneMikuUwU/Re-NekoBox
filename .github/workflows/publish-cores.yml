@@ -1,0 +1,27 @@
+name: Publish Verified Cores
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Build workflow run ID containing signed core-dist artifact
+        required: true
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Download Signed Core Distribution
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "${{ inputs.build_run_id }}" -n core-dist -D core-release
+      - name: Install cryptography
+        run: python3 -m pip install --quiet cryptography
+      - name: Publish Core Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp -f core-release/app/src/main/assets/cores/public-key.der app/src/main/assets/cores/public-key.der
+          python3 .github/scripts/publish_cores.py --target "${{ github.sha }}" --directory core-release/core-build/dist

@@ -45,3 +45,7 @@
 -dontwarn org.openjsse.javax.net.ssl.SSLSocket
 -dontwarn org.openjsse.net.ssl.OpenJSSE
 -dontwarn java.beans.PropertyVetoException
+
+# Keep CoreRuntime reflection entrypoint invoked from patched go.Seq
+-keep class io.nekohasekai.sagernet.update.CoreRuntime { public static void load(); }
+-keep class io.nekohasekai.sagernet.update.CoreState { *; }

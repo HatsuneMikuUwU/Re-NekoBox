@@ -1,0 +1,11 @@
+{
+  "bridge": "",
+  "stable": {
+    "version": "1.14.0",
+    "revision": 3
+  },
+  "preview": {
+    "version": "1.15.0-alpha.2",
+    "revision": 3
+  }
+}

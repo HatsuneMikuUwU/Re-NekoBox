@@ -2,6 +2,7 @@
 
 source ./env_java.sh || true
 source ../buildScript/init/env_ndk.sh
+source ../buildScript/lib/core/get_source_env.sh
 
 BUILD=".build"
 
@@ -15,8 +16,8 @@ if [ -z "$GOPATH" ]; then
 fi
 
 export GOBIND=gobind-matsuri
-"$GOPATH"/bin/gomobile-matsuri bind -v -androidapi 21 -cache "$(realpath $BUILD)" -trimpath -ldflags='-s -w' -tags='with_conntrack,with_gvisor,with_quic,with_wireguard,with_utls,with_clash_api' . || exit 1
-rm -r libcore-sources.jar
+"$GOPATH"/bin/gomobile-matsuri bind -v -androidapi 21 -cache "$(realpath $BUILD)" -trimpath -ldflags="-s -w -X github.com/sagernet/sing-box/constant.Version=$CORE_VERSION-renekobox-$CORE_REVISION" -tags="$CORE_TAGS" . || exit 1
+python3 ../buildScript/lib/core/patch_loader.py --verify libcore.aar libcore-sources.jar || exit 1
 
 proj=../app/libs
 mkdir -p $proj

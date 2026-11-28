@@ -6,21 +6,20 @@ import (
 	"fmt"
 	"io"
 	"libcore/device"
+	"libcore/protect"
 	"log"
 	"runtime"
 	"runtime/debug"
 	"strings"
 	"sync"
 
-	"github.com/matsuridayo/libneko/protect_server"
 	"github.com/matsuridayo/libneko/speedtest"
 	"github.com/sagernet/sing-box/adapter"
+	"github.com/sagernet/sing-box/adapter/certificate"
 	"github.com/sagernet/sing-box/boxapi"
-	"github.com/sagernet/sing-box/experimental/libbox/platform"
 	"github.com/sagernet/sing-box/protocol/group"
 
 	box "github.com/sagernet/sing-box"
-	"github.com/sagernet/sing-box/common/conntrack"
 	"github.com/sagernet/sing-box/common/dialer"
 	"github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/option"
@@ -60,7 +59,9 @@ func VersionBox() string {
 
 func ResetAllConnections(system bool) {
 	if system {
-		conntrack.Close()
+		if mainInstance != nil {
+			mainInstance.instance.Network().ResetNetwork(context.Background())
+		}
 		log.Println("Reset system connections done")
 	} else {
 		log.Println("TODO: Reset user connections")
@@ -70,9 +71,9 @@ func ResetAllConnections(system bool) {
 type BoxInstance struct {
 	access sync.Mutex
 
-	*box.Box
-	cancel context.CancelFunc
-	state  int
+	instance *box.Box
+	cancel   context.CancelFunc
+	state    int
 
 	v2api        *boxapi.SbV2rayServer
 	selector     *group.Selector
@@ -85,16 +86,20 @@ func NewSingBoxInstance(config string, localTransport LocalDNSTransport) (b *Box
 	// create box context
 	ctx, cancel := context.WithCancel(context.Background())
 	ctx = box.Context(ctx,
-		nekoboxAndroidInboundRegistry(), nekoboxAndroidOutboundRegistry(), nekoboxAndroidEndpointRegistry(),
-		nekoboxAndroidDNSTransportRegistry(localTransport), nekoboxAndroidServiceRegistry(),
+		arcaenboxAndroidInboundRegistry(), arcaenboxAndroidOutboundRegistry(), arcaenboxAndroidEndpointRegistry(),
+		arcaenboxAndroidDNSTransportRegistry(localTransport), arcaenboxAndroidServiceRegistry(), certificate.NewRegistry(),
 	)
 	ctx = service.ContextWithDefaultRegistry(ctx)
-	service.MustRegister[platform.Interface](ctx, boxPlatformInterfaceInstance)
+	service.MustRegister[adapter.PlatformInterface](ctx, boxPlatformInterfaceInstance)
 
 	// parse options
 	var options option.Options
-	err = options.UnmarshalJSONContext(ctx, []byte(config))
+	content, err := migrateConfig(config)
+	if err == nil {
+		err = options.UnmarshalJSONContext(ctx, content)
+	}
 	if err != nil {
+		cancel()
 		return nil, fmt.Errorf("decode config: %v", err)
 	}
 
@@ -110,13 +115,13 @@ func NewSingBoxInstance(config string, localTransport LocalDNSTransport) (b *Box
 	}
 
 	b = &BoxInstance{
-		Box:          instance,
+		instance:     instance,
 		cancel:       cancel,
 		pauseManager: service.FromContext[pause.Manager](ctx),
 	}
 
 	// selector
-	if proxy, ok := b.Outbound().Outbound("proxy"); ok {
+	if proxy, ok := b.instance.Outbound().Outbound("proxy"); ok {
 		if selector, ok := proxy.(*group.Selector); ok {
 			b.selector = selector
 		}
@@ -133,7 +138,7 @@ func (b *BoxInstance) Start() (err error) {
 
 	if b.state == 0 {
 		b.state = 1
-		return b.Box.Start()
+		return b.instance.Start()
 	}
 	return errors.New("already started")
 }
@@ -160,8 +165,8 @@ func (b *BoxInstance) Close() (err error) {
 	if b.cancel != nil {
 		b.cancel()
 	}
-	if b.Box != nil {
-		b.Box.Close()
+	if b.instance != nil {
+		b.instance.Close()
 	}
 
 	return nil
@@ -171,7 +176,7 @@ func (b *BoxInstance) Sleep() {
 	if b.pauseManager != nil {
 		b.pauseManager.DevicePause()
 	}
-	// _ = b.Box.Router().ResetNetwork()
+	// _ = b.instance.Router().ResetNetwork()
 }
 
 func (b *BoxInstance) Wake() {
@@ -180,9 +185,9 @@ func (b *BoxInstance) Wake() {
 	}
 }
 
-func (b *BoxInstance) SetAsMain() {
+func (b *BoxInstance) SetAsMain() error {
 	mainInstance = b
-	goServeProtect(true)
+	return goServeProtect(true)
 }
 
 func (b *BoxInstance) SetV2rayStats(outbounds string) {
@@ -196,7 +201,7 @@ func (b *BoxInstance) SetV2rayStats(outbounds string) {
 		Enabled:   true,
 		Outbounds: strings.Split(outbounds, "\n"),
 	})
-	b.Box.Router().AppendTracker(b.v2api.StatsService())
+	b.instance.Router().AppendTracker(b.v2api.StatsService())
 }
 
 func (b *BoxInstance) QueryStats(tag, direct string) int64 {
@@ -221,7 +226,7 @@ func UrlTest(i *BoxInstance, link string, timeout int32) (latency int32, err err
 		if i.v2api != nil {
 			connectionTracker = i.v2api.StatsService()
 		}
-		return speedtest.UrlTest(boxapi.CreateProxyHttpClient(i.Box, connectionTracker), link, timeout, speedtest.UrlTestStandard_RTT)
+		return speedtest.UrlTest(boxapi.CreateProxyHttpClient(i.instance, connectionTracker), link, timeout, speedtest.UrlTestStandard_RTT)
 	}
 	// test direct
 	if mainInstance == nil {
@@ -231,19 +236,22 @@ func UrlTest(i *BoxInstance, link string, timeout int32) (latency int32, err err
 	if mainInstance.v2api != nil {
 		connectionTracker = mainInstance.v2api.StatsService()
 	}
-	return speedtest.UrlTest(boxapi.CreateProxyHttpClient(mainInstance.Box, connectionTracker), link, timeout, speedtest.UrlTestStandard_RTT)
+	return speedtest.UrlTest(boxapi.CreateProxyHttpClient(mainInstance.instance, connectionTracker), link, timeout, speedtest.UrlTestStandard_RTT)
 }
 
 var protectCloser io.Closer
 
-func goServeProtect(start bool) {
+func goServeProtect(start bool) error {
 	if protectCloser != nil {
 		protectCloser.Close()
 		protectCloser = nil
 	}
 	if start {
-		protectCloser = protect_server.ServeProtect("protect_path", false, 0, func(fd int) {
-			intfBox.AutoDetectInterfaceControl(int32(fd))
+		var err error
+		protectCloser, err = protect.Serve("protect_path", func(fd int) error {
+			return intfBox.AutoDetectInterfaceControl(int32(fd))
 		})
+		return err
 	}
+	return nil
 }
