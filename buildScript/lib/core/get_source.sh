@@ -28,16 +28,8 @@ if old in s:
 dp = Path('common/dialer/default.go')
 ds = dp.read_text()
 if 'var DoNotSelectInterface' not in ds:
-    assert '
-var (
-' in ds, 'Expected var ( block in common/dialer/default.go'
-    ds = ds.replace('
-var (
-', '
-var DoNotSelectInterface = false
-
-var (
-', 1)
+    assert '\nvar (\n' in ds, 'Expected var ( block in common/dialer/default.go'
+    ds = ds.replace('\nvar (\n', '\nvar DoNotSelectInterface = false\n\nvar (\n', 1)
 if 'if d.networkStrategy == nil {' in ds:
     ds = ds.replace('if d.networkStrategy == nil {', 'if DoNotSelectInterface || d.networkStrategy == nil {')
 dp.write_text(ds)
