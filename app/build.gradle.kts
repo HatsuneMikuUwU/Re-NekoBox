@@ -102,7 +102,7 @@ dependencies {
     implementation("org.yaml:snakeyaml:1.30")
     implementation("com.jakewharton:process-phoenix:2.1.2")
     implementation("com.esotericsoftware:kryo:5.2.1")
-    implementation("com.google.guava:guava:31.0.1-android")
+    implementation("com.google.guava:guava:33.8.0-android")
     implementation("org.ini4j:ini4j:0.5.4")
 
     val roomVersion = "2.8.5"
