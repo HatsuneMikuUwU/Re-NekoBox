@@ -914,4 +914,25 @@
     <string name="dashboard_retry">重试</string>
     <string name="webview_cleanup">清除 WebView 数据</string>
     <string name="webview_cleanup_confirmation">确定清除面板缓存、Cookie 和本地存储吗？</string>
+
+    <!-- Protocols & Settings ported from husi-dev -->
+    <string name="network_strategy">网络策略</string>
+    <string name="network_preferred_interfaces">首选网络接口</string>
+    <string name="network_preferred_interfaces_help">使用逗号或换行分隔接口类型，例如 wifi、cellular、ethernet，留空禁用。</string>
+    <string name="fakedns_for_all">全部域名使用 FakeDNS</string>
+    <string name="fakedns_for_all_help">启用 FakeDNS 时，直连域名也通过 FakeDNS 解析。</string>
+    <string name="fakedns_range_4">FakeDNS IPv4 网段</string>
+    <string name="fakedns_range_6">FakeDNS IPv6 网段</string>
+    <string name="local_dns_port">本地 DNS 端口</string>
+    <string name="local_dns_port_help">本地 DNS 劫持入站监听端口（填 0 禁用）。</string>
+    <string name="ntp_enable">NTP 时间同步</string>
+    <string name="ntp_enable_help">通过 NTP 服务器同步核心时间，避免因时间偏差导致 TLS/VMess 连接失败。</string>
+    <string name="ntp_address">NTP 服务器</string>
+    <string name="ntp_port">NTP 端口</string>
+    <string name="ntp_interval">NTP 同步间隔</string>
+    <string name="disable_tcp_keep_alive">禁用 TCP Keep-Alive</string>
+    <string name="tcp_keep_alive_idle">TCP Keep-Alive 空闲时间</string>
+    <string name="tcp_keep_alive_help">Go 时长格式（如 5m、75s），留空使用核心默认值。</string>
+    <string name="debug_listen">调试监听地址</string>
+    <string name="debug_listen_help">可选 pprof 调试 HTTP 监听地址（如 127.0.0.1:9091），留空禁用。</string>
 </resources>

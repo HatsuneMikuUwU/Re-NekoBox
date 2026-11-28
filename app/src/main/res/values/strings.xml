@@ -992,4 +992,31 @@
     <string name="dashboard_retry">Retry</string>
     <string name="webview_cleanup">Clear WebView data</string>
     <string name="webview_cleanup_confirmation">Clear cached dashboard data, cookies, and storage?</string>
+
+    <!-- Protocols & Settings ported from husi-dev -->
+    <string name="action_direct" translatable="false">Direct</string>
+    <string name="action_tailscale" translatable="false">Tailscale</string>
+    <string name="action_tailcat" translatable="false">Tailcat</string>
+    <string name="action_masque" translatable="false">MASQUE</string>
+    <string name="action_openvpn" translatable="false">OpenVPN</string>
+    <string name="action_openconnect" translatable="false">OpenConnect</string>
+    <string name="network_strategy">Network Strategy</string>
+    <string name="network_preferred_interfaces">Preferred Network Interfaces</string>
+    <string name="network_preferred_interfaces_help">Comma or newline separated interface types, e.g. wifi, cellular, ethernet. Leave empty to disable.</string>
+    <string name="fakedns_for_all">FakeDNS for All Domains</string>
+    <string name="fakedns_for_all_help">Route direct-matched domains through FakeDNS as well when FakeDNS is enabled.</string>
+    <string name="fakedns_range_4">FakeDNS IPv4 Range</string>
+    <string name="fakedns_range_6">FakeDNS IPv6 Range</string>
+    <string name="local_dns_port">Local DNS Port</string>
+    <string name="local_dns_port_help">Listen port for local DNS hijacking inbound (0 to disable).</string>
+    <string name="ntp_enable">NTP Time Sync</string>
+    <string name="ntp_enable_help">Synchronize core clock with an NTP server to prevent TLS/VMess time drift errors.</string>
+    <string name="ntp_address">NTP Server</string>
+    <string name="ntp_port">NTP Port</string>
+    <string name="ntp_interval">NTP Sync Interval</string>
+    <string name="disable_tcp_keep_alive">Disable TCP Keep-Alive</string>
+    <string name="tcp_keep_alive_idle">TCP Keep-Alive Idle</string>
+    <string name="tcp_keep_alive_help">Go duration format (e.g. 5m, 75s). Leave empty to use core default.</string>
+    <string name="debug_listen">Debug Listen Address</string>
+    <string name="debug_listen_help">Optional pprof debug HTTP listener (e.g. 127.0.0.1:9091). Leave empty to disable.</string>
 </resources>

@@ -27,8 +27,20 @@ import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.buildSingBoxOutboundStandardV2RayBean
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 import io.nekohasekai.sagernet.fmt.shadowsocksr.buildSingBoxOutboundShadowsocksRBean
+import io.nekohasekai.sagernet.fmt.direct.DirectBean
+import io.nekohasekai.sagernet.fmt.direct.buildSingBoxOutboundDirectBean
+import io.nekohasekai.sagernet.fmt.masque.MASQUEBean
+import io.nekohasekai.sagernet.fmt.masque.buildSingBoxEndpointMASQUEBean
+import io.nekohasekai.sagernet.fmt.openconnect.OpenConnectBean
+import io.nekohasekai.sagernet.fmt.openconnect.buildSingBoxEndpointOpenConnectBean
+import io.nekohasekai.sagernet.fmt.openvpn.OpenVPNBean
+import io.nekohasekai.sagernet.fmt.openvpn.buildSingBoxEndpointOpenVPNBean
 import io.nekohasekai.sagernet.fmt.snell.SnellBean
 import io.nekohasekai.sagernet.fmt.snell.buildSingBoxOutboundSnellBean
+import io.nekohasekai.sagernet.fmt.tailscale.TailcatBean
+import io.nekohasekai.sagernet.fmt.tailscale.TailscaleBean
+import io.nekohasekai.sagernet.fmt.tailscale.buildSingBoxEndpointTailscaleBean
+import io.nekohasekai.sagernet.fmt.tailscale.buildSingBoxOutboundTailcatBean
 import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.fmt.wireguard.buildSingBoxOutboundWireguardBean
 import io.nekohasekai.sagernet.ktx.isIpAddress
@@ -222,6 +234,23 @@ fun buildConfig(
                         external_ui_download_url = "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
                     }
                 }
+                DataStore.debugListen.trim().takeIf { it.isNotEmpty() }?.let { listenAddr ->
+                    _hack_config_map["debug"] = mapOf("listen" to listenAddr)
+                }
+            }
+            if (DataStore.ntpEnable) {
+                val ntpHost = DataStore.ntpAddress.trim().ifEmpty { "time.apple.com" }
+                val ntpPort = DataStore.ntpPort.takeIf { it in 1..65535 } ?: 123
+                val ntpInterval = DataStore.ntpInterval.trim().ifEmpty { "30m" }
+                _hack_config_map["ntp"] = mapOf(
+                    "enabled" to true,
+                    "server" to ntpHost,
+                    "server_port" to ntpPort,
+                    "interval" to ntpInterval,
+                )
+                if (!ntpHost.isIpAddress()) {
+                    domainListDNSDirectForce.add("full:$ntpHost")
+                }
             }
         }
 
@@ -304,9 +333,19 @@ fun buildConfig(
                     })
                 }
             })
+            val localDnsPort = DataStore.localDnsPort
+            if (localDnsPort in 1..65535) {
+                inbounds.add(Inbound_DirectOptions().apply {
+                    type = "direct"
+                    tag = "dns-in"
+                    listen = bind
+                    listen_port = localDnsPort
+                })
+            }
         }
 
         outbounds = mutableListOf()
+        val endpointsList = mutableListOf<SingBoxOption>()
 
         // init routing object
         route = RouteOptions().apply {
@@ -476,6 +515,24 @@ fun buildConfig(
                         is SnellBean ->
                             buildSingBoxOutboundSnellBean(bean)
 
+                        is DirectBean ->
+                            buildSingBoxOutboundDirectBean(bean)
+
+                        is TailscaleBean ->
+                            buildSingBoxEndpointTailscaleBean(bean)
+
+                        is TailcatBean ->
+                            buildSingBoxOutboundTailcatBean(bean)
+
+                        is MASQUEBean ->
+                            buildSingBoxEndpointMASQUEBean(bean)
+
+                        is OpenVPNBean ->
+                            buildSingBoxEndpointOpenVPNBean(bean)
+
+                        is OpenConnectBean ->
+                            buildSingBoxEndpointOpenConnectBean(bean)
+
                         else -> throw IllegalStateException("can't reach")
                     }
 
@@ -517,6 +574,28 @@ fun buildConfig(
                     }
                     _hack_config_map["domain_strategy"] =
                         if (forTest) "" else defaultServerDomainStrategy
+
+                    if (!forTest) {
+                        if (DataStore.disableTcpKeepAlive) {
+                            _hack_config_map["disable_tcp_keep_alive"] = true
+                        } else {
+                            DataStore.tcpKeepAliveIdle.trim().takeIf { it.isNotEmpty() }?.let {
+                                _hack_config_map["tcp_keep_alive"] = it
+                            }
+                            DataStore.tcpKeepAliveInterval.trim().takeIf { it.isNotEmpty() }?.let {
+                                _hack_config_map["tcp_keep_alive_interval"] = it
+                            }
+                        }
+                        DataStore.networkStrategy.trim().takeIf { it.isNotEmpty() }?.let {
+                            _hack_config_map["network_strategy"] = it
+                        }
+                        DataStore.networkPreferredInterfaces.trim().takeIf { it.isNotEmpty() }?.let { raw ->
+                            val ifaces = raw.listByLineOrComma().filter { it.isNotBlank() }
+                            if (ifaces.isNotEmpty()) {
+                                _hack_config_map["network_type"] = ifaces
+                            }
+                        }
+                    }
 
                     _hack_config_map["tag"] = tagOut
 
@@ -576,7 +655,12 @@ fun buildConfig(
                     }
                 }
 
-                outbounds.add(currentOutbound)
+                val isEndpoint = bean is TailscaleBean || bean is MASQUEBean || bean is OpenVPNBean || bean is OpenConnectBean
+                if (isEndpoint) {
+                    endpointsList.add(currentOutbound)
+                } else {
+                    outbounds.add(currentOutbound)
+                }
                 chainOutbounds.add(currentOutbound)
                 pastOutbound = currentOutbound
                 pastEntity = proxyEntity
@@ -866,6 +950,11 @@ fun buildConfig(
         for (freedom in arrayOf(TAG_DIRECT, TAG_BYPASS)) outbounds.add(Outbound().apply {
             tag = freedom
             type = "direct"
+            if (!forTest) {
+                DataStore.domainStrategyForDirect.trim().takeIf { it.isNotEmpty() }?.let {
+                    _hack_config_map["domain_strategy"] = it
+                }
+            }
         })
 
         if (DataStore.enableTLSFragment) {
@@ -984,24 +1073,35 @@ fun buildConfig(
                 source_ip_cidr = listOf("224.0.0.0/3", "ff00::/8")
                 action = "reject"
             })
+            if (DataStore.localDnsPort in 1..65535) {
+                route.rules.add(0, Rule_DefaultOptions().apply {
+                    inbound = listOf("dns-in")
+                    action = "hijack-dns"
+                })
+            }
             // FakeDNS obj
             if (useFakeDns) {
                 dns.fakeip = DNSFakeIPOptions().apply {
                     enabled = true
-                    inet4_range = "198.18.0.0/15"
-                    inet6_range = "fc00::/18"
+                    inet4_range = DataStore.fakeDnsRange4.trim().ifEmpty { "198.18.0.0/15" }
+                    inet6_range = DataStore.fakeDnsRange6.trim().ifEmpty { "fc00::/18" }
                 }
                 dns.servers.add(DNSServerOptions().apply {
                     address = "fakeip"
                     tag = "dns-fake"
                     strategy = "ipv4_only"
                 })
-                dns.rules.add(DNSRule_DefaultOptions().apply {
+                val fakeRule = DNSRule_DefaultOptions().apply {
                     inbound = listOf(deviceInboundTag)
                     server = "dns-fake"
                     disable_cache = true
                     query_type = listOf("A", "AAAA")
-                })
+                }
+                if (DataStore.fakeDnsForAll) {
+                    dns.rules.add(0, fakeRule)
+                } else {
+                    dns.rules.add(fakeRule)
+                }
             }
             if (dnsHosts.isNotEmpty()) {
                 dns.rules.add(0, DNSRule_DefaultOptions().apply {
@@ -1044,6 +1144,9 @@ fun buildConfig(
             }
         }
 
+        if (endpointsList.isNotEmpty()) {
+            endpoints = endpointsList
+        }
         if (!forTest) _hack_custom_config = DataStore.globalCustomConfig
     }.let {
         val configMap = it.asMap()

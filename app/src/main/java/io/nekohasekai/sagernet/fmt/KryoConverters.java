@@ -19,7 +19,13 @@ import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean;
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean;
 import moe.matsuri.nb4a.proxy.anytls.AnyTLSBean;
 import moe.matsuri.nb4a.proxy.shadowtls.ShadowTLSBean;
+import io.nekohasekai.sagernet.fmt.direct.DirectBean;
+import io.nekohasekai.sagernet.fmt.masque.MASQUEBean;
+import io.nekohasekai.sagernet.fmt.openconnect.OpenConnectBean;
+import io.nekohasekai.sagernet.fmt.openvpn.OpenVPNBean;
 import io.nekohasekai.sagernet.fmt.snell.SnellBean;
+import io.nekohasekai.sagernet.fmt.tailscale.TailcatBean;
+import io.nekohasekai.sagernet.fmt.tailscale.TailscaleBean;
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean;
 import io.nekohasekai.sagernet.fmt.ssh.SSHBean;
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean;
@@ -168,6 +174,42 @@ public class KryoConverters {
     public static SnellBean snellDeserialize(byte[] bytes) {
         if (JavaUtil.isEmpty(bytes)) return null;
         return deserialize(new SnellBean(), bytes);
+    }
+
+    @TypeConverter
+    public static DirectBean directDeserialize(byte[] bytes) {
+        if (JavaUtil.isEmpty(bytes)) return null;
+        return deserialize(new DirectBean(), bytes);
+    }
+
+    @TypeConverter
+    public static TailscaleBean tailscaleDeserialize(byte[] bytes) {
+        if (JavaUtil.isEmpty(bytes)) return null;
+        return deserialize(new TailscaleBean(), bytes);
+    }
+
+    @TypeConverter
+    public static TailcatBean tailcatDeserialize(byte[] bytes) {
+        if (JavaUtil.isEmpty(bytes)) return null;
+        return deserialize(new TailcatBean(), bytes);
+    }
+
+    @TypeConverter
+    public static MASQUEBean masqueDeserialize(byte[] bytes) {
+        if (JavaUtil.isEmpty(bytes)) return null;
+        return deserialize(new MASQUEBean(), bytes);
+    }
+
+    @TypeConverter
+    public static OpenVPNBean openVPNDeserialize(byte[] bytes) {
+        if (JavaUtil.isEmpty(bytes)) return null;
+        return deserialize(new OpenVPNBean(), bytes);
+    }
+
+    @TypeConverter
+    public static OpenConnectBean openConnectDeserialize(byte[] bytes) {
+        if (JavaUtil.isEmpty(bytes)) return null;
+        return deserialize(new OpenConnectBean(), bytes);
     }
 
     @TypeConverter

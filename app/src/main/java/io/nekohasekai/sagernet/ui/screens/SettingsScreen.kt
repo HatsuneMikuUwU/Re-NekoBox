@@ -74,6 +74,8 @@ import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.RuleFolder
 import androidx.compose.material.icons.rounded.SettingsEthernet
+import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.SettingsInputComponent
 import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material.icons.rounded.Tune
@@ -409,7 +411,26 @@ fun SettingsScreen(
                         titleRes = R.string.ruleset_update_interval,
                         defaultValue = "0",
                         isNumber = true,
+                    )
+                    StoreListPref(
+                        store = store,
+                        key = Key.NETWORK_STRATEGY,
+                        titleRes = R.string.network_strategy,
+                        entriesRes = R.array.network_strategy_entries,
+                        entryValuesRes = R.array.network_strategy_values,
+                        defaultValue = "",
+                        icon = Icons.Rounded.AltRoute,
+                        onChanged = { notifyNeedReload() },
+                    )
+                    StoreEditTextPref(
+                        store = store,
+                        key = Key.NETWORK_PREFERRED_INTERFACES,
+                        icon = Icons.Rounded.Router,
+                        titleRes = R.string.network_preferred_interfaces,
+                        dialogMessageRes = R.string.network_preferred_interfaces_help,
+                        defaultValue = "",
                         position = ExpressiveGroupPosition.BOTTOM,
+                        onChanged = { notifyNeedReload() },
                     )
                 }
             }
@@ -575,6 +596,40 @@ fun SettingsScreen(
                         titleRes = R.string.dns_hosts,
                         dialogMessageRes = R.string.dns_hosts_dialog_message,
                         multiline = true,
+                        onChanged = { notifyNeedReload() },
+                    )
+                    StoreSwitchPref(
+                        store = store,
+                        key = Key.FAKE_DNS_FOR_ALL,
+                        icon = Icons.Rounded.Dns,
+                        titleRes = R.string.fakedns_for_all,
+                        summaryRes = R.string.fakedns_for_all_help,
+                        onChanged = { notifyNeedReload(); true },
+                    )
+                    StoreEditTextPref(
+                        store = store,
+                        key = Key.FAKE_DNS_RANGE_4,
+                        icon = Icons.Rounded.Dns,
+                        titleRes = R.string.fakedns_range_4,
+                        defaultValue = "198.18.0.0/15",
+                        onChanged = { notifyNeedReload() },
+                    )
+                    StoreEditTextPref(
+                        store = store,
+                        key = Key.FAKE_DNS_RANGE_6,
+                        icon = Icons.Rounded.Dns,
+                        titleRes = R.string.fakedns_range_6,
+                        defaultValue = "fc00::/18",
+                        onChanged = { notifyNeedReload() },
+                    )
+                    StoreListPref(
+                        store = store,
+                        key = Key.DOMAIN_STRATEGY_FOR_DIRECT,
+                        titleRes = R.string.domain_strategy_for_direct,
+                        entriesRes = R.array.domain_strategy_direct_entries,
+                        entryValuesRes = R.array.domain_strategy_direct_values,
+                        defaultValue = "",
+                        icon = Icons.Rounded.Public,
                         position = ExpressiveGroupPosition.BOTTOM,
                         onChanged = { notifyNeedReload() },
                     )
@@ -643,6 +698,16 @@ fun SettingsScreen(
                         icon = Icons.Rounded.Timer,
                         titleRes = R.string.udp_timeout_title,
                         dialogMessageRes = R.string.udp_timeout_help,
+                        defaultValue = "0",
+                        isNumber = true,
+                        onChanged = { notifyNeedReload() },
+                    )
+                    StoreEditTextPref(
+                        store = store,
+                        key = Key.LOCAL_DNS_PORT,
+                        icon = Icons.Rounded.Dns,
+                        titleRes = R.string.local_dns_port,
+                        dialogMessageRes = R.string.local_dns_port_help,
                         defaultValue = "0",
                         isNumber = true,
                         onChanged = { notifyNeedReload() },
@@ -725,6 +790,79 @@ fun SettingsScreen(
                         titleRes = R.string.advanced_core_cache,
                         summaryRes = R.string.advanced_core_cache_help,
                         onChanged = { notifyNeedReload(); true },
+                    )
+                    val ntpEnabled = store.getBoolean(Key.NTP_ENABLE, false)
+                    StoreSwitchPref(
+                        store = store,
+                        key = Key.NTP_ENABLE,
+                        icon = Icons.Rounded.Schedule,
+                        titleRes = R.string.ntp_enable,
+                        summaryRes = R.string.ntp_enable_help,
+                        onChanged = { notifyNeedReload(); true },
+                    )
+                    if (ntpEnabled) {
+                        StoreEditTextPref(
+                            store = store,
+                            key = Key.NTP_ADDRESS,
+                            icon = Icons.Rounded.Public,
+                            titleRes = R.string.ntp_address,
+                            defaultValue = "time.apple.com",
+                            onChanged = { notifyNeedReload() },
+                        )
+                        StoreEditTextPref(
+                            store = store,
+                            key = Key.NTP_PORT,
+                            icon = Icons.Rounded.SettingsInputComponent,
+                            titleRes = R.string.ntp_port,
+                            defaultValue = "123",
+                            isNumber = true,
+                            onChanged = { notifyNeedReload() },
+                        )
+                        StoreEditTextPref(
+                            store = store,
+                            key = Key.NTP_INTERVAL,
+                            icon = Icons.Rounded.Timer,
+                            titleRes = R.string.ntp_interval,
+                            defaultValue = "30m",
+                            onChanged = { notifyNeedReload() },
+                        )
+                    }
+                    val disableKeepAlive = store.getBoolean(Key.DISABLE_TCP_KEEP_ALIVE, false)
+                    StoreSwitchPref(
+                        store = store,
+                        key = Key.DISABLE_TCP_KEEP_ALIVE,
+                        icon = Icons.Rounded.Speed,
+                        titleRes = R.string.disable_tcp_keep_alive,
+                        onChanged = { notifyNeedReload(); true },
+                    )
+                    if (!disableKeepAlive) {
+                        StoreEditTextPref(
+                            store = store,
+                            key = Key.TCP_KEEP_ALIVE_IDLE,
+                            icon = Icons.Rounded.Timer,
+                            titleRes = R.string.tcp_keep_alive_idle,
+                            dialogMessageRes = R.string.tcp_keep_alive_help,
+                            defaultValue = "",
+                            onChanged = { notifyNeedReload() },
+                        )
+                        StoreEditTextPref(
+                            store = store,
+                            key = Key.TCP_KEEP_ALIVE_INTERVAL,
+                            icon = Icons.Rounded.Timer,
+                            titleRes = R.string.tcp_keep_alive_interval,
+                            dialogMessageRes = R.string.tcp_keep_alive_help,
+                            defaultValue = "",
+                            onChanged = { notifyNeedReload() },
+                        )
+                    }
+                    StoreEditTextPref(
+                        store = store,
+                        key = Key.DEBUG_LISTEN,
+                        icon = Icons.Rounded.BugReport,
+                        titleRes = R.string.debug_listen,
+                        dialogMessageRes = R.string.debug_listen_help,
+                        defaultValue = "",
+                        onChanged = { notifyNeedReload() },
                     )
                     PrefActionRow(title = stringResource(R.string.reset_settings), icon = Icons.Rounded.Restore, onClick = { showResetConfirm = true })
                     PrefActionRow(

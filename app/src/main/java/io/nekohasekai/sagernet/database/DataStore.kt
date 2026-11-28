@@ -343,6 +343,23 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     var globalMode by configurationStore.boolean(Key.GLOBAL_MODE)
 
+    // husi-dev ported sing-box settings
+    var fakeDnsForAll by configurationStore.boolean(Key.FAKE_DNS_FOR_ALL) { false }
+    var fakeDnsRange4 by configurationStore.string(Key.FAKE_DNS_RANGE_4) { "198.18.0.0/15" }
+    var fakeDnsRange6 by configurationStore.string(Key.FAKE_DNS_RANGE_6) { "fc00::/18" }
+    var domainStrategyForDirect by configurationStore.string(Key.DOMAIN_STRATEGY_FOR_DIRECT) { "" }
+    var localDnsPort by configurationStore.stringToInt(Key.LOCAL_DNS_PORT) { 0 }
+    var networkStrategy by configurationStore.string(Key.NETWORK_STRATEGY) { "" }
+    var networkPreferredInterfaces by configurationStore.string(Key.NETWORK_PREFERRED_INTERFACES) { "" }
+    var ntpEnable by configurationStore.boolean(Key.NTP_ENABLE) { false }
+    var ntpAddress by configurationStore.string(Key.NTP_ADDRESS) { "time.apple.com" }
+    var ntpPort by configurationStore.stringToInt(Key.NTP_PORT) { 123 }
+    var ntpInterval by configurationStore.string(Key.NTP_INTERVAL) { "30m" }
+    var disableTcpKeepAlive by configurationStore.boolean(Key.DISABLE_TCP_KEEP_ALIVE) { false }
+    var tcpKeepAliveIdle by configurationStore.string(Key.TCP_KEEP_ALIVE_IDLE) { "" }
+    var tcpKeepAliveInterval by configurationStore.string(Key.TCP_KEEP_ALIVE_INTERVAL) { "" }
+    var debugListen by configurationStore.string(Key.DEBUG_LISTEN) { "" }
+
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
     }
 }

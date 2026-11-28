@@ -680,6 +680,24 @@ fun ConfigurationScreen(
                                         Triple(stringResource(R.string.action_wireguard), Icons.Rounded.VpnLock) {
                                             context.startActivity(Intent(context, WireGuardSettingsActivity::class.java))
                                         },
+                                        Triple(stringResource(R.string.action_direct), Icons.Rounded.Public) {
+                                            context.startActivity(Intent(context, DirectSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_tailscale), Icons.Rounded.VpnLock) {
+                                            context.startActivity(Intent(context, TailscaleSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_tailcat), Icons.Rounded.VpnLock) {
+                                            context.startActivity(Intent(context, TailcatSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_masque), Icons.Rounded.Https) {
+                                            context.startActivity(Intent(context, MASQUESettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_openvpn), Icons.Rounded.Lock) {
+                                            context.startActivity(Intent(context, OpenVPNSettingsActivity::class.java))
+                                        },
+                                        Triple(stringResource(R.string.action_openconnect), Icons.Rounded.Lock) {
+                                            context.startActivity(Intent(context, OpenConnectSettingsActivity::class.java))
+                                        },
                                         Triple(stringResource(R.string.custom_config), Icons.Rounded.Code) {
                                             context.startActivity(Intent(context, ConfigSettingActivity::class.java))
                                         },

@@ -861,4 +861,163 @@ object ProtocolPreferenceSchemas {
         ),
     )
 
+    val Direct: List<PrefSectionSpec> = listOf(
+        PrefSectionSpec(
+            key = null,
+            title = null,
+            items = listOf(
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            ),
+        ),
+    )
+
+    val Tailscale: List<PrefSectionSpec> = listOf(
+        PrefSectionSpec(
+            key = null,
+            title = null,
+            items = listOf(
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            ),
+        ),
+        PrefSectionSpec(
+            key = null,
+            title = PrefText.Res(R.string.proxy_cat),
+            items = listOf(
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "authKey", title = PrefText.Literal("Auth Key"), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "controlURL", title = PrefText.Literal("Control URL"), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "hostname", title = PrefText.Literal("Hostname"), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "stateDirectory", title = PrefText.Literal("State Directory"), icon = Icons.Rounded.Layers, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.SWITCH, key = "ephemeral", title = PrefText.Literal("Ephemeral Node"), icon = Icons.Rounded.Bolt, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.SWITCH, key = "acceptRoutes", title = PrefText.Literal("Accept Routes"), icon = Icons.Rounded.SyncAlt, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "exitNode", title = PrefText.Literal("Exit Node"), icon = Icons.Rounded.MyLocation, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.SWITCH, key = "exitNodeAllowLANAccess", title = PrefText.Literal("Exit Node Allow LAN"), icon = Icons.Rounded.LockOpen, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "advertiseRoutes", title = PrefText.Literal("Advertise Routes"), icon = Icons.Rounded.Traffic, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.SWITCH, key = "advertiseExitNode", title = PrefText.Literal("Advertise Exit Node"), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "advertiseTags", title = PrefText.Literal("Advertise Tags"), icon = Icons.Rounded.BookmarkBorder, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "listenPort", title = PrefText.Literal("Listen Port"), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "0", entriesRes = null, entryValuesRes = null, dependency = null),
+            ),
+        ),
+    )
+
+    val Tailcat: List<PrefSectionSpec> = listOf(
+        PrefSectionSpec(
+            key = null,
+            title = null,
+            items = listOf(
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            ),
+        ),
+        PrefSectionSpec(
+            key = null,
+            title = PrefText.Res(R.string.proxy_cat),
+            items = listOf(
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "privateKey", title = PrefText.Res(R.string.ssh_private_key), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPublicKey", title = PrefText.Literal("Server Public Key"), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverDiscoKey", title = PrefText.Literal("Server Disco Key"), icon = Icons.Rounded.VpnKey, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "preSharedKey", title = PrefText.Res(R.string.wireguard_psk), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "derpMapURL", title = PrefText.Literal("DERP Map URL"), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "derpRegion", title = PrefText.Literal("DERP Region"), icon = Icons.Rounded.MyLocation, summary = null, defaultValue = "0", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "derpServers", title = PrefText.Literal("DERP Servers"), icon = Icons.Rounded.Layers, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            ),
+        ),
+    )
+
+    val MASQUE: List<PrefSectionSpec> = listOf(
+        PrefSectionSpec(
+            key = null,
+            title = null,
+            items = listOf(
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            ),
+        ),
+        PrefSectionSpec(
+            key = null,
+            title = PrefText.Res(R.string.proxy_cat),
+            items = listOf(
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "443", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "username", title = PrefText.Res(R.string.username_opt), icon = Icons.Rounded.Person, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "password", title = PrefText.Res(R.string.password_opt), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "path", title = PrefText.Literal("Path"), icon = Icons.Rounded.Layers, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "httpVersion", title = PrefText.Literal("HTTP Version (1/2/3)"), icon = Icons.Rounded.Traffic, summary = null, defaultValue = "3", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.SWITCH, key = "disableVersionFallback", title = PrefText.Literal("Disable Version Fallback"), icon = Icons.Rounded.Bolt, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "mtu", title = PrefText.Res(R.string.mtu), icon = Icons.Rounded.Straighten, summary = null, defaultValue = "1280", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.SWITCH, key = "enableTLS", title = PrefText.Literal("TLS"), icon = Icons.Rounded.WorkspacePremium, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "sni", title = PrefText.Res(R.string.sni), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.SWITCH, key = "allowInsecure", title = PrefText.Res(R.string.allow_insecure), icon = Icons.Rounded.LockOpen, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.SWITCH, key = "disableSNI", title = PrefText.Res(R.string.tuic_disable_sni), icon = Icons.Rounded.VisibilityOff, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "alpn", title = PrefText.Res(R.string.alpn), icon = Icons.Rounded.Layers, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "certificates", title = PrefText.Res(R.string.certificates), icon = Icons.Rounded.WorkspacePremium, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "utlsFingerprint", title = PrefText.Literal("uTLS Fingerprint"), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "echConfig", title = PrefText.Literal("ECH Config"), icon = Icons.Rounded.VpnKey, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            ),
+        ),
+    )
+
+    val OpenVPN: List<PrefSectionSpec> = listOf(
+        PrefSectionSpec(
+            key = null,
+            title = null,
+            items = listOf(
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            ),
+        ),
+        PrefSectionSpec(
+            key = null,
+            title = PrefText.Res(R.string.proxy_cat),
+            items = listOf(
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverAddress", title = PrefText.Res(R.string.server_address), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverPort", title = PrefText.Res(R.string.server_port), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "1194", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "network", title = PrefText.Literal("Network (udp / tcp)"), icon = Icons.Rounded.SyncAlt, summary = null, defaultValue = "udp", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "username", title = PrefText.Res(R.string.username_opt), icon = Icons.Rounded.Person, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "password", title = PrefText.Res(R.string.password_opt), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "cipher", title = PrefText.Literal("Cipher"), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "dataCiphers", title = PrefText.Literal("Data Ciphers"), icon = Icons.Rounded.VpnKey, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "auth", title = PrefText.Literal("Auth Digest"), icon = Icons.Rounded.WorkspacePremium, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "compression", title = PrefText.Literal("Compression"), icon = Icons.Rounded.Layers, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.SWITCH, key = "redirectGateway", title = PrefText.Literal("Redirect Gateway"), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "mtu", title = PrefText.Res(R.string.mtu), icon = Icons.Rounded.Straighten, summary = null, defaultValue = "1500", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "serverName", title = PrefText.Res(R.string.sni), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "certificate", title = PrefText.Literal("CA Certificate"), icon = Icons.Rounded.WorkspacePremium, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "clientCertificate", title = PrefText.Literal("Client Certificate"), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "clientKey", title = PrefText.Literal("Client Private Key"), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "peerFingerprint", title = PrefText.Literal("Peer Fingerprint"), icon = Icons.Rounded.BookmarkBorder, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "controlWrapType", title = PrefText.Literal("Control Wrap (tls_auth / tls_crypt / tls_crypt_v2)"), icon = Icons.Rounded.Layers, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "controlWrapKey", title = PrefText.Literal("Control Wrap Key"), icon = Icons.Rounded.VpnKey, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "controlWrapDirection", title = PrefText.Literal("Control Wrap Direction (0 / 1)"), icon = Icons.Rounded.SyncAlt, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            ),
+        ),
+    )
+
+    val OpenConnect: List<PrefSectionSpec> = listOf(
+        PrefSectionSpec(
+            key = null,
+            title = null,
+            items = listOf(
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "name", title = PrefText.Res(R.string.profile_name), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            ),
+        ),
+        PrefSectionSpec(
+            key = null,
+            title = PrefText.Res(R.string.proxy_cat),
+            items = listOf(
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "server", title = PrefText.Literal("Server URL / Host"), icon = Icons.Rounded.Dns, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "flavor", title = PrefText.Literal("Protocol Flavor (anyconnect / gp / pulse / fortinet)"), icon = Icons.Rounded.Layers, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "username", title = PrefText.Res(R.string.username_opt), icon = Icons.Rounded.Person, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "password", title = PrefText.Res(R.string.password_opt), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "authGroup", title = PrefText.Literal("Auth Group"), icon = Icons.Rounded.BookmarkBorder, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "reportedOS", title = PrefText.Literal("Reported OS"), icon = Icons.Rounded.SettingsInputComponent, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "userAgent", title = PrefText.Literal("User Agent"), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.SWITCH, key = "allowInsecureCrypto", title = PrefText.Literal("Allow Insecure Crypto"), icon = Icons.Rounded.LockOpen, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.SWITCH, key = "tlsInsecure", title = PrefText.Res(R.string.allow_insecure), icon = Icons.Rounded.LockOpen, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "tlsServerName", title = PrefText.Res(R.string.sni), icon = Icons.Rounded.Public, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "tlsPeerFingerprint", title = PrefText.Literal("TLS Peer Fingerprint"), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "certificateAuthority", title = PrefText.Literal("CA Certificate"), icon = Icons.Rounded.WorkspacePremium, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "clientCertificate", title = PrefText.Literal("Client Certificate"), icon = Icons.Rounded.Badge, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "clientKey", title = PrefText.Literal("Client Private Key"), icon = Icons.Rounded.Key, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+                PrefFieldSpec(type = PrefFieldType.EDIT_TEXT, key = "clientKeyPassword", title = PrefText.Literal("Client Key Password"), icon = Icons.Rounded.Password, summary = null, defaultValue = "", entriesRes = null, entryValuesRes = null, dependency = null),
+            ),
+        ),
+    )
+
 }

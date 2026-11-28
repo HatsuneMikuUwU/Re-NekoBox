@@ -209,6 +209,23 @@ object Key {
     const val WEBDAV_PATH = "webdavPath"
 
     const val GLOBAL_MODE = "globalMode"
+
+    // husi-dev ported sing-box settings
+    const val FAKE_DNS_FOR_ALL = "fakeDnsForAll"
+    const val FAKE_DNS_RANGE_4 = "fakeDnsRange4"
+    const val FAKE_DNS_RANGE_6 = "fakeDnsRange6"
+    const val DOMAIN_STRATEGY_FOR_DIRECT = "domainStrategyForDirect"
+    const val LOCAL_DNS_PORT = "localDnsPort"
+    const val NETWORK_STRATEGY = "networkStrategy"
+    const val NETWORK_PREFERRED_INTERFACES = "networkPreferredInterfaces"
+    const val NTP_ENABLE = "ntpEnable"
+    const val NTP_ADDRESS = "ntpAddress"
+    const val NTP_PORT = "ntpPort"
+    const val NTP_INTERVAL = "ntpInterval"
+    const val DISABLE_TCP_KEEP_ALIVE = "disableTcpKeepAlive"
+    const val TCP_KEEP_ALIVE_IDLE = "tcpKeepAliveIdle"
+    const val TCP_KEEP_ALIVE_INTERVAL = "tcpKeepAliveInterval"
+    const val DEBUG_LISTEN = "debugListen"
 }
 
 object TunImplementation {

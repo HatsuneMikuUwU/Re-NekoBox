@@ -80,6 +80,7 @@ func arcaenboxAndroidOutboundRegistry() *outbound.Registry {
 	hysteria.RegisterOutbound(registry)
 	tuic.RegisterOutbound(registry)
 	hysteria2.RegisterOutbound(registry)
+	registerPreviewOutbounds(registry)
 
 	return registry
 }
@@ -88,6 +89,7 @@ func arcaenboxAndroidEndpointRegistry() *endpoint.Registry {
 	registry := endpoint.NewRegistry()
 
 	wireguard.RegisterEndpoint(registry)
+	registerPreviewEndpoints(registry)
 
 	return registry
 }
@@ -105,6 +107,7 @@ func arcaenboxAndroidDNSTransportRegistry(localTransport LocalDNSTransport) *dns
 
 	quic.RegisterTransport(registry)
 	quic.RegisterHTTP3Transport(registry)
+	registerPreviewDNSTransports(registry)
 
 	if localTransport == nil {
 		local.RegisterTransport(registry)
