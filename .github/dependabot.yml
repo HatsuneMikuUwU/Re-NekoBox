@@ -1,0 +1,58 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps)"
+    ignore:
+      # Pinned intentionally at 2.9.0 for runtime compatibility
+      - dependency-name: "com.google.code.gson:gson"
+    groups:
+      androidx:
+        patterns:
+          - "androidx.*"
+      kotlin-compose:
+        patterns:
+          - "org.jetbrains.kotlin*"
+          - "org.jetbrains.kotlinx*"
+      material:
+        patterns:
+          - "com.google.android.material*"
+          - "com.materialkolor*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci(deps)"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "gomod"
+    directory: "/libcore"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(libcore)"
+    ignore:
+      # Managed via local replace & buildScript/lib/core/get_source_env.sh
+      - dependency-name: "github.com/sagernet/sing-box"
+      - dependency-name: "github.com/matsuridayo/libneko"
+      - dependency-name: "golang.org/x/mobile"
