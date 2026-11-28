@@ -9,7 +9,6 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/sagernet/sing-box/adapter"
 	"github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/dns"
 	"github.com/sagernet/sing-box/option"
