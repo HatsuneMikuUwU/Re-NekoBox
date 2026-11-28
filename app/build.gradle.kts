@@ -98,7 +98,7 @@ dependencies {
     implementation("androidx.work:work-multiprocess:2.9.1")
 
     implementation("com.google.code.gson:gson:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.3")
+    implementation("com.squareup.okhttp3:okhttp:5.5.1")
     implementation("org.yaml:snakeyaml:1.30")
     implementation("com.jakewharton:process-phoenix:2.1.2")
     implementation("com.esotericsoftware:kryo:5.2.1")
