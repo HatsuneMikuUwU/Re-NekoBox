@@ -22,6 +22,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Brush
@@ -62,6 +65,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -509,10 +514,22 @@ private fun ColorEditorGroup(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ShapedIconBadge(Icons.Outlined.Tag)
+            val hexState = rememberTextFieldState(initialText = hexText)
+            val currentHexText by rememberUpdatedState(hexText)
+            val currentOnHexChange by rememberUpdatedState(onHexChange)
+            LaunchedEffect(hexState) {
+                snapshotFlow { hexState.text.toString() }.collect { current ->
+                    if (current != currentHexText) currentOnHexChange(current)
+                }
+            }
+            LaunchedEffect(hexText) {
+                if (hexState.text.toString() != hexText) {
+                    hexState.setTextAndPlaceCursorAtEnd(hexText)
+                }
+            }
             OutlinedTextField(
-                value = hexText,
-                onValueChange = onHexChange,
-                singleLine = true,
+                state = hexState,
+                lineLimits = TextFieldLineLimits.SingleLine,
                 isError = parseHexColor(hexText) == null,
                 modifier = Modifier.weight(1f),
                 colors =

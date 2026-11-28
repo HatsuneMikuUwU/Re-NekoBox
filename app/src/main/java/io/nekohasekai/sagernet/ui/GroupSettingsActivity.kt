@@ -26,6 +26,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Login
 import androidx.compose.material.icons.automirrored.rounded.Logout
@@ -646,22 +648,21 @@ class GroupSettingsActivity : ThemedActivity() {
             }
 
             editingHeader?.let { (headerName, titleRes, currentValue) ->
-                var draft by remember(headerName, currentValue) { mutableStateOf(currentValue) }
+                val draftState = remember(headerName, currentValue) { TextFieldState(initialText = currentValue) }
                 AppDialog(
                     icon = Icons.Rounded.Tune,
                     title = stringResource(titleRes),
                     onDismiss = { editingHeader = null },
                     text = {
                         OutlinedTextField(
-                            value = draft,
-                            onValueChange = { draft = it },
-                            singleLine = true,
+                            state = draftState,
+                            lineLimits = TextFieldLineLimits.SingleLine,
                             modifier = Modifier.fillMaxWidth(),
                         )
                     },
                     confirmButton = {
                         DialogConfirmButton(stringResource(android.R.string.ok)) {
-                            val updatedHeaders = deviceHeaders + (headerName to draft)
+                            val updatedHeaders = deviceHeaders + (headerName to draftState.text.toString())
                             store.putString(Key.SUBSCRIPTION_DEVICE_HEADERS, JSONObject(updatedHeaders).toString())
                             editingHeader = null
                         }

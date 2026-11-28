@@ -86,7 +86,7 @@ object XhttpExtraConverter {
                                 convertField(tlsSettings, tls, "serverName", "server_name")
                                 convertField(tlsSettings, tls, "alpn", "alpn")
                                 convertField(tlsSettings, tls, "allowInsecure", "insecure")
-                                tlsSettings.optString("fingerprint")?.let { fp ->
+                                tlsSettings.optString("fingerprint").let { fp ->
                                     if (fp.isNotBlank()) {
                                         val utls = JSONObject().apply {
                                             put("enabled", true)
@@ -106,7 +106,7 @@ object XhttpExtraConverter {
                                     convertField(realitySettings, this, "shortId", "short_id")
                                 }
                                 tls.put("reality", reality)
-                                realitySettings.optString("fingerprint")?.let { fp ->
+                                realitySettings.optString("fingerprint").let { fp ->
                                     if (fp.isNotBlank()) {
                                         val utls = JSONObject().apply {
                                             put("enabled", true)
