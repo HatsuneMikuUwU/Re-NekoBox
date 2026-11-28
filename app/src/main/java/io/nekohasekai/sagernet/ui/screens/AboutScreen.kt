@@ -6,11 +6,6 @@
 
 package io.nekohasekai.sagernet.ui.screens
 
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
-import android.os.PowerManager
-import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -44,7 +39,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.AccountTree
-import androidx.compose.material.icons.outlined.BatteryChargingFull
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Extension
@@ -155,15 +149,6 @@ fun AboutScreen(
     var licenseText by remember { mutableStateOf("") }
     var showLicense by remember { mutableStateOf(false) }
 
-    val ignoringBattery = remember {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val pm = context.getSystemService(PowerManager::class.java)
-            pm?.isIgnoringBatteryOptimizations(context.packageName) ?: true
-        } else {
-            true
-        }
-    }
-
     LaunchedEffect(Unit) {
         licenseText = withContext(Dispatchers.IO) {
             runCatching { context.assets.open("LICENSE").bufferedReader().use { it.readText() } }
@@ -207,25 +192,6 @@ fun AboutScreen(
                 onClick = { context.launchCustomTab("$REPO_URL/issues") },
             ),
         )
-        if (!ignoringBattery && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            add(
-                AboutLink(
-                    icon = Icons.Outlined.BatteryChargingFull,
-                    title = stringResource(R.string.ignore_battery_optimizations),
-                    subtitle = stringResource(R.string.ignore_battery_optimizations_sum),
-                    onClick = {
-                        runCatching {
-                            context.startActivity(
-                                Intent(
-                                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                                    Uri.parse("package:${context.packageName}"),
-                                ),
-                            )
-                        }
-                    },
-                ),
-            )
-        }
         add(
             AboutLink(
                 icon = Icons.Outlined.Layers,
