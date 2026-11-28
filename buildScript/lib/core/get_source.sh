@@ -34,8 +34,10 @@ if 'if d.networkStrategy == nil {' in ds:
     ds = ds.replace('if d.networkStrategy == nil {', 'if DoNotSelectInterface || d.networkStrategy == nil {')
 dp.write_text(ds)
 PY
+  git apply -C1 --ignore-whitespace --exclude=route/rule/rule_action.go "$SRC_ROOT/buildScript/lib/core/patches/core-compat.patch"
+else
+  git apply -C1 --ignore-whitespace "$SRC_ROOT/buildScript/lib/core/patches/core-compat.patch"
 fi
-git apply -C1 --ignore-whitespace "$SRC_ROOT/buildScript/lib/core/patches/core-compat.patch"
 popd
 
 ####
