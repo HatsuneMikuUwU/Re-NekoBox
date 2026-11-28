@@ -908,4 +908,10 @@
     <string name="advanced_core_cache_help">重启后保留远程规则集和 FakeIP 缓存</string>
     <string name="preview_tls_cert_sha256">TLS 证书 SHA-256 固定（测试版）</string>
     <string name="preview_tls_cert_sha256_help">仅在 sing-box 1.15-alpha 测试版内核可用：为 TLS 出站固定叶证书 SHA-256 指纹</string>
+    <string name="dashboard_not_connected">VPN 尚未连接</string>
+    <string name="dashboard_not_connected_sum">请先启用 Clash API 并连接 VPN，然后再打开 MetaCubeXD 面板。</string>
+    <string name="dashboard_load_failed">无法加载面板</string>
+    <string name="dashboard_retry">重试</string>
+    <string name="webview_cleanup">清除 WebView 数据</string>
+    <string name="webview_cleanup_confirmation">确定清除面板缓存、Cookie 和本地存储吗？</string>
 </resources>

@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
 
 	"golang.org/x/mobile/asset"
@@ -19,19 +18,16 @@ func extractAssets() {
 	extract := func(name string) {
 		err := extractAssetName(name, useOfficialAssets)
 		if err != nil {
-			log.Println("Extract", geoipDat, "failed:", err)
+			log.Println("Extract", name, "failed:", err)
 		}
 	}
 
 	extract(geoipDat)
 	extract(geositeDat)
-	extract(yacdDstFolder)
+	extract(metacubexdDstFolder)
 }
 
-// 这里解压的是 apk 里面的
 func extractAssetName(name string, useOfficialAssets bool) error {
-	// 支持非官方源的，就是 replaceable，放 Android 目录
-	// 不支持非官方源的，就放 file 目录
 	replaceable := true
 
 	var version string
@@ -43,8 +39,8 @@ func extractAssetName(name string, useOfficialAssets bool) error {
 	case geositeDat:
 		version = geositeVersion
 		apkPrefix = apkAssetPrefixSingBox
-	case yacdDstFolder:
-		version = yacdVersion
+	case metacubexdDstFolder:
+		version = metacubexdVersion
 		replaceable = false
 	}
 
@@ -55,11 +51,11 @@ func extractAssetName(name string, useOfficialAssets bool) error {
 		dir = externalAssetsPath
 	}
 	dstName := dir + name
+	tmpDstName := dstName + ".tmp"
 
 	var localVersion string
 	var assetVersion string
 
-	// loadAssetVersion from APK
 	loadAssetVersion := func() error {
 		av, err := asset.Open(apkPrefix + version)
 		if err != nil {
@@ -80,31 +76,22 @@ func extractAssetName(name string, useOfficialAssets bool) error {
 	var doExtract bool
 
 	if _, err := os.Stat(dstName); err != nil {
-		// assetFileMissing
 		doExtract = true
 	} else if useOfficialAssets || !replaceable {
-		// 官方源升级
 		b, err := os.ReadFile(dir + version)
 		if err != nil {
-			// versionFileMissing
 			doExtract = true
-			_ = os.RemoveAll(version)
+			_ = os.RemoveAll(dir + version)
 		} else {
 			localVersion = string(b)
-			if localVersion == "Custom" {
-				doExtract = false
+			av, err := strconv.ParseUint(assetVersion, 10, 64)
+			if err != nil {
+				doExtract = assetVersion != localVersion
 			} else {
-				av, err := strconv.ParseUint(assetVersion, 10, 64)
-				if err != nil {
-					doExtract = assetVersion != localVersion
-				} else {
-					lv, err := strconv.ParseUint(localVersion, 10, 64)
-					doExtract = err != nil || av > lv
-				}
+				lv, err := strconv.ParseUint(localVersion, 10, 64)
+				doExtract = err != nil || av > lv
 			}
 		}
-	} else {
-		//非官方源不升级
 	}
 
 	if !doExtract {
@@ -124,37 +111,38 @@ func extractAssetName(name string, useOfficialAssets bool) error {
 		return nil
 	}
 
-	extracZip := func(f asset.File, outDir string) error {
-		tmpZipName := dstName + ".zip"
-		err := extractAsset(f, tmpZipName)
+	extractTarGz := func(f asset.File, outDir string) error {
+		tmpTarGzName := tmpDstName + ".tgz"
+		err := extractAsset(f, tmpTarGzName)
 		if err == nil {
-			err = Unzip(tmpZipName, outDir)
-			os.Remove(tmpZipName)
+			err = UntarGz(tmpTarGzName, outDir)
+			os.Remove(tmpTarGzName)
 		}
 		if err != nil {
-			return fmt.Errorf("extract zip: %v", err)
+			return fmt.Errorf("extract tgz: %v", err)
 		}
 		return nil
 	}
 
 	if f, err := asset.Open(apkPrefix + name + ".xz"); err == nil {
-		extractXz(f)
-	} else if f, err := asset.Open("yacd.zip"); err == nil {
-		os.RemoveAll(dstName)
-		extracZip(f, internalAssetsPath)
-		m, err := filepath.Glob(internalAssetsPath + "/Yacd-*")
-		if err != nil {
-			return fmt.Errorf("glob Yacd: %v", err)
+		if err := extractXz(f); err != nil {
+			return err
 		}
-		if len(m) != 1 {
-			return fmt.Errorf("glob Yacd found %d result, expect 1", len(m))
+	} else if f, err := asset.Open("metacubexd.tgz"); err == nil {
+		_ = os.RemoveAll(tmpDstName)
+		if err := os.MkdirAll(tmpDstName, 0o755); err != nil {
+			return fmt.Errorf("mkdir metacubexd temp dir: %v", err)
 		}
-		err = os.Rename(m[0], dstName)
-		if err != nil {
-			return fmt.Errorf("rename Yacd: %v", err)
+		if err := extractTarGz(f, tmpDstName); err != nil {
+			_ = os.RemoveAll(tmpDstName)
+			return err
 		}
-
-	} // TODO normal file
+		_ = os.RemoveAll(dstName)
+		if err := os.Rename(tmpDstName, dstName); err != nil {
+			_ = os.RemoveAll(tmpDstName)
+			return fmt.Errorf("commit metacubexd: %v", err)
+		}
+	}
 
 	o, err := os.Create(dir + version)
 	if err != nil {

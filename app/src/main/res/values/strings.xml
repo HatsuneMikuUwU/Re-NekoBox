@@ -986,4 +986,10 @@
     <string name="advanced_core_cache_help">Persist remote rule-sets and FakeIP cache across restarts</string>
     <string name="preview_tls_cert_sha256">TLS certificate SHA-256 pinning (Alpha)</string>
     <string name="preview_tls_cert_sha256_help">Available on sing-box 1.15-alpha preview core: pin leaf TLS certificate SHA-256 hex for outbounds</string>
+    <string name="dashboard_not_connected">VPN is not connected</string>
+    <string name="dashboard_not_connected_sum">Connect your VPN with Clash API enabled to open the MetaCubeXD dashboard.</string>
+    <string name="dashboard_load_failed">Could not load dashboard</string>
+    <string name="dashboard_retry">Retry</string>
+    <string name="webview_cleanup">Clear WebView data</string>
+    <string name="webview_cleanup_confirmation">Clear cached dashboard data, cookies, and storage?</string>
 </resources>

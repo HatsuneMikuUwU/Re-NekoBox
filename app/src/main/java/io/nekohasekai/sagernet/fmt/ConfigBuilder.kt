@@ -218,7 +218,8 @@ fun buildConfig(
                 if (DataStore.enableClashAPI) {
                     clash_api = ClashAPIOptions().apply {
                         external_controller = "127.0.0.1:9090"
-                        external_ui = "../files/yacd"
+                        external_ui = "../files/metacubexd"
+                        external_ui_download_url = "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
                     }
                 }
             }
