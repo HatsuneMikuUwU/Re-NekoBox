@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Golang Status
@@ -19,7 +19,7 @@ jobs:
         run: git ls-files libcore | sort | xargs cat | sha1sum > libcore_status
       - name: LibCore Cache
         id: cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             libcore/libcore.aar
@@ -27,7 +27,7 @@ jobs:
           key: libcore-go12611-v115-${{ hashFiles('golang_status', 'libcore_status') }}
       - name: Install Golang
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version: '1.26.11'
       - name: Native Build
@@ -53,11 +53,11 @@ jobs:
       - libcore
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Download LibCore
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: libcore
           path: app/libs
@@ -66,7 +66,7 @@ jobs:
           git submodule status hev-socks5-tunnel > hev_status
           cat buildScript/compile-hevtun.sh | sha1sum >> hev_status
       - name: HevTun Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             app/src/main/jniLibs/arm64-v8a/libhev-socks5-tunnel.so
@@ -75,7 +75,7 @@ jobs:
             app/src/main/jniLibs/x86_64/libhev-socks5-tunnel.so
           key: hevtun-${{ hashFiles('.github/workflows/*', 'hev_status') }}
       - name: Gradle cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.gradle
           key: gradle-oss-${{ hashFiles('**/*.gradle.kts') }}
