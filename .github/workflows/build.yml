@@ -30,12 +30,12 @@ jobs:
           path: |
             libcore/libcore.aar
             libcore/libcore-sources.jar
-          key: libcore-go12514-${{ matrix.channel }}-${{ hashFiles('golang_status', 'libcore_status') }}
+          key: libcore-go12611-${{ matrix.channel }}-${{ hashFiles('golang_status', 'libcore_status') }}
       - name: Install Golang
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/setup-go@v6
         with:
-          go-version: '1.25.14'
+          go-version: '1.26.11'
       - name: Native Build
         if: steps.cache.outputs.cache-hit != 'true'
         run: |

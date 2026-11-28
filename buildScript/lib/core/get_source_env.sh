@@ -6,9 +6,9 @@ if [ "$CORE_CHANNEL" = "stable" ]; then
   export SING_BOX_REPO="https://github.com/MatsuriDayo/sing-box.git"
   export CORE_VERSION="1.14.0"
 elif [ "$CORE_CHANNEL" = "preview" ]; then
-  export COMMIT_SING_BOX="b4b5af50b37dbdb3015e7a4b6b1c08a2dee80dbe"
+  export COMMIT_SING_BOX="refs/tags/v1.15.0-alpha.14"
   export SING_BOX_REPO="https://github.com/SagerNet/sing-box.git"
-  export CORE_VERSION="1.15.0-alpha.2"
+  export CORE_VERSION="1.15.0-alpha.14"
   export CORE_TAGS="$CORE_TAGS,core_preview"
 else
   echo "Unknown CORE_CHANNEL" >&2
