@@ -45,10 +45,7 @@ func (g *geoip) Rules(countryCode string) ([]option.HeadlessRule, error) {
 	}
 
 	var headlessRule option.DefaultHeadlessRule
-	headlessRule.IPCIDR = make([]string, 0, len(ipNets))
-	for _, cidr := range ipNets {
-		headlessRule.IPCIDR = append(headlessRule.IPCIDR, cidr.String())
-	}
+	setGeoIPRuleCIDRs(&headlessRule, ipNets)
 
 	return []option.HeadlessRule{
 		{

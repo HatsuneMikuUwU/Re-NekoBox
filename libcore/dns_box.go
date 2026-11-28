@@ -46,10 +46,6 @@ func newPlatformTransport(iif LocalDNSTransport, tag string, options option.Loca
 	}
 }
 
-func (p *platformLocalDNSTransport) Start(stage adapter.StartStage) error {
-	return nil
-}
-
 func (p *platformLocalDNSTransport) Close() error {
 	return nil
 }
