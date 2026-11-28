@@ -1,5 +1,3 @@
-//go:build core_preview
-
 package libcore
 
 import (

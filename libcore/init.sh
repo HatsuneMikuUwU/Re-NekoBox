@@ -8,9 +8,6 @@ if [ ! -d gomobile ]; then
   git clone --no-checkout https://github.com/MatsuriDayo/gomobile.git gomobile
 fi
 git -C gomobile checkout "$COMMIT_GOMOBILE"
-python3 ../buildScript/lib/core/patch_loader.py gomobile/bind/java/Seq.java
-# gobind locates support files through the target module graph, not its own binary.
-# Without this replacement it silently copies the unpatched module-cache Seq.java.
 go mod edit -replace golang.org/x/mobile=./gomobile
 (
   cd gomobile

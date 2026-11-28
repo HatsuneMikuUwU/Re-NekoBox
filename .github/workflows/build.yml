@@ -6,14 +6,8 @@ on:
       - main
 jobs:
   libcore:
-    name: Native Build (${{ matrix.channel }})
-    strategy:
-      fail-fast: false
-      matrix:
-        channel: [stable, preview]
+    name: Native Build (sing-box)
     runs-on: ubuntu-latest
-    env:
-      CORE_CHANNEL: ${{ matrix.channel }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -30,7 +24,7 @@ jobs:
           path: |
             libcore/libcore.aar
             libcore/libcore-sources.jar
-          key: libcore-go12611-${{ matrix.channel }}-${{ hashFiles('golang_status', 'libcore_status') }}
+          key: libcore-go12611-v115-${{ hashFiles('golang_status', 'libcore_status') }}
       - name: Install Golang
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/setup-go@v6
@@ -46,7 +40,7 @@ jobs:
       - name: Upload LibCore Artifact
         uses: actions/upload-artifact@v7
         with:
-          name: core-${{ matrix.channel }}
+          name: libcore
           path: |
             libcore/libcore.aar
             libcore/libcore-sources.jar
@@ -62,37 +56,11 @@ jobs:
         uses: actions/checkout@v5
         with:
           submodules: recursive
-      - name: Download Stable Core
+      - name: Download LibCore
         uses: actions/download-artifact@v5
         with:
-          name: core-stable
-          path: core-build/stable
-      - name: Download Preview Core
-        uses: actions/download-artifact@v5
-        with:
-          name: core-preview
-          path: core-build/preview
-      - name: Package Dual Cores
-        env:
-          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
-        run: |
-          python3 -m pip install --quiet cryptography || true
-          KEYSTORE_ARG=""
-          if [ -f "release.keystore" ]; then
-            KEYSTORE_ARG="--keystore release.keystore"
-          fi
-          python3 .github/scripts/package_cores.py \
-            --stable core-build/stable/libcore.aar \
-            --preview core-build/preview/libcore.aar \
-            $KEYSTORE_ARG
-      - name: Upload Packaged Cores
-        uses: actions/upload-artifact@v7
-        with:
-          name: core-dist
-          path: |
-            core-build/dist
-            app/src/main/assets/cores
-          retention-days: 7
+          name: libcore
+          path: app/libs
       - name: HevTun Status
         run: |
           git submodule status hev-socks5-tunnel > hev_status

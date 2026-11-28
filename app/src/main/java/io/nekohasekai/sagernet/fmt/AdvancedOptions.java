@@ -28,7 +28,6 @@ public final class AdvancedOptions {
         public String fingerprint = "";
         public String tunDnsMode = "";
         public String tlsCertSha256 = "";
-        public boolean isPreviewCore = false;
     }
 
     public static void validateIp(String value) {
@@ -129,7 +128,7 @@ public final class AdvancedOptions {
 
         // Default uTLS fingerprint & sing-box 1.15-alpha TLS leaf certificate SHA-256 pinning
         boolean hasFingerprint = options.fingerprint != null && !options.fingerprint.isBlank();
-        boolean hasCertPin = options.isPreviewCore && options.tlsCertSha256 != null && !options.tlsCertSha256.isBlank();
+        boolean hasCertPin = options.tlsCertSha256 != null && !options.tlsCertSha256.isBlank();
         if ((hasFingerprint || hasCertPin) && root.has("outbounds")) {
             for (JsonElement element : root.getAsJsonArray("outbounds")) {
                 JsonObject out = element.getAsJsonObject();

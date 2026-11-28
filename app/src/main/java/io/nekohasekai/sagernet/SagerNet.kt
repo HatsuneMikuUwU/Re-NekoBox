@@ -26,7 +26,6 @@ import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.ui.onboarding.Onboarding
 import io.nekohasekai.sagernet.ui.theme.Appearance
-import io.nekohasekai.sagernet.update.CoreRuntime
 import io.nekohasekai.sagernet.utils.*
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
@@ -45,7 +44,6 @@ class SagerNet : Application(),
         super.attachBaseContext(base)
 
         application = this
-        CoreRuntime.initialize(this)
     }
 
     private val nativeInterface = NativeInterface()
@@ -72,7 +70,6 @@ class SagerNet : Application(),
                 DataStore.logLevel > 0,
                 nativeInterface, nativeInterface, LocalResolverImpl
             )
-            CoreRuntime.markReady()
 
             // fix multi process issue in Android 9+
             JavaUtil.handleWebviewDir(this)

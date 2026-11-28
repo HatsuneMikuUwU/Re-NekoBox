@@ -14,9 +14,8 @@ fi
 pushd sing-box
 git fetch --depth 1 "$SING_BOX_REPO" "$COMMIT_SING_BOX"
 git checkout --detach FETCH_HEAD
-if [ "$CORE_CHANNEL" = "preview" ]; then
-  git apply -C1 --ignore-whitespace --exclude=box.go --exclude=common/dialer/default.go "$SRC_ROOT/buildScript/lib/core/patches/android-preview.patch"
-  python3 - <<'PY'
+git apply -C1 --ignore-whitespace --exclude=box.go --exclude=common/dialer/default.go "$SRC_ROOT/buildScript/lib/core/patches/android-preview.patch"
+python3 - <<'PY'
 from pathlib import Path
 
 p = Path('box.go')
@@ -34,10 +33,7 @@ if 'if d.networkStrategy == nil {' in ds:
     ds = ds.replace('if d.networkStrategy == nil {', 'if DoNotSelectInterface || d.networkStrategy == nil {')
 dp.write_text(ds)
 PY
-  git apply -C1 --ignore-whitespace --exclude=route/rule/rule_action.go "$SRC_ROOT/buildScript/lib/core/patches/core-compat.patch"
-else
-  git apply -C1 --ignore-whitespace "$SRC_ROOT/buildScript/lib/core/patches/core-compat.patch"
-fi
+git apply -C1 --ignore-whitespace --exclude=route/rule/rule_action.go "$SRC_ROOT/buildScript/lib/core/patches/core-compat.patch"
 popd
 
 ####

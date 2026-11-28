@@ -18,7 +18,6 @@ fi
 export PATH="$GOPATH/bin:$PATH"
 export GOBIND=gobind-matsuri
 "$GOPATH"/bin/gomobile-matsuri bind -v -androidapi 21 -cache "$(realpath $BUILD)" -trimpath -ldflags="-s -w -X github.com/sagernet/sing-box/constant.Version=$CORE_VERSION-renekobox-$CORE_REVISION" -tags="$CORE_TAGS" . || exit 1
-python3 ../buildScript/lib/core/patch_loader.py --verify libcore.aar libcore-sources.jar || exit 1
 
 proj=../app/libs
 mkdir -p $proj

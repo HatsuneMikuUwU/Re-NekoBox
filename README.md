@@ -36,7 +36,7 @@
 | :--- | :--- |
 | **Material 3 Expressive UI** | Full Jetpack Compose interface with MaterialKolor dynamic theming (`SPEC_2025` / `2026`), custom seed & per-role color overrides, AMOLED dark mode, UI & font scaling, onboarding flow, SplashScreen, and app-wide haptics. |
 | **Visual Effects & Chrome** | 11 animated backgrounds + seasonal themes with accelerometer parallax, Blur & Liquid Glass bars, and a switchable **Floating Tab Bar** or blurred **Material 3 NavigationBar**. |
-| **Dual-Channel Kernel Manager** | Ships with both **sing-box 1.14.0 (Stable)** and **1.15.0-alpha.14 (Preview)** built in—switch channels offline, check signed GitHub Release kernel updates, and recover automatically on boot failure. |
+| **Latest sing-box 1.15 Core** | Ships with both **sing-box 1.14.0 (Stable)** and **1.15.0-alpha.14 (Preview)** built in—switch channels offline, check signed GitHub Release kernel updates, and recover automatically on boot failure. |
 | **sing-box 1.14 / 1.15 Core Options** | Optimistic DNS cache, DNS cache capacity & query timeout, AAAA / SVCB & HTTPS query blocking, Android system Hosts, Bootstrap DNS IP, TUN DNS mode, UDP session timeout, native TLS handshake fragmentation (`record` / `packet`), default uTLS fingerprint, persistent `cache_file`, and preview TLS certificate SHA-256 pinning. |
 | **Subscriptions & Management** | Long-press drag-and-drop reordering for profiles, groups, and routes; Subscription **Device ID** (HWID Support, Spoof App for Happ / v2RayTun / Incy, Device Profile presets, editable headers); and built-in **MetaCubeXD** Clash API dashboard. |
 
@@ -151,16 +151,11 @@ git clone --recursive https://github.com/HatsuneMikuUwU/Re-NekoBox.git
 cd Re-NekoBox
 
 # 2. Build stable and preview libcore AARs
-CORE_CHANNEL=stable buildScript/lib/core/init.sh
-CORE_CHANNEL=stable buildScript/lib/core/build.sh
 cp libcore/libcore.aar core-stable.aar
 
-CORE_CHANNEL=preview buildScript/lib/core/init.sh
-CORE_CHANNEL=preview buildScript/lib/core/build.sh
 cp libcore/libcore.aar core-preview.aar
 
 # 3. Package dual cores into app/libs & jniLibs
-python3 .github/scripts/package_cores.py \
   --stable core-stable.aar \
   --preview core-preview.aar
 

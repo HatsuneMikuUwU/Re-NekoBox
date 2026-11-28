@@ -4,7 +4,6 @@ import android.widget.Toast
 import io.nekohasekai.sagernet.*
 import io.nekohasekai.sagernet.bg.VpnService
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.update.CoreRuntime
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.ProxyEntity.Companion.TYPE_CONFIG
 import io.nekohasekai.sagernet.database.ProxyGroup
@@ -1151,7 +1150,6 @@ fun buildConfig(
     }.let {
         val configMap = it.asMap()
         Util.mergeJSON(configMap, proxy.requireBean().customConfigJson)
-        val previewCore = runCatching { CoreRuntime.active.channel == "preview" }.getOrDefault(false)
         var tunedJson = ConnectionOptions.apply(
             gson.toJson(configMap),
             DataStore.udpTimeout,
@@ -1176,7 +1174,6 @@ fun buildConfig(
                     cachePath = java.io.File(SagerNet.application.filesDir, "sing-box-cache.db").absolutePath
                     cacheId = "profile-${proxy.id}"
                     tlsCertSha256 = DataStore.previewTlsCertSha256.trim()
-                    isPreviewCore = previewCore
                 },
             )
         } else {
@@ -1185,7 +1182,6 @@ fun buildConfig(
                 AdvancedOptions.Settings().apply {
                     fingerprint = DataStore.defaultFingerprint.trim()
                     tlsCertSha256 = DataStore.previewTlsCertSha256.trim()
-                    isPreviewCore = previewCore
                 },
             )
         }
