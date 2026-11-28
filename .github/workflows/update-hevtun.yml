@@ -1,0 +1,73 @@
+name: Update hev-socks5-tunnel Submodule
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Optional tag, branch, or commit SHA (leave empty for latest default branch)
+        required: false
+        default: ''
+  schedule:
+    - cron: '0 3 * * 1'
+
+permissions:
+  contents: write
+
+jobs:
+  update-hevtun:
+    name: Update hev-socks5-tunnel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Update hev-socks5-tunnel submodule
+        id: update
+        env:
+          TARGET_REF: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          OLD_SHA=$(git -C hev-socks5-tunnel rev-parse --short HEAD)
+          git -C hev-socks5-tunnel fetch --tags --prune origin
+
+          if [ -n "$TARGET_REF" ]; then
+            git -C hev-socks5-tunnel checkout "$TARGET_REF"
+          else
+            DEFAULT_BRANCH=$(git -C hev-socks5-tunnel symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||' || true)
+            if [ -z "$DEFAULT_BRANCH" ]; then
+              if git -C hev-socks5-tunnel show-ref --verify --quiet refs/remotes/origin/main; then
+                DEFAULT_BRANCH="main"
+              else
+                DEFAULT_BRANCH="master"
+              fi
+            fi
+            git -C hev-socks5-tunnel checkout "origin/$DEFAULT_BRANCH"
+          fi
+
+          git -C hev-socks5-tunnel submodule update --init --recursive
+          NEW_SHA=$(git -C hev-socks5-tunnel rev-parse --short HEAD)
+          NEW_DESC=$(git -C hev-socks5-tunnel describe --tags --always HEAD)
+
+          echo "old_sha=$OLD_SHA" >> "$GITHUB_OUTPUT"
+          echo "new_sha=$NEW_SHA" >> "$GITHUB_OUTPUT"
+          echo "new_desc=$NEW_DESC" >> "$GITHUB_OUTPUT"
+
+          if [ "$OLD_SHA" = "$NEW_SHA" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "hev-socks5-tunnel is already up to date ($NEW_DESC)."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Updated hev-socks5-tunnel: $OLD_SHA -> $NEW_SHA ($NEW_DESC)"
+          fi
+
+      - name: Commit and push submodule update
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add hev-socks5-tunnel
+          git commit -m "chore(hevtun): update hev-socks5-tunnel submodule to ${{ steps.update.outputs.new_desc }}"
+          git push
