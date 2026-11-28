@@ -356,14 +356,6 @@ fun SettingsScreen(
                         titleRes = R.string.bypass_lan_in_core,
                         onChanged = { notifyNeedReload(); true },
                     )
-                    StoreSwitchPref(
-                        store = store,
-                        key = Key.CONCURRENT_DIAL,
-                        icon = Icons.Rounded.CallSplit,
-                        titleRes = R.string.concurrent_dial,
-                        summaryRes = R.string.concurrent_dial_summary,
-                        onChanged = { notifyNeedReload(); true },
-                    )
                     StoreListPref(
                         store = store,
                         key = Key.TRAFFIC_SNIFFING,

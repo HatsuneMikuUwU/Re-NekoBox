@@ -312,9 +312,6 @@ fun buildConfig(
             override_android_vpn = true
             rules = mutableListOf()
             rule_set = mutableListOf()
-
-            // 添加并发拨号设置
-             concurrent_dial = DataStore.concurrentDial
         }
 
         // returns outbound tag
@@ -873,10 +870,8 @@ fun buildConfig(
             val fragmentOutbound = Outbound().apply {
                 tag = TAG_FRAGMENT
                 type = "direct"
-                _hack_config_map["fragment"] = Fragment().apply {
-                    length = DataStore.fragmentLength
-                    interval = DataStore.fragmentInterval
-                }.asMap()
+                _hack_config_map["tls_fragment"] = true
+                _hack_config_map["tls_record_fragment"] = true
             }
             outbounds.add(fragmentOutbound)
         }
